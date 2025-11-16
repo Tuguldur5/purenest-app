@@ -29,7 +29,9 @@ export default function RootLayout({
       <body>
         <div className="min-h-screen bg-white flex flex-col">
           <Header />
-          <main className="flex-1 container mx-auto px-4 py-8">{children}</main>
+          <main className="flex-1 min-h-110">
+          {children}
+        </main>
           <Footer />
         </div>
       </body>

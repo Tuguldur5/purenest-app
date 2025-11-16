@@ -22,9 +22,9 @@ export default function Header() {
                     <div className="relative group">
                         <button className="hover:text-">Үйлчилгээ</button>
                         <div className="absolute left-0 bg-white rounded-lg w-45 shadow-lg hidden group-hover:block">
-                            <Link className="block px-4 py-2 hover:bg-gray-100 rounded-lg" href="/service">Гэр</Link>
-                            <Link className="block px-4 py-2 hover:bg-gray-100 rounded-lg" href="/service">СӨХ</Link>
-                            <Link className="block px-4 py-2 hover:bg-gray-100 rounded-lg" href="/service">Олон нийтийн талбай</Link>
+                            <Link className="block px-4 py-2 hover:bg-gray-100 rounded-lg" href="/service/ger">Гэр</Link>
+                            <Link className="block px-4 py-2 hover:bg-gray-100 rounded-lg" href="/service/suh">СӨХ</Link>
+                            <Link className="block px-4 py-2 hover:bg-gray-100 rounded-lg" href="/service/public-space">Олон нийтийн талбай</Link>
                         </div>
                     </div>
 
@@ -34,7 +34,6 @@ export default function Header() {
                         <button className="hover-mustard items-center">Бусад</button>
 
                         <div className="absolute left-0 bg-white rounded-lg shadow-lg hidden group-hover:block w-52 py-2 transition-all duration-300">
-                            <Link className="block px-4 py-2 hover:bg-gray-100 rounded-lg" href="/contact">Холбоо барих</Link>
                             <Link className="block px-4 py-2 hover:bg-gray-100 rounded-lg" href="/about">Бидний тухай</Link>
                             <Link className="block px-4 py-2 hover:bg-gray-100 rounded-lg" href="/faq">Түгээмэл асуултууд</Link>
                         </div>
@@ -55,7 +54,6 @@ export default function Header() {
                         <Link href="/home">Нүүр</Link>
                         <Link href="/service">ҮЙлчилгээ</Link>
                         <Link href="/booking">Захиалга</Link>
-                        <Link href="/contact">Холбоо барих</Link>
                         <Link href="/about">Бидний тухай</Link>
                         <Link href="/faq">Түгээмэл асуултууд</Link>
                         <Link href="/login">Нэвтрэх</Link>
