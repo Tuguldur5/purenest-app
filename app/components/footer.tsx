@@ -13,19 +13,19 @@ export default function Footer({ size = 28, color = "white" }: SocialIconsProps)
                 {/* Contact */}
                 <div>
                     <h3 className="text-xl font-semibold mb-3">Холбоо барих</h3>
-                    <p>Утас: +976 9900-0000</p>
-                    <p>Email: contact@purenest.mn</p>
-                    <p>Хаяг: Улаанбаатар, Монгол</p>
+                    <p  className="hover:text-amber-400">Утас: +976 9900-0000</p>
+                    <p  className="hover:text-amber-400">Email: Sales@purenest.mn</p>
+                    <p  className="hover:text-amber-400">Хаяг: Улаанбаатар, Монгол</p>
                 </div>
 
                 {/* Quick Links */}
                 <div>
                     <h3 className="text-xl font-semibold mb-3">Хурдан Холбоос</h3>
                     <ul className="space-y-2">
-                        <li><Link className="hover:text-[#E3BE72]" href="/">Нүүр</Link></li>
-                        <li><Link className="hover:text-[#E3BE72]" href="/service">Үйлчилгээ</Link></li>
-                        <li><Link className="hover:text-[#E3BE72]" href="/booking">Захиалах</Link></li>
-                        <li><Link className="hover:text-[#E3BE72]" href="/faq">FAQ</Link></li>
+                        <li><Link className="hover:text-amber-400" href="/">Нүүр</Link></li>
+                        <li><Link className="hover:text-amber-400" href="/service">Үйлчилгээ</Link></li>
+                        <li><Link className="hover:text-amber-400" href="/booking">Захиалах</Link></li>
+                        <li><Link className="hover:text-amber-400" href="/faq">Түгээмэл асуултууд</Link></li>
                     </ul>
                 </div>
 
@@ -33,21 +33,21 @@ export default function Footer({ size = 28, color = "white" }: SocialIconsProps)
                 <div>
                     <h3 className="text-xl font-semibold mb-3">Сошиал</h3>
                     <div className="flex items-center gap-4">
-                        <a href="#" className="hover:text-[#E3BE72] transition duration-200">
-                            <FaFacebook size={size} color={color} />
+                        <a href="#" className="hover:text-amber-400 transition duration-200">
+                            <FaFacebook size={size}  />
                         </a>
                         <a href="#" className="hover:text-[#E3BE72] transition duration-200">
-                            <FaInstagram size={size} color={color} />
+                            <FaInstagram size={size} />
                         </a>
                         <a href="#" className="hover:text-[#E3BE72] transition duration-200">
-                            <FaViber size={size} color={color} />
+                            <FaViber size={size} />
                         </a>
                         </div>
                     </div>
             </div>
 
-            <p className="text-center text-sm mt-8 opacity-70">
-                © {new Date().getFullYear()} Purenest — All rights reserved.
+            <p className="text-center text-sm mt-8 -mb-5">
+                © {new Date().getFullYear()} Purenest — Бүх эрх хуулиар хамгаалагдсан.
             </p>
         </footer>
     );

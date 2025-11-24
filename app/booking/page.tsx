@@ -115,70 +115,25 @@ export default function Booking() {
                             onChange={(e) => setForm({ ...form, service: e.target.value })}
                             className="w-full border p-2 rounded"
                         >
-                            <option>Гэр цэвэрлэгээ</option>
+                            <option>Оффис цэвэрлэгээ</option>
                             <option>СӨХ цэвэрлэгээ</option>
                             <option>Олон нийтийн талбай</option>
                         </select>
                     </div>
 
-                    <div>
-                        <label className="block mb-2">Огноо</label>
-                        <input
-                            type="date"
-                            value={form.date}
-                            onChange={(e) => setForm({ ...form, date: e.target.value })}
-                            className="w-full border p-2 rounded"
-                        />
-                    </div>
+
 
                     {/* House cleaning */}
-                    {(form.service === 'Гэр цэвэрлэгээ') && (
-                        <div className="space-y-4">
-                            <h2 className="font-semibold text-lg">Цэвэрлэх өрөө</h2>
-                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                {roomOptions.map((room) => (
-                                    <div key={room.key} className="flex flex-col items-center">
-                                        <Image src={room.img} alt={room.label} width={80} height={80} />
-                                        <span>{room.label}</span>
-                                        <div className="flex gap-2 mt-2">
-                                            <button
-                                                type="button"
-                                                onClick={() => decrementRoom(room.key)}
-                                                className="border px-2 rounded hover:bg-gray-200"
-                                            >-</button>
-                                            <span>{form.roomsCount[room.key as keyof typeof form.roomsCount]}</span>
-                                            <button
-                                                type="button"
-                                                onClick={() => incrementRoom(room.key)}
-                                                className="border px-2 rounded hover:bg-gray-200"
-                                            >+</button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-
-                            <h2 className="font-semibold text-lg mt-4">Нэмэлт</h2>
-                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                {extrasOptions.map((extra) => (
-                                    <div key={extra.key} className="flex flex-col items-center">
-                                        <Image src={extra.img} alt={extra.label} width={80} height={80} />
-                                        <span>{extra.label}</span>
-                                        <div className="flex gap-2 mt-2">
-                                            <button
-                                                type="button"
-                                                onClick={() => decrementExtra(extra.key)}
-                                                className="border px-2 rounded hover:bg-gray-200"
-                                            >-</button>
-                                            <span>{form.extrasCount[extra.key as keyof typeof form.extrasCount]}</span>
-                                            <button
-                                                type="button"
-                                                onClick={() => incrementExtra(extra.key)}
-                                                className="border px-2 rounded hover:bg-gray-200"
-                                            >+</button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
+                    {(form.service === 'Оффис цэвэрлэгээ') && (
+                        <div>
+                            <label className="block mb-2">Талбайн хэмжээ (м²)</label>
+                            <input
+                                type="number"
+                                min={1}
+                                value={form.publicAreaSize}
+                                onChange={(e) => setForm({ ...form, publicAreaSize: e.target.value })}
+                                className="w-full border p-2 rounded"
+                            />
                         </div>
                     )}
 
@@ -217,7 +172,7 @@ export default function Booking() {
                                         className="w-full border p-2 rounded"
                                     />
                                 </div>
-                            
+
                                 <div>
                                     <label>Айлын тоо</label>
                                     <input
@@ -245,7 +200,15 @@ export default function Booking() {
                             />
                         </div>
                     )}
-
+                    <div>
+                        <label className="block mb-2">Огноо</label>
+                        <input
+                            type="date"
+                            value={form.date}
+                            onChange={(e) => setForm({ ...form, date: e.target.value })}
+                            className="w-full border p-2 rounded"
+                        />
+                    </div>
                     {/* Frequency */}
                     <div>
                         <label className="block mb-2">Давтамж</label>
@@ -295,17 +258,20 @@ export default function Booking() {
                             />
                         </div>
                     </div>
-
-                    {/* Submit */}
                     <button
                         type="button"
-                        className="w-full border mt-4 border-white/5 shadow-md p-2 rounded bg-[#102B5A] text-white hover:text-[#E3BE72] duration-300"
+                        className="w-full border mt-4 border-white/5 shadow-md p-2 rounded bg-[#102B5A] text-white hover:text-amber-400 duration-300"
                         onClick={() => alert('Захиалга илгээгдлээ (demo)')}
                     >
                         Илгээх
                     </button>
                 </form>
             </div>
+            <div className=''>
+                <div></div>
+                <div></div>
+            </div>
+
         </section>
     )
 }
