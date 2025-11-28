@@ -24,7 +24,15 @@ const frequencyOptions = [
     'Өдөр бүр',
 ]
 
+
+
 export default function Booking() {
+    const [name, setName] = useState("");
+    const [phone, setPhone] = useState("");
+    const [service, setService] = useState("");   // ← энэ заавал байх ёстой
+    const [area, setArea] = useState("");
+    const [frequency, setFrequency] = useState("");
+
     const [form, setForm] = useState({
         name: '',
         phone: '',
@@ -81,6 +89,61 @@ export default function Booking() {
             suhInfo: { ...form.suhInfo, [key]: value },
         })
     }
+    // PRICE CALCULATION LOGIC
+    const calculatePrice = () => {
+        let base = 0;
+
+        // --- Оффис цэвэрлэгээ ---
+        if (form.service === "Оффис цэвэрлэгээ") {
+            const size = Number(form.publicAreaSize || 0);
+            base = size * 35000;
+        }
+
+        // --- Олон нийтийн талбай ---
+        if (form.service === "Олон нийтийн талбай") {
+            const size = Number(form.publicAreaSize || 0);
+            base = size * 25000;
+        }
+
+        // --- СӨХ цэвэрлэгээ ---
+        if (form.service === "СӨХ цэвэрлэгээ") {
+            const { apartments, floors, lifts, rooms } = form.suhInfo;
+            base =
+                apartments * 100000 +
+                floors * 40000 +
+                lifts * 20000 +
+                rooms * 5000;            // айлын тоо
+        }
+
+        // --- Давтамжийн нэмэлт/хасалт ---
+        let factor = 1;
+        switch (form.frequency) {
+            case "Долоо хоногт 1 удаа": factor = 0.9; break; // 10% хөнгөлөлт
+            case "2 долоо хоногт 1 удаа": factor = 0.95; break;
+            case "Сард 1 удаа": factor = 1; break;
+            case "Өдөр бүр": factor = 0.80; break; // их ажил тул бууруулахгүй бас болно
+        }
+
+        return Math.max(0, Math.round(base * factor));
+    };
+    const handleSubmit = () => {
+        fetch("/api/send-mail", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, phone, service, area, frequency }),
+        })
+            .then(res => res.json())
+            .then(data => {
+                console.log(data);
+                alert("Захиалга илгээгдлээ (demo)");
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Алдаа гарлаа, дахин оролдоно уу");
+            });
+    };
+
+
 
     return (
         <section className="flex justify-center mt-10 mb-10 text-black">
@@ -261,7 +324,7 @@ export default function Booking() {
                     <button
                         type="button"
                         className="w-full border mt-4 border-white/5 shadow-md p-2 rounded bg-[#102B5A] text-white hover:text-amber-400 duration-300"
-                        onClick={() => alert('Захиалга илгээгдлээ (demo)')}
+                        onClick={handleSubmit   }
                     >
                         Илгээх
                     </button>
@@ -270,6 +333,39 @@ export default function Booking() {
             <div className=''>
                 <div></div>
                 <div></div>
+            </div>
+            <div className="w-96 ml-8 sticky top-10 h-fit p-6 border border-black/5 shadow-lg rounded-2xl bg-white">
+                <h2 className="text-xl font-semibold mb-4">Таны захиалга</h2>
+
+                <p className="text-gray-700 mb-2">
+                    <strong>Үйлчилгээ:</strong> {form.service}
+                </p>
+
+                {form.service !== "СӨХ цэвэрлэгээ" && (
+                    <p className="text-gray-700 mb-2">
+                        <strong>Талбай:</strong> {form.publicAreaSize || 0} м²
+                    </p>
+                )}
+
+                {form.service === "СӨХ цэвэрлэгээ" && (
+                    <div className="text-gray-700 mb-2 space-y-1">
+                        <p><strong>Байр:</strong> {form.suhInfo.apartments}</p>
+                        <p><strong>Давхар:</strong> {form.suhInfo.floors}</p>
+                        <p><strong>Лифт:</strong> {form.suhInfo.lifts}</p>
+                        <p><strong>Айлын тоо:</strong> {form.suhInfo.rooms}</p>
+                    </div>
+                )}
+
+                <p className="text-gray-700 mb-2">
+                    <strong>Давтамж:</strong> {form.frequency}
+                </p>
+
+                <div className="border-t pt-4 mt-4">
+                    <p className="text-lg font-bold">Нийт үнэ:</p>
+                    <p className="text-3xl font-bold text-emerald-600">
+                        {calculatePrice().toLocaleString()} ₮
+                    </p>
+                </div>
             </div>
 
         </section>

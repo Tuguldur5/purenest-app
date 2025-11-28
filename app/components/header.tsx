@@ -6,26 +6,24 @@ import { useState } from 'react'
 export default function Header() {
     const [open, setOpen] = useState(false)
     return (
-        <header className="bg-white border border-black/5 shadow-md text-black"
-        style={{
-
-        }}>
-            <div className="container mx-auto px-4 py-4 flex items-center justify-between "
-            style={{}}>
-                <Link href="/home" className="text-xl font-semibold ">
-                <img src="./purenest.jpg" alt="Logo" width={80} height={40} className='rounded-lg shadow-md'/>
+        <header className="bg-white border border-black/5 shadow-md text-black z-50"
+                style={{
+                    borderRadius: '0 0 100px'
+                    }}>
+             <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+                <Link href="/home" className=" flex text-xl font-semibold ">
+                <img src="./nest.jpg" alt="Logo" width={70} height={70} className='rounded-lg'/>
+                 <span className="ml-4 text-2xl mt-4 text-[#e2bd6e] font-bold">Purenest Service</span>
                 </Link>
                 
                 <nav className="hidden md:flex items-center gap-10 group-hover:text-[#E3BE72] transform duration-300">
                     <Link 
                         href="/home" 
                         className="hover:text-amber-400 hover:bg-[#102B5A] px-3 py-2 rounded-md transition-colors duration-300 flex items-center"
-                    >
-                                Нүүр
-                                </Link>
+                        > Нүүр
+                    </Link>
 
-
-                    <div className="relative group">
+                    <div className="relative group z-50">
                         <button className="block px-4 py-2 hover:bg-[#102B5A] hover:text-amber-400 rounded-lg transition-colors duration-300">Үйлчилгээ</button>
                         <div className="absolute left-0 bg-white rounded-lg w-45 shadow-lg hidden group-hover:block">
                             <Link className="block px-4 py-2  hover:text-amber-400 rounded-lg transition-colors duration-300" href="/service/office">Оффис</Link>
@@ -37,7 +35,7 @@ export default function Header() {
 
                     <Link href="/booking" className="hover-mustard block px-4 py-2 hover:bg-[#102B5A] hover:text-amber-400 rounded-lg transition-colors duration-300">Захиалга</Link>
 
-                    <div className="relative group">
+                    <div className="relative group z-50 ">
                         <button className="hover-mustard items-center block px-4 py-2 hover:bg-[#102B5A] hover:text-amber-400 rounded-lg transition-colors duration-300">Бусад</button>
 
                         <div className="absolute left-0 bg-white rounded-lg shadow-lg hidden group-hover:block w-52 py-2 transition-all duration-300">

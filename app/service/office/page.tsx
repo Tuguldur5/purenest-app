@@ -3,7 +3,7 @@ import { RiH4 } from "react-icons/ri"
 export default function ServiceCard() {
     const title = 'Оффис цэвэрлэгээ'
     return (
-        <section className="bg-white text-black py-5">
+        <section className="container mx-auto  text-black px-4 py-10">
             <div className="container mx-auto border border-black/5 shadow-md p-4 rounded-lg">
                 <h2 className="text-3xl font-semibold mb-4 text-center">
                     Оффис цэвэрлэгээнд юу багтдаг вэ?</h2>

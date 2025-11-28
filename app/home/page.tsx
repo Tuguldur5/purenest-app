@@ -53,24 +53,36 @@ export default function Home() {
     return (
         <section className="bg-gray-50 min-h-screen text-black">
             {/* Hero Section */}
-            <div className="container mx-auto flex flex-col md:flex-row items-center justify-between px-6 py-12 gap-8">
-                <div className="md:w-1/2">
-                    <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-                        Тавтай морилно уу — <span className="text-amber-400">Purenest</span>
+            <div className="relative  w-full h-[600px] md:h-[700px] flex items-center justify-center">
+                {/* Background Image */}
+                <img
+                    src="/clean.png"
+                    alt="Cleaning Service"
+                    className="absolute inset-0 w-full h-full object-cover brightness-75"
+                />
+
+                {/* Overlay Content */}
+                <div className="relative z-10 text-center max-w-2xl px-6">
+                    <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 drop-shadow-lg">
+                        Тавтай морилно уу — <span className="text-amber-300">Purenest</span>
                     </h1>
-                    <p className="text-gray-700 text-lg md:text-xl mb-6">
-                        Бидний найдвартай цэвэрлэгээ үйлчилгээ таны <strong>Оффис</strong>, <strong>СӨХ-ийн талбай</strong> болон <strong>Олон нийтийн талбай</strong>-г цэвэр, эрүүл болгоно.
+
+                    <p className="text-white text-lg md:text-xl mb-6 drop-shadow-md">
+                        Бидний найдвартай цэвэрлэгээ үйлчилгээ таны
+                        <strong> Оффис</strong>,
+                        <strong> СӨХ</strong> болон
+                        <strong> Олон нийтийн талбай</strong>-г цэвэр, эрүүл болгоно.
                     </p>
-                    <div className="flex flex-wrap gap-4">
-                        <Link href="/booking" className="px-6 py-3 rounded-lg bg-emerald-400 hover:bg-emerald-500 text-white font-medium transition">
-                            Захиалах
-                        </Link>
-                    </div>
-                </div>
-                <div className="md:w-1/2">
-                    <img src="/clean.png" alt="Cleaning Service" className="rounded-lg shadow-lg w-full" />
+
+                    <Link
+                        href="/booking"
+                        className="px-8 py-4 rounded-lg bg-emerald-400 hover:bg-emerald-500 text-white font-semibold transition shadow-md"
+                    >
+                        Захиалах
+                    </Link>
                 </div>
             </div>
+
 
             {/* Services Section */}
             <div className="container mx-auto px-6 py-12 ">

@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Header from "./components/header";
 import Footer from "./components/footer";
+import Loading from "./loading";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,9 +16,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  icons: "./public/nest.jpg",
   title: "Purenest",
   description: "Purenest cleaning service",
-
+  
 };
 
 export default function RootLayout({
@@ -30,9 +32,11 @@ export default function RootLayout({
       <body>
         <div className="min-h-screen bg-white flex flex-col">
           <Header />
+
           <main className="flex-1 min-h-110">
-          {children}
-        </main>
+            {children}
+          </main>
+
           <Footer />
         </div>
       </body>

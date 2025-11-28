@@ -10,7 +10,6 @@ export default function Footer({ size = 28, color = "white" }: SocialIconsProps)
         <footer className="w-full bg-[#102B5A] text-white py-10 px-6 mt-10">
             <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-10">
 
-                {/* Contact */}
                 <div>
                     <h3 className="text-xl font-semibold mb-3">Холбоо барих</h3>
                     <p  className="hover:text-amber-400">Утас: +976 9900-0000</p>
@@ -18,7 +17,6 @@ export default function Footer({ size = 28, color = "white" }: SocialIconsProps)
                     <p  className="hover:text-amber-400">Хаяг: Улаанбаатар, Монгол</p>
                 </div>
 
-                {/* Quick Links */}
                 <div>
                     <h3 className="text-xl font-semibold mb-3">Хурдан Холбоос</h3>
                     <ul className="space-y-2">
@@ -29,7 +27,6 @@ export default function Footer({ size = 28, color = "white" }: SocialIconsProps)
                     </ul>
                 </div>
 
-                {/* Social icons */}
                 <div>
                     <h3 className="text-xl font-semibold mb-3">Сошиал</h3>
                     <div className="flex items-center gap-4">
