@@ -79,13 +79,13 @@ export default function PublicSpaceService() {
                     </div>
                 </div>
 
-                <div className="mt-6 text-center">
-                    <Link
-                        href={`/booking?service=${encodeURIComponent(title)}`}
-                        className="inline-block px-6 py-3 rounded-lg border bg-black text-white hover:text-[#E3BE72] transition-colors duration-200"
+               <div className="mt-8 text-center">
+                    <a
+                        href="/booking"
+                        className="inline-block px-6 py-3 pr-15 pl-15 rounded-lg border border-white/5 shadow-md bg-[#102B5A] text-white hover:text-amber-400 transition-colors duration-200"
                     >
                         Захиалах
-                    </Link>
+                    </a>
                 </div>
                 <div className="flex flex-col mt-10 w-full items-center bg-[#C04A3A] border border-white/5 shadow-md p-4 rounded-lg text-white">
                     <h3 className="text-xl font-medium text-center mb-3">

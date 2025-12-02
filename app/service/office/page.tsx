@@ -108,28 +108,7 @@ export default function ServiceCard() {
                 </div>
             </div>
 
-            <div className="p-10">
-                <h2 className="text-2xl font-bold text-center mb-5">
-                    Хамтран ажилладаг байгууллагууд
-                </h2>
-
-                <div className="w-full overflow-hidden py-3 bg-white">
-                    <div className="flex items-center gap-15 animate-scroll will-change-transform">
-                        <img src="/purenest.jpg" alt="Logo1" className="h-12 object-contain" />
-                        <img src="/window.svg" alt="Logo2" className="h-12 object-contain" />
-                        <img src="/next.svg" alt="Logo3" className="h-12 object-contain" />
-                        <img src="/globe.svg" alt="Logo4" className="h-12 object-contain" />
-                        <img src="/file.svg" alt="Logo5" className="h-12 object-contain" />
-
-                        {/* дахин гүйлгэх */}
-                        <img src="/purenest.jpg" alt="Logo1" className="h-12 object-contain" />
-                        <img src="/window.svg" alt="Logo2" className="h-12 object-contain" />
-                        <img src="/next.svg" alt="Logo3" className="h-12 object-contain" />
-                        <img src="/globe.svg" alt="Logo4" className="h-12 object-contain" />
-                        <img src="/file.svg" alt="Logo5" className="h-12 object-contain" />
-                    </div>
-                </div>
-            </div>
+           
         </section>
     )
 }
