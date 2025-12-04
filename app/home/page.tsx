@@ -2,6 +2,14 @@ import Link from 'next/link'
 import ServiceCard from '../components/ServiceCard'
 
 export default function Home() {
+    interface News {
+  id: number;
+  title: string;
+  description: string;
+  image?: string;
+  created_at: string;
+}
+
     const services = [
         {
             title: 'Оффис цэвэрлэгээ',
@@ -111,6 +119,9 @@ export default function Home() {
                     </Link>
                 </div>
             </div>
+            {/* Home -> News Section */}
+
+
              <div className="p-10">
                 <h2 className="text-2xl font-bold text-center mb-5">
                     Хамтран ажилладаг байгууллагууд

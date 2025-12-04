@@ -1,4 +1,5 @@
 'use client'
+
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation' 
@@ -6,62 +7,70 @@ import { useRouter } from 'next/navigation'
 export default function Login() {
     const [email, setEmail] = useState('')
     const [pass, setPass] = useState('')
+    // const [role, setRole] = useState('') // 💡 Role-ийг хэрэглэгч сонгох шаардлагагүй бол устгаж болно. Backend өөрөө шалгана.
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
     const router = useRouter() 
 
+    // 💡 Тэмдэглэл: Таны API URL 'http://localhost:4000/auth/login' байна.
     const handleLogin = async () => {
         setError('')
         setLoading(true)
 
         try {
-            // ✅ FETCH КОДЫГ НӨХӨЖ ОРУУЛАВ
+            // Role-ийг Backend-д илгээхгүй бол state-ийг body-оос хасна.
             const res = await fetch("http://localhost:4000/auth/login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     email: email,
-                    password: pass // 'pass' state-ийн утгыг илгээж байна
+                    password: pass,
+                    // role: role, // Backend role-ийг шалгадаггүй бол хэрэггүй
                 })
             })
 
             const data = await res.json()
 
             if (!res.ok) {
-                // Backend-ээс ирсэн алдааны мессежийг харуулна
                 setError(data.error || "Нэвтрэхэд алдаа гарлаа. Мэдээллээ шалгана уу.") 
-            } else {
-                // 1. Токенг хадгалах
-                localStorage.setItem("token", data.token)
-
-                // 2. Хэрэглэгчийн мэдээллийг хадгалах
-                if (data.user) {
-                    localStorage.setItem("user", JSON.stringify(data.user))
-                }
-                
-                // 3. Админ эрхийг шалгах
-                const userRole = data.user?.role; 
-                const redirectPath = (userRole === 'admin') ? '/admin/dashboard' : '/'; 
-
-                console.log(`Нэвтрэлт амжилттай. Role: ${userRole}. Чиглүүлэх зам: ${redirectPath}`);
-
-                // 4. Зохих хуудас руу шилжих (Admin бол хатуу шилжүүлэлт хийх нь илүү найдвартай)
-                if (userRole === 'admin') {
-                    // Хатуу шилжүүлэлт нь Next.js-ийн кэшийг алгасахад тусалдаг
-                    window.location.href = redirectPath; 
-                } else {
-                    router.push(redirectPath);
-                    setTimeout(() => {
-                        router.refresh(); // Header зэргийг шинэчлэх
-                    }, 100);
-                }
+                return // Алдаа гарвал цааш үргэлжлүүлэхгүй
             }
+            
+            // Нэвтрэлт амжилттай
+            // -----------------------------------------------------
+            
+            // 1. Токенг хадгалах
+            localStorage.setItem("token", data.token)
+
+            // 2. Хэрэглэгчийн мэдээллийг хадгалах (role-ийг агуулсан)
+            if (data.user) {
+                // 💡 Хэрэглэгчийн role-ийг local storage-д тусад нь хадгалах нь хурдан шалгалт хийхэд тустай
+                localStorage.setItem("userRole", data.user.role || 'user');
+                localStorage.setItem("user", JSON.stringify(data.user))
+            }
+            
+            // 3. Админ эрхийг шалгах ба Чиглүүлэх Замыг Тодорхойлох
+            const userRole = data.user?.role; 
+            const redirectPath = (userRole === 'admin') ? '/admin' : '/'; // 💡 /admin руу чиглүүлнэ (Таны page.tsx-ийн root)
+            router.push(redirectPath);
+            console.log(`Нэвтрэлт амжилттай. Role: ${userRole}. Чиглүүлэх зам: ${redirectPath}`);
+
+            // 4. Зохих хуудас руу шилжих
+            if (userRole === 'admin') {
+                // 💡 Хатуу шилжүүлэлт: Admin Panel-ийн UI-ийг зөв ачаалахад тусална
+                window.location.href = redirectPath; 
+            } else {
+                router.push(redirectPath);
+                // Зарим үед Header component-ийг шинэчлэхийн тулд refresh хийх шаардлагатай болдог
+                setTimeout(() => {
+                    router.refresh(); 
+                }, 100);
+            }
+            
         } catch (err) {
             console.error("Login Fetch Error:", err);
-            // 💡 4000 порт ажиллаж байсан ч холбогдохгүй бол Firewall/CORS-ийг шалгахыг сануулна.
             setError("Сервертэй холбогдож чадсангүй. (Холболт эсвэл CORS-ийн алдаа)")
         } finally {
-            // ✅ Хүсэлт амжилттай эсвэл алдаатай байсан ч loading-ийг унтраана.
             setLoading(false) 
         }
     }
@@ -89,13 +98,13 @@ export default function Login() {
             />
 
             <div className="flex items-center justify-between"><br />
-                <Link href="/forgot-password" className="text-sm text-red-500 hover-mustard">
+                <Link href="/forgot-password" className="text-sm text-red-500 hover:text-red-700">
                     Нууц үгээ мартсан?
                 </Link>
             </div>
 
             <button 
-                className="mt-3 p-2 border border-gray-300 shadow-md rounded-lg text-white w-full bg-[#102B5A]"
+                className="mt-3 p-2 border border-gray-300 shadow-md rounded-lg text-white w-full bg-[#102B5A] disabled:opacity-50"
                 onClick={handleLogin}
                 disabled={loading}
             >
@@ -103,7 +112,7 @@ export default function Login() {
             </button>
 
             <p className="mt-4 text-center">
-                Бүртгэлгүй? <Link href="/register" className="hover-mustard text-[#102B5A] font-medium">Бүртгүүлэх</Link>
+                Бүртгэлгүй? <Link href="/register" className="text-[#102B5A] font-medium hover:text-blue-700">Бүртгүүлэх</Link>
             </p>
         </section>
     )

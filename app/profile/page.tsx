@@ -38,7 +38,7 @@ function UserDetails({ details }: UserDetailsProps) {
     return (
         <div className="p-6 rounded-xl border border-gray-200 bg-white shadow-md h-full">
             <div className="flex justify-between items-center mb-6 border-b pb-3">
-                <h2 className="text-xl font-bold text-gray-800">👤 Хувийн Мэдээлэл</h2>
+                <h2 className="text-xl font-bold text-gray-800"> Хувийн Мэдээлэл</h2>
                 <button className="flex items-center text-sm font-semibold text-indigo-600 hover:text-indigo-800 transition duration-150">
                     Засах
                 </button>
@@ -67,7 +67,7 @@ const DetailRow: React.FC<{ label: string; value: string }> = ({ label, value })
 function OrderHistory({ orders }: OrderHistoryProps) {
     return (
         <div className="p-6 rounded-xl border border-gray-200 bg-white shadow-md h-full">
-            <h2 className="text-xl font-bold text-gray-800 mb-6 border-b pb-3">🛍️ Захиалгын Түүх</h2>
+            <h2 className="text-xl font-bold text-gray-800 mb-6 border-b pb-3"> Захиалгын Түүх</h2>
 
             {orders.length === 0 ? (
                 <p className="text-gray-500 py-4">Та одоогоор захиалга хийгээгүй байна.</p>
@@ -157,9 +157,9 @@ export default function Profile() {
                     // DB-ээс авсан мэдээллийг UserDetail interface-д хувиргах
                     setUserDetails({
                         full_name: user.full_name || user.email.split('@')[0],
-                        email: user.email,
+                        email: user.email,  
                         phone_number: user.phone || '',
-                        role: user.role || 'user',
+                       
                     });
                 }
 

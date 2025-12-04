@@ -25,7 +25,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     <Link href="/admin/users" className="block p-3 rounded hover:bg-gray-200">Users</Link>
                     <Link href="/admin/pricing" className="block p-3 rounded hover:bg-gray-200">Pricing</Link>
                 </nav>
-                <Link href="/home" className="absolute bottom-5 bg-red-300 text-sm text-red-600 hover:text-red-800 border border-black/5 shadow-md ml-5 p-3 pl-5 pr-5 rounded-sm">🏠 Гарах</Link>
+                <Link href="/home" className="absolute bottom-5 text-sm text-red-600 hover:text-red-800">🏠 Гарах</Link>
             </aside>
 
             {/* Main content */}

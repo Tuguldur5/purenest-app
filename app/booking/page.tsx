@@ -45,6 +45,7 @@ export default function Booking() {
         city: 'Улаанбаатар', // 💡 Default-ийг УБ болгож өөрчлөв
         district: '', // 💡 Дүүрэг/Хороог сонголттой болгохын тулд эхлээд хоосон байна
         khoroo: '',
+        total_price: 0,
         address: '',
     })
 
@@ -129,6 +130,7 @@ export default function Booking() {
             district: form.district,
             khoroo: form.khoroo,
             address: form.address,
+            totalPrice: totalPrice,
         };
         
         // 4. Fetch API ашиглан хүсэлт илгээх

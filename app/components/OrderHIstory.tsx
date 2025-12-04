@@ -12,7 +12,7 @@ interface OrderHistoryProps {
 function OrderHistory({ orders }: OrderHistoryProps) {
     return (
         <div>
-            <h2 className="text-2xl font-semibold mb-4 text-gray-800">🛍️ Захиалгын Түүх</h2>
+            <h2 className="text-2xl font-semibold mb-4 text-gray-800">Захиалгын Түүх</h2>
             
             {orders.length === 0 ? (
                 <p className="text-gray-500">Та одоогоор захиалга хийгээгүй байна.</p>
