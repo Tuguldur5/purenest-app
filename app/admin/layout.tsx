@@ -1,11 +1,12 @@
 'use client'
 
 import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
     const router = useRouter()
+    const pathname = usePathname() // Одоогийн замыг авах
 
     useEffect(() => {
         const role = localStorage.getItem("userRole")
@@ -14,18 +15,35 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         }
     }, [])
 
+    const menuItems = [
+        { name: 'Dashboard', href: '/admin/dashboard' },
+        { name: 'Orders', href: '/admin/orders' },
+        { name: 'Users', href: '/admin/users' },
+        { name: 'Pricing', href: '/admin/pricing' },
+    ]
+
     return (
         <div className="flex min-h-screen bg-gray-100 text-black">
             {/* Sidebar */}
-            <aside className="w-64 bg-white shadow-lg p-5 border-r">
-                <h2 className="text-2xl font-bold mb-8">Admin Panel</h2>
+            <aside className="w-64 bg-white shadow-lg p-5 border-r relative">
+                <h2 className="text-2xl font-bold mb-8"><Link href="/admin" className="block rounded ">Admin Panel</Link></h2>
                 <nav className="space-y-2">
-                    <Link href="/admin/dashboard" className="block p-3 rounded hover:bg-gray-200">Dashboard</Link>
-                    <Link href="/admin/orders" className="block p-3 rounded hover:bg-gray-200">Orders</Link>
-                    <Link href="/admin/users" className="block p-3 rounded hover:bg-gray-200">Users</Link>
-                    <Link href="/admin/pricing" className="block p-3 rounded hover:bg-gray-200">Pricing</Link>
+                    {menuItems.map((item) => {
+                        const isActive = pathname === item.href
+                        return (
+                            <Link
+                                key={item.href}
+                                href={item.href}
+                                className={`block p-3 rounded transition
+                                    ${isActive ? 'bg-blue-500 text-white font-semibold' : 'hover:bg-gray-200'}
+                                `}
+                            >
+                                {item.name}
+                            </Link>
+                        )
+                    })}
                 </nav>
-                <Link href="/home" className="absolute bottom-5 bg-red-300 text-sm text-red-600 hover:text-red-800 border border-black/5 shadow-md ml-5 p-3 pl-5 pr-5 rounded-sm">🏠 Гарах</Link>
+                <Link href="/home" className="absolute bottom-5 text-sm text-red-600 hover:text-red-800">Гарах</Link>
             </aside>
 
             {/* Main content */}

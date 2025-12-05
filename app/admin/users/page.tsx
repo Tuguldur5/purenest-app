@@ -6,11 +6,28 @@ export default function UsersPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetch('/api/admin/users')
-            .then(res => res.json())
-            .then(data => setUsers(data.users))
-            .finally(() => setLoading(false));
-    }, []);
+    async function loadUsers() {
+        try {
+            const token = localStorage.getItem("token");
+            const res = await fetch("http://localhost:4000/api/admin/users", {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+            const data = await res.json();
+            if (!res.ok || data.error) {
+                alert(data.error || "Server error");
+                return;
+            }
+            setUsers(data.users || []);
+        } catch (err) {
+            console.error("Fetch users error:", err);
+            alert("Сервертэй холбогдож чадсангүй.");
+        } finally {
+            setLoading(false);
+        }
+    }
+    loadUsers();
+}, []);
+
 
     return (
         <div>

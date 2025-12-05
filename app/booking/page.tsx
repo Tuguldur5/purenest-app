@@ -24,7 +24,7 @@ const ULAANBAATAR_DISTRICTS = [
 
 // 💡 2. Аймаг, Хотын жагсаалт
 const PROVINCES = [
-    'Улаанбаатар', 
+    'Улаанбаатар',
 ];
 
 
@@ -117,14 +117,11 @@ export default function Booking() {
 
         // 3. Backend-рүү илгээх мэдээллийг бэлтгэх
         const payload = {
-            // user_id-г payload-д илгээх шаардлагагүй, учир нь Backend Токенг задлаад ID-г өөрөө авна.
             service: form.service,
-            // ... (бусад мэдээлэл хэвээр) ...
             public_area_size: form.service !== "СӨХ цэвэрлэгээ" ? Number(form.publicAreaSize) : null,
-            apartments: form.suhInfo.apartments,
-            floors: form.suhInfo.floors,
-            lifts: form.suhInfo.lifts,
-            rooms: form.suhInfo.rooms,
+            roomsCount: form.roomsCount,
+            extrasCount: form.extrasCount,
+            suhInfo: form.suhInfo,
             frequency: form.frequency,
             city: form.city,
             district: form.district,
@@ -132,7 +129,8 @@ export default function Booking() {
             address: form.address,
             totalPrice: totalPrice,
         };
-        
+
+
         // 4. Fetch API ашиглан хүсэлт илгээх
         try {
             const res = await fetch(API_URL, {
@@ -140,7 +138,7 @@ export default function Booking() {
                 headers: {
                     "Content-Type": "application/json",
                     // ✅ Токенг Authorization Header-т нэмсэн
-                    "Authorization": `Bearer ${token}` 
+                    "Authorization": `Bearer ${token}`
                 },
                 body: JSON.stringify(payload),
             });
@@ -173,7 +171,7 @@ export default function Booking() {
 
                     {/* Basic info */}
                     {/* ... (Нэр, Утас, Үйлчилгээ, Талбай, СӨХ мэдээлэл) ... */}
-                    
+
                     {/* Basic info */}
                     <div>
                         <label className="block mb-2">Нэр</label>
@@ -192,7 +190,7 @@ export default function Booking() {
                             className="w-full border p-2 rounded"
                         />
                     </div>
-                    
+
                     <div>
                         <label className="block mb-2">Үйлчилгээ</label>
                         <select
@@ -306,7 +304,7 @@ export default function Booking() {
                                 }}
                                 className="w-full border p-2 rounded"
                             >
-                                
+
                                 {PROVINCES.map(p => (
                                     <option key={p} value={p}>{p}</option>
                                 ))}
@@ -347,7 +345,7 @@ export default function Booking() {
                                 {/* 💡 Бусад аймгийн багуудыг энд нэмэх шаардлагатай */}
                             </select>
                         </div>
-                        
+
                         {/* Үлдсэн Байршил / Гудамж - Input хэвээр үлдэнэ */}
                         <div>
                             <label className="block mb-2">Байршил / Гудамж</label>
@@ -360,15 +358,15 @@ export default function Booking() {
                     </div>
                     {/* 💡 type="submit" -ийн оронд type="button" байсан тул onClick={handleSubmit}-ийг хэвээр үлдээв */}
                     <button
-                        type="button" 
+                        type="button"
                         className="w-full border mt-4 border-white/5 shadow-md p-2 rounded bg-[#102B5A] text-white hover:text-amber-400 duration-300"
-                        onClick={handleSubmit} 
+                        onClick={handleSubmit}
                     >
                         Илгээх
                     </button>
                 </form>
             </div>
-            
+
             {/* Price Summary (Үнийн хураангуй) */}
             <div className="w-96 ml-8 sticky top-10 h-fit p-6 border border-black/5 shadow-lg rounded-2xl bg-white">
                 <h2 className="text-xl font-semibold mb-4">Таны захиалга</h2>

@@ -3,9 +3,31 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation'; // useRouter-ийг импортлох
 import { FaUserCircle } from 'react-icons/fa';
-
+import { usePathname } from 'next/navigation';
+import { Home, MoreHorizontal } from "lucide-react";
 export default function Header() {
     // 💡 Header функцийг дотор нь тодорхойлсныг устгаж, шууд Header функцийг ашиглаж байна.
+    const [scrolled, setScrolled] = useState(false)
+    const pathname = usePathname() // Одоо байгаа page-г авах
+
+    useEffect(() => {
+        // Зөвхөн Home page-д scroll event нэмэх
+        if (pathname === '/home') {
+            const handleScroll = () => {
+                if (window.scrollY > 50) setScrolled(true)
+                else setScrolled(false)
+            }
+            window.addEventListener('scroll', handleScroll)
+            return () => window.removeEventListener('scroll', handleScroll)
+        }
+    }, [pathname])
+
+    // Home page-д scroll шалгаж классыг өөрчлөх
+    const headerClasses =
+        pathname === '/home'
+            ? `fixed w-full top-0 z-50 transition-colors duration-300 ${scrolled ? 'bg-white border border-black/5 shadow-md text-black' : 'bg-transparent text-white'
+            }`
+            : 'w-full top-0 z-50 bg-white text-black shadow-md'
 
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [open, setOpen] = useState(false);
@@ -33,52 +55,94 @@ export default function Header() {
     };
 
     return (
-        <header className="bg-white border border-black/5 shadow-md text-black z-50">
-            <div className="container mx-auto px-4 py-4 flex items-center justify-between" style={{fontFamily:"arial"}}>
-                <Link href="/home" className=" flex text-xl font-semibold ">
-                    <img src="./nest.jpg" alt="Logo" width={70} height={70} className='rounded-lg' />
-                    <span className="ml-4 mt-3 text-3xl text-[#e2bd6e] "
+        <header className={headerClasses}>
+            <div className="container mx-auto px-4 py-4 flex items-center justify-between" style={{ fontFamily: "arial" }}>
+                <Link href="/home" className="flex items-center">
+                    <img
+                        src="./nest.jpg"
+                        alt="Logo"
+                        className="w-16 h-16 rounded-full object-cover"
+                    />
+                    <span
+                        className="ml-4 text-3xl text-[#e2bd6e]"
                         style={{ fontFamily: 'Montserrat' }}
-                    >Purenest Service</span>
+                    >
+                        Purenest Service
+                    </span>
                 </Link>
 
-                <nav className="hidden md:flex items-center gap-10">
-                    <Link
-                        href="/home"
-                        className="hover:text-amber-400 px-3 py-2 rounded-md transition-colors duration-300 flex items-center"
-                    > Нүүр
+
+                <nav className="hidden md:flex items-center space-x-4 ">
+                    {/* Нүүр */}
+                    <Link href="/home" className="flex items-center gap-2 px-3 py-2 rounded-md hover:text-amber-400 transition-colors duration-0">
+                        <Home size={20} /> Нүүр
                     </Link>
 
-                    {/* Үйлчилгээ Dropdown */}
+
+                    {/* Үйлчилгээ */}
                     <div className="relative group z-50">
-                        <button className="block px-4 py-2 hover:text-amber-400 rounded-lg transition-colors duration-300">Үйлчилгээ</button>
+                        <button className="flex items-center gap-2 px-4 py-2 hover:text-amber-400 rounded-lg transition-colors">
+
+                            {/* Layers / Categories Icon */}
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                fill="none" viewBox="0 0 24 24"
+                                strokeWidth="1.5" stroke="currentColor"
+                                className="w-6 h-6">
+                                <path strokeLinecap="round" strokeLinejoin="round"
+                                    d="M3 7.5l9-4.5 9 4.5-9 4.5-9-4.5z" />
+                                <path strokeLinecap="round" strokeLinejoin="round"
+                                    d="M3 12l9 4.5 9-4.5" />
+                                <path strokeLinecap="round" strokeLinejoin="round"
+                                    d="M3 16.5l9 4.5 9-4.5" />
+                            </svg>
+
+                            Үйлчилгээ
+                        </button>
+
                         <div className="absolute left-0 bg-white rounded-lg w-45 shadow-lg hidden group-hover:block">
-                            <Link className="block px-4 py-2 hover:text-amber-400 rounded-lg transition-colors duration-300" href="/service/office">Оффис</Link>
-                            <Link className="block px-4 py-2 hover:text-amber-400 rounded-lg transition-colors duration-300" href="/service/suh">СӨХ</Link>
-                            <Link className="block px-4 py-2 hover:text-amber-400 rounded-lg transition-colors duration-300" href="/service/public-space">Олон нийтийн талбай</Link>
+                            <Link className="block px-4 py-2 text-black hover:text-amber-400" href="/service/office">Оффис</Link>
+                            <Link className="block px-4 py-2 text-black hover:text-amber-400" href="/service/suh">СӨХ</Link>
+                            <Link className="block px-4 py-2 text-black hover:text-amber-400" href="/service/public-space">Олон нийтийн талбай</Link>
                         </div>
                     </div>
 
-                    <Link href="/booking" className="hover-mustard block px-4 py-2 hover:text-amber-400 rounded-lg transition-colors duration-300">Захиалга</Link>
 
-                    {/* Бусад Dropdown */}
-                    <div className="relative group z-50 ">
-                        <button className="hover-mustard items-center block px-4 py-2 hover:text-amber-400 rounded-lg transition-colors duration-300">Бусад</button>
-                        <div className="absolute left-0 bg-white rounded-lg shadow-lg hidden group-hover:block w-52 py-2 transition-all duration-300">
-                            <Link className="block px-4 py-2 rounded-lg block px-4 py-2 hover:text-amber-400 rounded-lg transition-colors duration-300 " href="/about">Бидний тухай</Link>
-                            <Link className="block px-4 py-2 rounded-lg block px-4 py-2 hover:text-amber-400 rounded-lg transition-colors duration-300" href="/faq">Түгээмэл асуултууд</Link>
+                    {/* Захиалга */}
+                    <Link
+                        href="/booking"
+                        className="flex items-center gap-2 hover:text-amber-400 px-3 py-2 rounded-md transition-colors duration-0"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                            viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor"
+                            className="w-5 h-5">
+                            <path strokeLinecap="round" strokeLinejoin="round"
+                                d="M3 7h18M6 12h12M9 17h6" />
+                        </svg>
+                        <span className="text-[17px]">Захиалга</span>
+                    </Link>
+
+
+
+                    {/* Бусад */}
+                    <div className="relative group z-50">
+                        <button className="flex items-center gap-2 px-4 py-2 hover:text-amber-400 rounded-lg transition-colors">
+                            <MoreHorizontal size={20} /> Бусад
+                        </button>
+                        <div className="absolute left-0 bg-white rounded-lg w-52 shadow-lg hidden group-hover:block py-2">
+                            <Link href="/about" className="block px-4 text-black py-2 hover:text-amber-400">Бидний тухай</Link>
+                            <Link href="/faq" className="block px-4 text-black py-2 hover:text-amber-400">Түгээмэл асуултууд</Link>
                         </div>
                     </div>
 
                     {/* Хэрэглэгчийн Төлөв (Login/Profile) */}
-                    <div className="flex items-center">
+                    <div className="flex ml-4 items-center">
                         {isLoggedIn ? (
                             // ✅ Нэвтэрсэн үед: Profile Icon болон Гарах товч
                             <div className="flex items-center space-x-4">
                                 <Link href="/profile" className="text-[#102B5A] hover:text-amber-400 transition-colors duration-300">
                                     <FaUserCircle size={35} />
                                 </Link>
-                                
+
                             </div>
                         ) : (
                             // ❌ Нэвтрээгүй үед: Нэвтрэх товч

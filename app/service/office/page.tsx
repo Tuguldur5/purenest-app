@@ -89,23 +89,38 @@ export default function ServiceCard() {
                     </a>
                 </div>
 
-                <div className="flex flex-col mt-10 w-full items-center bg-[#C04A3A] border border-white/5shadow-md p-4 rounded-lg text-white">
-                    <h3 className="text-xl font-medium text-center mb-3">
-                       <strong> Хамаарахгүй үйлчилгээ</strong> 
-                    </h3>
-                    <p className="text-sm mb-3">
-                        Аюулгүй байдал болон техникийн зааврын дагуу бид дараах ажлыг хийх боломжгүй:
-                    </p>
+  <div className="flex flex-col mt-10 w-full bg-red-700 border border-white/10 shadow-lg p-6 rounded-xl text-white">
+  <h3 className="text-2xl font-semibold text-center mb-6">
+    Хамаарахгүй үйлчилгээ
+  </h3>
+  <p className="text-sm text-white/90 mb-6 text-center">
+    Аюулгүй байдал болон техникийн зааврын дагуу бид дараах ажлыг хийх боломжгүй:
+  </p>
 
-                    <ul className="list-disc list-inside space-y-2 text-sm">
-                        <li>25кг-аас дээш жинтэй тавилга өргөх, зөөх</li>
-                        <li>Хүрэх боломжгүй өндөр талбай, гадна цонх угаах</li>
-                        <li>Био-аюултай бохирдол (нүдэнд харагдах аюултай материал)</li>
-                        <li>Барилгын дараах гүн цэвэрлэгээ</li>
-                        <li>Гүн тогтсон, химийн тусгай бүтээгдэхүүн шаардсан толбо</li>
-                        <li>Илүү их хог хуримтлагдсан, онцгой нөхцөлтэй аж ахуйн нэгж</li>
-                    </ul>
-                </div>
+  <ul className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
+    <li className="border border-white/20 rounded-lg p-4 bg-white/30 hover:bg-white/20 transition w-full text-center">
+      25кг-аас дээш жинтэй тавилга өргөх, зөөх
+    </li>
+    <li className="border border-white/20 rounded-lg p-4 bg-white/30 hover:bg-white/20 transition w-full text-center">
+      Хүрэх боломжгүй өндөр талбай, гадна цонх угаах
+    </li>
+    <li className="border border-white/20 rounded-lg p-4 bg-white/30 hover:bg-white/20 transition w-full text-center">
+      Био-аюултай бохирдол (нүдэнд харагдах аюултай материал)
+    </li>
+    <li className="border border-white/20 rounded-lg p-4 bg-white/30 hover:bg-white/20 transition w-full text-center">
+      Барилгын дараах гүн цэвэрлэгээ
+    </li>
+    <li className="border border-white/20 rounded-lg p-4 bg-white/30 hover:bg-white/20 transition w-full text-center">
+      Гүн тогтсон, химийн тусгай бүтээгдэхүүн шаардсан толбо
+    </li>
+    <li className="border border-white/20 rounded-lg p-4 bg-white/30 hover:bg-white/20 transition w-full text-center">
+      Илүү их хог хуримтлагдсан, онцгой нөхцөлтэй аж ахуйн нэгж
+    </li>
+  </ul>
+</div>
+
+
+
             </div>
 
            

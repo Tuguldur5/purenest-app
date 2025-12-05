@@ -3,7 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
-const pool = require('./db'); // PostgreSQL холболт
+const pool = require('./db.js'); // PostgreSQL холболт
 
 const app = express();
 app.use(cors());
@@ -69,12 +69,42 @@ app.post('/api/booking', authMiddleware, async (req, res) => {
     try {
         const user_id = req.user.id || req.user.userId;
         const userDetails = await fetchUserDetails(user_id);
-        const { service, date, address, totalPrice } = req.body;
+        const {
+            service,
+            date,
+            address,
+            totalPrice,
+            roomsCount,
+            extrasCount,
+            suhInfo,
+            frequency,
+            city,
+            district,
+            khoroo,
+            public_area_size
+        } = req.body;
 
         const orderResult = await pool.query(
-            `INSERT INTO orders (user_id, service, date, address, total_price, status)
-             VALUES ($1, $2, $3, $4, $5, 'Хүлээгдэж байна') RETURNING *`,
-            [user_id, service, date, address, totalPrice]
+            `INSERT INTO orders
+            (user_id, service, date, address, total_price, status,
+             rooms_count, extras_count, suh_info, frequency, city, district, khoroo, public_area_size )
+             VALUES ($1,$2,$3,$4,$5,'Хүлээгдэж байна',$6,$7,$8,$9,$10,$11,$12,$13)
+             RETURNING *`,
+            [
+                user_id,
+                service || 'Тодорхойгүй үйлчилгээ',
+                date || new Date().toISOString(),
+                address || '',
+                totalPrice || 0,
+                roomsCount || {},
+                extrasCount || {},
+                suhInfo || {},
+                frequency || 'Нэг удаа',
+                city || '',
+                district || '',
+                khoroo || '',
+                public_area_size || 0
+            ]
         );
 
         res.json({
@@ -105,7 +135,22 @@ app.get('/api/orders/history', authMiddleware, async (req, res) => {
 });
 
 // Admin routes
-app.use("/api/admin", require("./route/admin"));
+const adminRoutes = require("./route/admin");
+app.use("/api/admin", adminRoutes);
+
+app.get("/api/admin/users", isAdminMiddleware, async (req, res) => {
+    const { rows } = await pool.query(`
+        SELECT u.id AS user_id, u.full_name AS name, u.email,
+               COUNT(o.order_id) AS orders_count,
+               COALESCE(SUM(o.total_price), 0) AS total_spent
+        FROM users u
+        LEFT JOIN orders o ON o.user_id = u.id
+        GROUP BY u.id
+        ORDER BY u.id DESC
+    `);
+    res.json({ users: rows });
+});
+
 
 // Бүх захиалгыг авах
 app.get('/api/admin/orders', isAdminMiddleware, async (req, res) => {
