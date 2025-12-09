@@ -36,10 +36,6 @@ export default function Login() {
                 return // Алдаа гарвал цааш үргэлжлүүлэхгүй
             }
             
-            // Нэвтрэлт амжилттай
-            // -----------------------------------------------------
-            
-            // 1. Токенг хадгалах
             localStorage.setItem("token", data.token)
 
             // 2. Хэрэглэгчийн мэдээллийг хадгалах (role-ийг агуулсан)
@@ -51,7 +47,7 @@ export default function Login() {
             
             // 3. Админ эрхийг шалгах ба Чиглүүлэх Замыг Тодорхойлох
             const userRole = data.user?.role; 
-            const redirectPath = (userRole === 'admin') ? '/admin' : '/'; // 💡 /admin руу чиглүүлнэ (Таны page.tsx-ийн root)
+            const redirectPath = (userRole === 'admin') ? '/admin' : '/home'; // 💡 /admin руу чиглүүлнэ (Таны page.tsx-ийн root)
             router.push(redirectPath);
             console.log(`Нэвтрэлт амжилттай. Role: ${userRole}. Чиглүүлэх зам: ${redirectPath}`);
 

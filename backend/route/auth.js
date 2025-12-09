@@ -10,29 +10,35 @@ const JWT_SECRET = process.env.JWT_SECRET || 'PLEASE_CHANGE_ME_IN_ENV';
 
 // --- REGISTER ---
 router.post("/register", async (req, res) => {
-    // 💡 user-ийн default role-ийг 'user' гэж тогтоов
     const { full_name, email, password, phone } = req.body;
-    const defaultRole = 'user'; // Энд та default role-ийг тохируулна
+    const defaultRole = 'user';
 
     try {
-        // Имэйл давхардлыг шалгах
-        const existingUser = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
+        // 1. Email давхардал шалгах
+        const existingUser = await pool.query(
+            'SELECT id FROM users WHERE email = $1',
+            [email]
+        );
+
         if (existingUser.rowCount > 0) {
-            return res.status(409).json({ error: "Энэ имэйл хаяг бүртгэлтэй байна." });
+            return res.status(409).json({ error: "Энэ имэйл бүртгэлтэй байна." });
         }
 
-        // Нууц үгийг hash хийх
+        // 2. Password hash хийх
         const hash = await bcrypt.hash(password, 10);
 
-        // 💡 SQL Query-д role-ийг нэмж оруулав
+        // 3. ШИНЭ хэрэглэгч оруулах — ЭНД Л АЛДАА БАЙСАН
         await pool.query(
+            `INSERT INTO users (full_name, email, password_hash, phone, role)
+             VALUES ($1, $2, $3, $4, $5)`,
             [full_name, email, hash, phone, defaultRole]
         );
 
         res.status(201).json({ message: "Бүртгэл амжилттай!" });
-    } catch (err) {
+        
+    } catch(err) {
         console.error("Бүртгэлийн алдаа:", err);
-        res.status(500).json({ error: "Серверийн дотоод алдаа гарлаа." });
+        res.status(500).json({ error: "Серверийн алдаа." });
     }
 });
 

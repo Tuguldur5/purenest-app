@@ -16,8 +16,8 @@ export default function OrderCalendar({ orders }: { orders: any[] }) {
 
     useEffect(() => {
         const ev = orders.map(o => ({
-            id: o.order_id.toString(),
-            title: `${o.service} (${o.total_price.toLocaleString()}₮)`,
+            id: o.order_id,
+            title: `${o.service} (${o.total_price}₮)`,
             date: o.service_date,
             color: STATUS_COLORS[o.status] || 'blue'
         }));

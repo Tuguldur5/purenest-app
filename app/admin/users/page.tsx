@@ -6,27 +6,27 @@ export default function UsersPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-    async function loadUsers() {
-        try {
-            const token = localStorage.getItem("token");
-            const res = await fetch("http://localhost:4000/api/admin/users", {
-                headers: { "Authorization": `Bearer ${token}` }
-            });
-            const data = await res.json();
-            if (!res.ok || data.error) {
-                alert(data.error || "Server error");
-                return;
+        async function loadUsers() {
+            try {
+                const token = localStorage.getItem("token");
+                const res = await fetch("http://localhost:4000/api/admin/users", {
+                    headers: { "Authorization": `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (!res.ok || data.error) {
+                    alert(data.error || "Server error");
+                    return;
+                }
+                setUsers(data.users || []);
+            } catch (err) {
+                console.error("Fetch users error:", err);
+                alert("Сервертэй холбогдож чадсангүй.");
+            } finally {
+                setLoading(false);
             }
-            setUsers(data.users || []);
-        } catch (err) {
-            console.error("Fetch users error:", err);
-            alert("Сервертэй холбогдож чадсангүй.");
-        } finally {
-            setLoading(false);
         }
-    }
-    loadUsers();
-}, []);
+        loadUsers();
+    }, []);
 
 
     return (
@@ -44,16 +44,17 @@ export default function UsersPage() {
                         </tr>
                     </thead>
                     <tbody>
-                        {users.map(u => (
-                            <tr key={u.user_id} className="hover:bg-gray-50">
-                                <td className="p-3 border">{u.user_id}</td>
-                                <td className="p-3 border">{u.name}</td>
-                                <td className="p-3 border">{u.email}</td>
-                                <td className="p-3 border">{u.orders_count}</td>
-                                <td className="p-3 border text-green-700 font-bold">{u.total_spent.toLocaleString()} ₮</td>
+                        {users.map((user, idx) => (
+                            <tr key={user.user_id ?? idx} className="hover:bg-gray-50">
+                                <td className="p-3 border">{user.user_id}</td>
+                                <td className="p-3 border">{user.full_name}</td>
+                                <td className="p-3 border">{user.email}</td>
+                                <td className="p-3 border">{user.orders_count}</td>
+                                <td className="p-3 border text-green-700 font-bold">{user.total_spent} ₮</td>
                             </tr>
                         ))}
                     </tbody>
+
                 </table>
             }
         </div>

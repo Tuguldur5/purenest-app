@@ -29,6 +29,9 @@ export default function Header() {
             }`
             : 'w-full top-0 z-50 bg-white text-black shadow-md'
 
+
+
+            
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [open, setOpen] = useState(false);
     const router = useRouter(); // useRouter-ийг дуудах
@@ -131,6 +134,7 @@ export default function Header() {
                         <div className="absolute left-0 bg-white rounded-lg w-52 shadow-lg hidden group-hover:block py-2">
                             <Link href="/about" className="block px-4 text-black py-2 hover:text-amber-400">Бидний тухай</Link>
                             <Link href="/faq" className="block px-4 text-black py-2 hover:text-amber-400">Түгээмэл асуултууд</Link>
+                            <Link href="/contact" className="block px-4 text-black py-2 hover:text-amber-400">Холбоо барих</Link>
                         </div>
                     </div>
 
@@ -146,8 +150,8 @@ export default function Header() {
                             </div>
                         ) : (
                             // ❌ Нэвтрээгүй үед: Нэвтрэх товч
-                            <Link href="/login" className="hover-mustard border text-white bg-[#102B5A] border-black p-2 ml-5 pl-4 pr-4
-                                shadow-md rounded-md hover:bg-gray-700 rounded-lg transition-colors duration-300">
+                            <Link href="/login" className="hover-mustard border text-white bg-[#102B5A] border-black/5 p-2 ml-5 pl-4 pr-4
+                                shadow-md rounded-md  rounded-lg transition-colors duration-300 hover:text-amber-400">
                                 Нэвтрэх
                             </Link>
                         )}

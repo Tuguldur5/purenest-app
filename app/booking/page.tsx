@@ -96,83 +96,86 @@ export default function Booking() {
     };
 
     // Хүсэлт илгээх функц
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        const totalPrice = calculatePrice();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-        // 💡 1. Токенг шалгах
-        const token = localStorage.getItem('token');
-        if (!token) {
-            alert("Захиалга хийхийн тулд та эхлээд нэвтрэх шаардлагатай!");
-            // Хэрэв Next.js ашиглаж байгаа бол:
-            // useRouter().push('/login'); 
-            return;
-        }
+    const totalPrice = calculatePrice();
 
-        // 2. Шаардлагатай талбаруудыг шалгах (Validation)
-        if (!form.name || !form.phone || !form.city || !form.district || !form.address || !form.date) {
-            alert("Нэр, утас, огноо, хаягийн мэдээллийг (Хот/Дүүрэг/Байршил) бүрэн бөглөнө үү.");
-            return;
-        }
-
-        // 3. Backend-рүү илгээх мэдээллийг бэлтгэх
-        const payload = {
-            service: form.service,
-            public_area_size: form.service !== "СӨХ цэвэрлэгээ" ? Number(form.publicAreaSize) : null,
-            roomsCount: form.roomsCount,
-            extrasCount: form.extrasCount,
-            suhInfo: form.suhInfo,
-            frequency: form.frequency,
-            city: form.city,
-            district: form.district,
-            khoroo: form.khoroo,
-            address: form.address,
-            totalPrice: totalPrice,
-        };
+    // 1. Токен шалгах
+    const token = localStorage.getItem('token');
+    if (!token) {
+        alert("Захиалга хийхийн тулд эхлээд нэвтрэх шаардлагатай!");
+        return;
+    }
 
 
-        // 4. Fetch API ашиглан хүсэлт илгээх
-        try {
-            const res = await fetch(API_URL, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    // ✅ Токенг Authorization Header-т нэмсэн
-                    "Authorization": `Bearer ${token}`
-                },
-                body: JSON.stringify(payload),
-            });
+    
+    // 2. Шаардлагатай талбаруудыг шалгах
+    if (!form.name || !form.phone || !form.city || !form.district || !form.address || !form.date) {
+        alert("Нэр, утас, огноо, хаягийн мэдээллийг бүрэн бөглөнө үү.");
+        return;
+    }
 
-            if (res.ok) {
-                const data = await res.json();
-                console.log("Backend response:", data);
-                alert(`Захиалга амжилттай илгээгдлээ! Дугаар: ${data.order.order_id || 'N/A'}`);
-            } else {
-                const errorData = await res.json();
-                console.error("Server Error:", errorData);
-                // 💡 Хэрэв токен хүчингүй бол "Нэвтрэлт шаардлагатай" гэсэн алдааг Frontend-д харуулна.
-                alert(`Захиалга илгээхэд алдаа гарлаа: ${errorData.error || res.statusText}`);
-            }
-        } catch (err) {
-            console.error("Fetch Error:", err);
-            alert("Сүлжээний алдаа гарлаа. Сервер ажиллаж байгаа эсэхийг шалгана уу.");
-        };
+    // 3. Payload бэлтгэх
+    const payload = {
+        service: form.service,
+        public_area_size: form.service !== "СӨХ цэвэрлэгээ" ? Number(form.publicAreaSize) : 0,
+        roomsCount: form.roomsCount || {},
+        extrasCount: form.extrasCount || {},
+        suhInfo: form.suhInfo || {},
+        frequency: form.frequency || "Нэг удаа",
+        city: form.city,
+        district: form.district,
+        khoroo: form.khoroo,
+        address: form.address,
+        totalPrice: totalPrice || 0,
     };
+
+    try {
+        const res = await fetch(API_URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`,
+            },
+            body: JSON.stringify(payload),
+        });
+
+        if (res.ok) {
+            const data = await res.json();
+            console.log("Backend response:", data);
+            alert(`Захиалга амжилттай илгээгдлээ! Дугаар: ${data.order?.order_id ?? 'N/A'}`);
+        } else {
+            // JSON parse-д алдаа гарахыг catch хийх
+            let errorData: { error?: string } = {};
+            try {
+                errorData = await res.json();
+            } catch (parseErr) {
+                console.warn("JSON parse failed, likely empty or non-JSON response:", parseErr);
+            }
+
+            // Type-safe алдаа message
+            const errorMessage = errorData?.error ?? res.statusText ?? 'Unknown error';
+            console.error("Server Error:", errorMessage);
+            alert(`Захиалга илгээхэд алдаа гарлаа: ${errorMessage}`);
+        }
+    } catch (err) {
+        console.error("Fetch failed:", err);
+        alert("Сервертэй холбогдож чадсангүй. Та дараа дахин оролдоно уу.");
+    }
+};
+
+
     // 💡 4. Сонгосон дүүрэгт хамаарах хороог шүүж авах
     const availableKhoroos = ULAANBAATAR_DISTRICTS.find(d => d.name === form.district)?.khoroos || [];
 
 
     return (
         <section className="flex justify-center mt-10 mb-10 text-black">
-            <div className="w-full max-w-3xl p-10 border border-black/5 shadow-md rounded-2xl space-y-6">
+            <div className="w-full max-w-3xl p-10 bg-gray-50 border border-black/5 shadow-md rounded-xl space-y-6">
                 <h1 className="text-2xl font-semibold text-center mb-6">Захиалах</h1>
 
-                <form className="space-y-4" onSubmit={handleSubmit}> {/* form-ийн submit-ийг handleSubmit-тай холбов */}
-
-                    {/* Basic info */}
-                    {/* ... (Нэр, Утас, Үйлчилгээ, Талбай, СӨХ мэдээлэл) ... */}
-
-                    {/* Basic info */}
+                <form className="space-y-4" onSubmit={handleSubmit}>
                     <div>
                         <label className="block mb-2">Нэр</label>
                         <input
@@ -362,19 +365,23 @@ export default function Booking() {
                         className="w-full border mt-4 border-white/5 shadow-md p-2 rounded bg-[#102B5A] text-white hover:text-amber-400 duration-300"
                         onClick={handleSubmit}
                     >
-                        Илгээх
+                        Захиалах
                     </button>
                 </form>
             </div>
 
             {/* Price Summary (Үнийн хураангуй) */}
-            <div className="w-96 ml-8 sticky top-10 h-fit p-6 border border-black/5 shadow-lg rounded-2xl bg-white">
+            <div className="w-96 ml-8 sticky bg-gray-100 top-10 h-fit p-6 border border-black/5  shadow-lg rounded-xl bg-white">
                 <h2 className="text-xl font-semibold mb-4">Таны захиалга</h2>
                 <p className="text-gray-700 mb-2">
                     <strong>Үйлчилгээ:</strong> {form.service}
                 </p>
-                {/* ... (Үнийн мэдээлэл) ... */}
-
+                <p className="text-gray-700 mb-2">
+                    <strong>Давтамж:</strong> {form.frequency}
+                </p>
+                <p className="text-gray-700 mb-2">
+                    <strong>Огноо:</strong> {form.date}
+                </p>
                 <div className="border-t pt-4 mt-4">
                     <p className="text-lg font-bold">Нийт үнэ:</p>
                     <p className="text-3xl font-bold text-emerald-600">

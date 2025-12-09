@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Header from "./components/header";
-import Footer from "./components/footer";
-import Loading from "./loading";
+import HeaderWrapper from "./components/HeaderWrapper";
+import FooterWrapper from "./components/footerWrapper";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,25 +18,16 @@ export const metadata: Metadata = {
   icons: "./public/nest.jpg",
   title: "Purenest",
   description: "Purenest cleaning service",
-  
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="mn">
       <body>
         <div className="min-h-screen bg-white flex flex-col">
-          <Header />
-
-          <main className="flex-1 min-h-130">
-            {children}
-          </main>
-
-          <Footer />
+          <HeaderWrapper />
+          <main className="min-h-screen">{children}</main>
+          <FooterWrapper />
         </div>
       </body>
     </html>

@@ -7,7 +7,7 @@ import Link from 'next/link'
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
     const router = useRouter()
 
-    useEffect(() => {
+    useEffect(() => { 
         const role = localStorage.getItem("userRole")
         if (role !== 'admin') {
             router.push('/') // Admin биш бол homepage руу
@@ -15,9 +15,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }, [])
 
     return (
-        <div className="conatainer flex flex-col g-gray-100 text-black">
-         
-         
-        </div>
+        <div></div>
     )
 }

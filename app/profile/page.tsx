@@ -126,7 +126,7 @@ function OrderHistory({ orders }: OrderHistoryProps) {
                             <StatusBadge status={order.status} type="order" />
                         </div>
                         <div className="flex justify-end items-center mb-1">
-                            <span className="text-lg font-bold text-gray-800 pr-4">{order.total_price.toLocaleString()}₮</span>
+                            <span className="text-lg font-bold text-gray-800 pr-4">{order.total_price}₮</span>
                             <span className="text-sm text-gray-500">Огноо: {new Date(order.date).toLocaleDateString('mn-MN')}</span>
                         </div>
                         {/* 2-р мөр: Service + Total Price + Status */}
