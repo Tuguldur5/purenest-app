@@ -10,11 +10,17 @@ interface Order {
     service: string;
     city: string;
     district: string;
+    khoroo: string;
+    full_name: string;
+    email: string;
+    phone: string;
     address: string;
     frequency: string;
     total_price: number;
     status: string;
     date: string;
+
+    created_at: string;
 }
 
 const STATUS_OPTIONS = [
@@ -138,25 +144,30 @@ export default function AdminDashboardPage() {
                 <h3 className="text-2xl font-semibold mb-4">Сүүлийн 5 захиалга</h3>
                 <div className="bg-white rounded-xl shadow border overflow-hidden">
                     <table className="min-w-full text-sm">
-                        <thead className="bg-gray-100">
+                        <thead className="bg-gray-300">
                             <tr>
-                                <th className="p-3 border-b">ID</th>
+
+                                <th className="p-3 border-b">Нэр</th>
+                                <th className="p-3 border-b">Email</th>
                                 <th className="p-3 border-b">Үйлчилгээ</th>
                                 <th className="p-3 border-b">Хаяг</th>
                                 <th className="p-3 border-b">Үнэ</th>
                                 <th className="p-3 border-b">Төлөв</th>
+                                <th className="p-3 border-b">Үүссэн хугацаа</th>
                             </tr>
                         </thead>
                         <tbody>
                             {recentOrders.map((order, idx) => (
-                                <tr key={order.order_id ?? idx} className="hover:bg-gray-50">
-                                    <td className="p-3 border-b">{order.order_id ?? idx}</td>
-                                    <td className="p-3 border-b">{order.service}</td>
-                                    <td className="p-3 border-b">{order.district}, {order.address}</td>
-                                    <td className="p-3 border-b text-emerald-700 font-bold">
+                                <tr key={order.order_id ?? idx} className="hover:bg-gray-100">
+                                    <td className="pl-5 border-b">{order.full_name}</td>
+                                    <td className="pl-5 border-b">{order.email}</td>
+                                    <td className="pl-5 border-b">{order.service}</td>
+                                    <td className="p-3 border-b"><strong>{order.district}, {order.khoroo}, {order.address}</strong></td>
+                                    <td className="p-3 border-b text-emerald-500 font-bold">
                                         {order.total_price} ₮
                                     </td>
                                     <td className="p-3 border-b">{order.status}</td>
+                                    <td className="p-3 border-b">{new Date(order.created_at).toLocaleString()}</td>
                                 </tr>
                             ))}
                         </tbody>

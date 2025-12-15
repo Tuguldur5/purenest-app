@@ -35,32 +35,125 @@ interface OrderHistoryProps {
 function UserDetails({ details }: UserDetailsProps) {
     if (!details)
         return <div className="text-center py-10">Мэдээлэл олдсонгүй.</div>;
+    const [isEditing, setIsEditing] = useState(false)
+    const [form, setForm] = useState(details)
+    const [loading, setLoading] = useState(false)
 
+    const handleSave = async () => {
+        setLoading(true)
+        try {
+            const res = await fetch('/api/users/update', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(form)
+            })
+
+            if (!res.ok) throw new Error("Update failed")
+
+            setIsEditing(false)
+        } catch (error) {
+            console.error(error)
+        }
+        setLoading(false)
+    }
     return (
         <div className="p-6 rounded-xl border border-gray-200 bg-white shadow-md h-full">
             <div className="flex justify-between items-center mb-6 border-b pb-3">
                 <h2 className="text-xl font-bold text-gray-800">Хувийн Мэдээлэл</h2>
-                <button className="flex items-center text-sm font-semibold text-indigo-600 hover:text-indigo-800 transition duration-150">
-                    Засах
-                </button>
+
+                {!isEditing ? (
+                    <button
+                        onClick={() => setIsEditing(true)}
+                        className="flex items-center text-sm font-semibold text-indigo-600 hover:text-indigo-800 transition duration-150"
+                    >
+                        Засах
+                    </button>
+                ) : (
+                    <div className="flex gap-3">
+                        <button
+                            onClick={handleSave}
+                            disabled={loading}
+                            className="text-sm font-semibold text-green-600 hover:text-green-800"
+                        >
+                            {loading ? "Хадгалж байна..." : "Хадгалах"}
+                        </button>
+                        <button
+                            onClick={() => { setIsEditing(false); setForm(details); }}
+                            className="text-sm font-semibold text-red-500 hover:text-red-700"
+                        >
+                            Болих
+                        </button>
+                    </div>
+                )}
             </div>
 
-            <div className="space-y-3 text-base">
-                <DetailRow label="Нэр" value={details.full_name || 'Нэр олдсонгүй'} />
-                <DetailRow label="И-мэйл" value={details.email} />
-                <DetailRow label="Утас" value={details.phone || 'Утас олдсонгүй'} />
-                <DetailRow label="Хаяг" value={details.address || 'Хаяг байхгүй'} />
-            </div>
+            {/* VIEW MODE */}
+            {!isEditing && (
+                <div className="space-y-3 text-base">
+                    <DetailRow label="Нэр" value={details.full_name || 'Нэр олдсонгүй'} />
+                    <DetailRow label="И-мэйл" value={details.email} />
+                    <DetailRow label="Утас" value={details.phone || 'Утас олдсонгүй'} />
+                </div>
+            )}
+
+            {/* EDIT MODE */}
+            {isEditing && (
+                <div className="space-y-4">
+                    <InputField
+                        label="Нэр"
+                        value={form.full_name}
+                        onChange={(e) => setForm({ ...form, full_name: e.target.value })}
+                    />
+
+                    <InputField
+                        label="И-мэйл"
+                        value={form.email}
+                        onChange={(e) => setForm({ ...form, email: e.target.value })}
+                    />
+
+                    <InputField
+                        label="Утас"
+                        value={form.phone}
+                        onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                    />
+                </div>
+            )}
         </div>
-    );
+    )
 }
 
-const DetailRow: React.FC<{ label: string; value: string }> = ({ label, value }) => (
-    <div className="flex flex-col">
-        <span className="font-medium text-gray-500 text-sm">{label}</span>
-        <span className="text-gray-900 font-semibold">{value}</span>
-    </div>
-);
+/* Detail Row Component */
+function DetailRow({ label, value }: { label: string, value: string }) {
+    return (
+        <div className="flex justify-between">
+            <span className="font-medium text-gray-600">{label}</span>
+            <span className="text-gray-800">{value}</span>
+        </div>
+    )
+}
+
+/* Input Field Component */
+function InputField({
+    label,
+    value,
+    onChange
+}: {
+    label: string;
+    value: string;
+    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}) {
+    return (
+        <div className="flex flex-col">
+            <label className="text-sm text-gray-600 mb-1">{label}</label>
+            <input
+                className="border rounded-lg px-3 py-2 text-gray-800"
+                value={value}
+                onChange={onChange}
+            />
+        </div>
+    )
+}
+
 
 // ===========================================
 // 3. STATUS BADGE COMPONENT
@@ -219,11 +312,11 @@ export default function Profile() {
                         <UserDetails details={userDetails} />
                         <div className="text-center">
                             <button
-                            onClick={handleLogout}
-                            className="w-full sm:w-2/3 md:w-1/2 lg:w-1/3 mx-auto mt-3 py-3 px-6 bg-[#102B5A] text-white text-lg rounded-2xl shadow-lg hover:bg-[#0D1F42] hover:text-amber-400 transition duration-300"
+                                onClick={handleLogout}
+                                className="w-full sm:w-2/3 md:w-1/2 lg:w-1/3 mx-auto mt-3 py-3 px-6 bg-[#102B5A] text-white text-lg rounded-2xl shadow-lg hover:bg-[#0D1F42] hover:text-amber-400 transition duration-300"
                             >
-                            Гарах
-                        </button>
+                                Гарах
+                            </button>
                         </div>
                     </div>
 

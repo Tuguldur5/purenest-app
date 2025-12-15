@@ -17,7 +17,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
     const menuItems = [
         { name: 'Хяналтын самбар', href: '/admin/dashboard' },
-        { name: 'Захиалга', href: '/admin/orders' },
+        
         { name: 'Хэрэглэгчид', href: '/admin/users' },
         { name: 'Үнэ тохиргоо', href: '/admin/pricing' },
     ]

@@ -2,7 +2,7 @@
 
 export default function AboutPage() {
     return (
-        <section className="container mx-auto w-full py-16 px-6 md:px-20 mt-10 bg-gray-50 text-gray-800 rounded-lg border border-black/5 shadow-lg">
+        <section className="container mx-auto w-full py-14 px-6 md:px-20 text-gray-800 ">
             {/* Title Section */}
             <div className="max-w-5xl mx-auto text-center mb-12">
                 <h2 className="text-4xl font-bold text-[#102B5A]">Бидний тухай</h2>
@@ -48,7 +48,7 @@ export default function AboutPage() {
                     ].map((item, index) => (
                         <div
                             key={index}
-                            className="bg-white shadow-md rounded-lg p-5 font-medium hover:shadow-xl duration-200"
+                            className="bg-white shadow-lg border border-black/5 rounded-lg p-5 font-medium hover:shadow-xl duration-200"
                         >
                             {item}
                         </div>

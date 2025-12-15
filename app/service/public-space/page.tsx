@@ -4,7 +4,7 @@ export default function PublicSpaceService() {
     const title = 'Олон нийтийн талбай'
     return (
         <section className="container mx-auto px-4 py-10 text-black">
-            <div className='container mx-auto border border-black/5 shadow-md p-4 rounded-lg'>
+            <div className='container mx-auto  p-4 rounded-lg'>
                 <h1 className="text-3xl font-semibold mb-4 text-center">{title} цэвэрлэгээнд юу багтдаг вэ?</h1>
 
                 <p className="mb-6 text-sm text-center">

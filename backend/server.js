@@ -1,20 +1,22 @@
 // server.js
+const bodyParser = require('body-parser');
 const nodemailer = require('nodemailer');
 const express = require('express');
 const cors = require('cors');
-const jwt = require('jsonwebtoken');    
+const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const pool = require('./db.js'); // PostgreSQL холболт
-
+const port = process.env.PORT || 3001;
 const app = express();
-
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cors({
     origin: "http://localhost:3000",
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"]
 }));
- 
+
 const JWT_SECRET = process.env.JWT_SECRET || 'YOUR_HIGHLY_SECURE_SECRET_KEY_123';
 
 // ---------------------------
@@ -23,7 +25,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'YOUR_HIGHLY_SECURE_SECRET_KEY_123'
 async function fetchUserDetails(user_id) {
     try {
         const userQuery = await pool.query(
-            `SELECT full_name, phone_number FROM users WHERE id = $1`,
+            `SELECT full_name, phone FROM users WHERE id = $1`,
             [user_id]
         );
         return userQuery.rows[0];
@@ -66,104 +68,169 @@ app.get('/', (req, res) => {
 
 app.use('/auth', require('./route/auth'));
 
+const generateBookingHtml = (data, userDetails) => {  
+
+    const isSuh = data.service === 'СӨХ цэвэрлэгээ';
+    
+    let suhDetails = '';
+    if (isSuh) {
+        suhDetails = `
+            <tr><th colspan="2" style="background-color: #f4f4f4; text-align: center;">СӨХ-ийн Барилгын Мэдээлэл</th></tr>
+            <tr><th>Байрны тоо</th><td>${data.apartments || 0}</td></tr>
+            <tr><th>Давхарын тоо</th><td>${data.floors || 0}</td></tr>
+            <tr><th>Лифтийн тоо</th><td>${data.lifts || 0}</td></tr>
+            <tr><th>Айлын тоо</th><td>${data.rooms || 0}</td></tr>
+        `;
+    }
+
+    let htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                .container { max-width: 600px; margin: 0 auto; border: 1px solid #ddd; padding: 20px; border-radius: 8px; }
+                h2 { color: #102B5A; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+                table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+                th, td { padding: 10px; text-align: left; border-bottom: 1px solid #eee; }
+                th { background-color: #f4f4f4; width: 40%; }
+                .total { background-color: #e6f7ff; font-weight: bold; font-size: 1.2em; }
+                pre { white-space: pre-wrap; font-family: monospace; padding: 10px; background-color: #f9f9f9; border: 1px solid #eee; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h2>🔔 Шинэ Захиалга: ${data.service}</h2>
+                
+                <h3>Хэрэглэгчийн Мэдээлэл</h3>
+                <table>
+                    <tr><th>Нэр</th><td>${userDetails.full_name || 'Нэр тодорхойгүй'}</td></tr> 
+                    <tr><th>Утас</th><td>${userDetails.phone || 'Утасны дугааргүй'}</td></tr>
+                    <tr><th>Хэрэглэгчийн ID</th><td>${userDetails.id}</td></tr>
+                </table>
+
+                <h3>Захиалгын Дэлгэрэнгүй</h3>
+                <table>
+                    <tr><th>Үйлчилгээ</th><td>${data.service}</td></tr>
+                    <tr><th>Давтамж</th><td>${data.frequency}</td></tr>
+                    <tr><th>Огноо</th><td>${data.date.substring(0, 10)}</td></tr>
+                    <tr><th>Хаяг</th><td>${data.city}, ${data.district}, ${data.khoroo}, ${data.address}</td></tr>
+                    
+                    ${suhDetails} 
+                    
+                    <tr><th colspan="2" style="background-color: #ddd;">Бусад Мэдээлэл</th></tr>
+                    <tr><th>Талбайн хэмжээ (м²)</th><td>${data.public_area_size || 0} м²</td></tr>
+
+                   <tr class="total">
+                        <th>НИЙТ ҮНЭ</th>
+                        <td>${Number(data.total_price || 0).toLocaleString()} ₮</td> 
+                    </tr>
+                </table>
+
+                <p>Захиалгын мэдээлэл (Payload-оос ирсэн):</p>
+                <pre>${JSON.stringify(data, null, 2)}</pre> 
+            </div>
+        </body>
+        </html>
+    `;
+    return htmlContent;
+};
+
+// =========================================================================
+
+// (Энэхүү хэсгийг server.js доторх бусад холбогдох хувьсагч, модулиудын хамт байрлуулна)
+
 app.post('/api/booking', authMiddleware, async (req, res) => {
     try {
         const user_id = req.user.id;
-        const userDetails = await fetchUserDetails(user_id);
 
+        // req.user-ээс шууд мэдээллийг авах (Token-оос)
+        const userName = req.user.full_name || 'Нэр тодорхойгүй';
+        const userPhone = req.user.phone || 'Утасны дугааргүй';
+
+        // ⚠️ Frontend-ээс ирж буй талбаруудыг DB-ийн нэрээр зөвөөр татаж авах:
         const {
-            service,
-            date,
-            address,
-            totalPrice,
-            roomsCount,
-            extrasCount,
-            suhInfo,
-            frequency,
-            city,
-            district,
-            khoroo,
-            public_area_size
+            service, date, address, 
+            total_price, 
+            apartments, floors, lifts, rooms, 
+            frequency, city, district, khoroo, public_area_size
         } = req.body;
-
+        
+        // --- DB INSERT QUERY (Баганын нэр, утгын дарааллыг шалгана уу) ---
         const orderResult = await pool.query(
             `INSERT INTO orders
-            (user_id, service, date, address, total_price, status,
-             rooms_count, extras_count, suh_info, frequency, city, district, khoroo, public_area_size )
-             VALUES ($1,$2,$3,$4,$5,'Хүлээгдэж байна',$6,$7,$8,$9,$10,$11,$12,$13)
+             (user_id, service, date, address, total_price, status, 
+              apartments, floors, lifts, rooms, 
+              frequency, city, district, khoroo, public_area_size )
+             VALUES ($1,$2,$3,$4,$5,'Хүлээгдэж байна',
+                     $6,$7,$8,$9, 
+                     $10,$11,$12,$13,$14) 
              RETURNING *`,
             [
-                user_id,
-                service || 'Тодорхойгүй үйлчилгээ',
-                date || new Date().toISOString(),
-                address || '',
-                totalPrice || 0,
-                JSON.stringify(roomsCount || {}),
-                JSON.stringify(extrasCount || {}),
-                JSON.stringify(suhInfo || {}),
-                frequency || 'Нэг удаа',
-                city || '',
-                district || '',
-                khoroo || '',
-                public_area_size || 0
+                req.user.id, // $1
+                service || 'Тодорхойгүй үйлчилгээ', // $2
+                date, // $3
+                address || '', // $4
+                total_price || 0, // $5 
+                
+                apartments || 0, // $6
+                floors || 0, // $7
+                lifts || 0, // $8
+                rooms || 0, // $9
+                
+                frequency || 'Нэг удаа', // $10
+                city || '', // $11
+                district || '', // $12
+                khoroo || '', // $13
+                public_area_size || 0 // $14
             ]
         );
 
-        // ---------------------------
-        // EMAIL SEND PART
-        // ---------------------------
+        // --- NODEMAILER ХЭСЭГ (өөрчлөлтгүй) ---
+        const SENDER_USER = process.env.MAIL_USER;
+        const SENDER_PASS = process.env.MAIL_PASS;
+
         const transporter = nodemailer.createTransport({
             host: "smtp.gmail.com",
             port: 587,
-            secure: false,
+            secure: false, 
             auth: {
-                user: process.env.MAIL_USER, // example: info@domain.mn
-                pass: process.env.MAIL_PASS,
+                user: SENDER_USER,
+                pass: SENDER_PASS, 
             },
         });
 
+        // Имэйлийн HTML агуулгыг үүсгэх
+        const emailHtml = generateBookingHtml(
+            req.body, // data нь одоо зөвхөн DB-ийн талбарын нэрсийг агуулж байна
+            { id: user_id, full_name: userName, phone: userPhone } // Хэрэглэгчийн мэдээлэл
+        );
+
         const mailOptions = {
-            from: `"Booking System" <${process.env.MAIL_USER}>`,
-            to: "it@silla-group.mn", // → бүх мэдээлэл энэ майл рүү ирнэ
-            subject: "Шинэ захиалга ирлээ",
-            html: `
-                <h2>Шинэ захиалга</h2>
-                <p><strong>Үйлчилгээ:</strong> ${service}</p>
-                <p><strong>Огноо:</strong> ${date}</p>
-                <p><strong>Хаяг:</strong> ${address}</p>
-                <p><strong>Нийт үнэ:</strong> ${totalPrice}₮</p>
-                <p><strong>Хот:</strong> ${city}, <strong>Дүүрэг:</strong> ${district}, <strong>Хороо:</strong> ${khoroo}</p>
-                <p><strong>Давтамж:</strong> ${frequency}</p>
-
-                <h3>Өрөөний мэдээлэл</h3>
-                <pre>${JSON.stringify(roomsCount, null, 2)}</pre>
-
-                <h3>Нэмэлт үйлчилгээ</h3>
-                <pre>${JSON.stringify(extrasCount, null, 2)}</pre>
-
-                <h3>СӨХ мэдээлэл</h3>
-                <pre>${JSON.stringify(suhInfo, null, 2)}</pre>
-
-                <h3>Олон нийтийн талбайн хэмжээ:</h3>
-                <p>${public_area_size} м²</p>
-
-                <hr/>
-                <p>Захиалагчийн мэдээлэл:</p>
-                <pre>${JSON.stringify(userDetails, null, 2)}</pre>
-            `
+            from: `"Захиалгын систем" <${SENDER_USER}>`,
+            to: process.env.COMPANY_MAIL || "it@silla-group.mn", 
+            subject: `ШИНЭ ЗАХИАЛГА: ${service} - ${userName}`,
+            html: emailHtml,
         };
 
         await transporter.sendMail(mailOptions);
+        // ------------------------------------
 
         res.json({
             success: true,
-            message: 'Захиалга үүслээ, имэйл илгээгдлээ!',
+            message: 'Захиалга амжилттай хийгдлээ. Баталгаажуулах имэйл илгээсэн.',
             order: orderResult.rows[0],
         });
 
     } catch (err) {
-        console.error("Захиалга илгээхэд алдаа:", err);
-        res.status(500).json({ error: 'Захиалга хийхэд алдаа гарлаа' });
+        console.error("Захиалга илгээхэд БОДИТ алдаа:", err); 
+
+        // DB-ийн алдааг илүү нарийвчлан барих
+        if (err.code === '42703') {
+            return res.status(500).json({ error: 'DB Алдаа: INSERT Query-н баганын нэр Payload-той таарахгүй байна.' });
+        }
+        
+        res.status(500).json({ error: 'Захиалга хийхэд алдаа гарлаа. Серверийн логийг шалгана уу.' });
     }
 });
 
@@ -190,7 +257,7 @@ app.get("/api/admin/users", isAdminMiddleware, async (req, res) => {
     try {
         const { rows } = await pool.query(
             `SELECT * FROM orders WHERE user_id = $1`,
-    );
+        );
         res.json({ users: rows });
     } catch (err) {
         console.error(err);
@@ -317,7 +384,52 @@ app.get('/api/admin/pricing', isAdminMiddleware, async (req, res) => {
     }
 });
 
+// server.js доторх /api/contact хэсэг
 
+app.post('/api/contact', async (req, res) => {
+    // ...
+    const { name, email, message } = req.body;
+    if (!name || !email || !message) {
+        return res.status(400).json({ error: "Бүх талбарыг бөглөнө үү." });
+    }
+
+    // 💡 SMTP HOST болон MAIL USER-ийг баталгаажуулж байна
+    const SENDER_HOST = process.env.SMTP_HOST || 'smtp.gmail.com'; // Default утга өгч байна
+    const SENDER_USER = process.env.MAIL_USER;
+    const SENDER_PASS = process.env.MAIL_PASS;
+    const SENDER_PORT = Number(process.env.SMTP_PORT || 587);
+
+    // Хэрэв нэвтрэх мэдээлэл байхгүй бол 500 алдаа буцаана
+    if (!SENDER_USER || !SENDER_PASS) {
+        console.error("EMAIL_USER эсвэл EMAIL_PASS хувьсагчид дутуу байна.");
+        return res.status(500).json({ error: 'Серверийн тохиргооны алдаа (Имэйл).' });
+    }
+
+    const transporter = nodemailer.createTransport({
+        host: SENDER_HOST,
+        port: SENDER_PORT,
+        secure: SENDER_PORT === 465, // Хэрэв 465 бол true, 587 бол false
+        auth: {
+            user: SENDER_USER,
+            pass: SENDER_PASS,
+        },
+    });
+
+    const mailOptions = {
+        from: email,
+        to: process.env.COMPANY_MAIL || SENDER_USER,
+        subject: `Холбоо барих маягт: ${name}`,
+        html: `<p>Нэр: ${name}</p><p>Имэйл: ${email}</p><p>Мессеж: ${message}</p>`,
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        return res.status(200).json({ ok: true });
+    } catch (err) {
+        console.error("Имэйл илгээх үед гарсан бодит алдаа:", err); // 💡 Энэ алдааг бид дахин харахгүй байхыг хүсэж байна.
+        return res.status(500).json({ error: 'Серверийн алдаа. Дахин оролдоно уу.' });
+    }
+});
 
 // Серверийг асаах
 app.listen(4000, async () => {

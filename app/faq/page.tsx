@@ -27,7 +27,7 @@ export default function FAQPage() {
         setOpenIndex(openIndex === index ? null : index);
 
     return (
-        <section className="max-w-3xl mx-auto px-6 py-16 text-black">
+        <section className="max-w-3xl mx-auto px-6 py-14 text-black">
             <h2 className="text-4xl font-bold text-center mb-10 text-[#102B5A]">Түгээмэл асуултууд</h2>
 
             <div className="space-y-4">

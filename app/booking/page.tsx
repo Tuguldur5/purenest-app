@@ -1,6 +1,7 @@
 'use client'
-import { useState } from 'react'
+import { useState, useMemo } from 'react' // useMemo-г нэмэв
 
+// Давтамж
 const frequencyOptions = [
     'Нэг удаа',
     'Долоо хоногт 1 удаа',
@@ -9,7 +10,7 @@ const frequencyOptions = [
     'Өдөр бүр',
 ]
 
-// 💡 1. Улаанбаатарын дүүрэг, хорооны жишээ мэдээлэл
+// 💡 Улаанбаатарын дүүрэг, хорооны мэдээлэл
 const ULAANBAATAR_DISTRICTS = [
     { name: 'Сонгинохайрхан', khoroos: Array.from({ length: 43 }, (_, i) => `${i + 1}-р хороо`) },
     { name: 'Баянзүрх', khoroos: Array.from({ length: 43 }, (_, i) => `${i + 1}-р хороо`) },
@@ -22,7 +23,7 @@ const ULAANBAATAR_DISTRICTS = [
     { name: 'Багахангай', khoroos: Array.from({ length: 2 }, (_, i) => `${i + 1}-р хороо`) },
 ];
 
-// 💡 2. Аймаг, Хотын жагсаалт
+// 💡 Аймаг, Хотын жагсаалт (Одоогоор зөвхөн УБ)
 const PROVINCES = [
     'Улаанбаатар',
 ];
@@ -37,45 +38,60 @@ export default function Booking() {
         phone: '',
         service: 'Оффис цэвэрлэгээ',
         date: '',
-        roomsCount: { bathrooms: 0, bedrooms: 0, kitchen: 0, livingRoom: 0, hallway: 0 },
-        extrasCount: { tv: 0, computer: 0, furniture: 0 },
-        suhInfo: { apartments: 0, floors: 0, lifts: 0, rooms: 0 },
+        
+        // ❌ roomsCount, extrasCount, suhInfo object-г устгав.
+        // 💡 DB-ийн INT баганууд:
+        apartments: 0, // Байрны тоо
+        floors: 0,     // Давхарын тоо
+        lifts: 0,      // Лифтийн тоо
+        rooms: 0,      // Айлын тоо
+
         publicAreaSize: '',
         frequency: 'Нэг удаа',
-        city: 'Улаанбаатар', // 💡 Default-ийг УБ болгож өөрчлөв
-        district: '', // 💡 Дүүрэг/Хороог сонголттой болгохын тулд эхлээд хоосон байна
+        city: 'Улаанбаатар',
+        district: '',
         khoroo: '',
-        total_price: 0,
         address: '',
     })
 
-    const handleSuhChange = (key: string, value: number) => {
-        setForm({
-            ...form,
-            suhInfo: { ...form.suhInfo, [key]: value },
-        })
-    }
+    // Үндсэн form өөрчлөх функц
+    const handleFormChange = (key: string, value: any) => {
+        setForm(prevForm => {
+            // Дүүрэг солигдоход хороог цэвэрлэнэ
+            if (key === 'district') {
+                 return { ...prevForm, district: value, khoroo: '' };
+            }
+            // Хот солигдоход дүүрэг, хороог цэвэрлэнэ
+            if (key === 'city') {
+                 return { ...prevForm, city: value, district: '', khoroo: '' };
+            }
+            return { ...prevForm, [key]: value };
+        });
+    };
 
-    // PRICE CALCULATION LOGIC (Үнийн тооцооллын логик)
-    const calculatePrice = () => {
+
+    // PRICE CALCULATION LOGIC (Үнийн тооцооллын логик) - useMemo ашиглаж сайжруулав
+    const totalPrice = useMemo(() => {
         let base = 0;
+
+        const publicAreaSizeNum = Number(form.publicAreaSize || 0);
 
         // --- Оффис цэвэрлэгээ ---
         if (form.service === "Оффис цэвэрлэгээ") {
-            const size = Number(form.publicAreaSize || 0);
-            base = size * 20000;
+            base = publicAreaSizeNum * 20000;
         }
 
         // --- Олон нийтийн талбай ---
         if (form.service === "Олон нийтийн талбай") {
-            const size = Number(form.publicAreaSize || 0);
-            base = size * 25000;
+            base = publicAreaSizeNum * 25000;
         }
 
         // --- СӨХ цэвэрлэгээ ---
         if (form.service === "СӨХ цэвэрлэгээ") {
-            const { apartments, floors, lifts, rooms } = form.suhInfo;
-            // Үнийн томьёо: Байр * 100k + Давхар * 40k + Лифт * 20k + Айлын тоо * 5k
+            // ⚠️ form-оос шууд утгыг авлаа
+            const { apartments, floors, lifts, rooms } = form; 
+            
+            // Үнийн томьёо: Байр * 100k + Давхар * 20k + Лифт * 10k + Айлын тоо * 5k
             base =
                 apartments * 100000 +
                 floors * 20000 +
@@ -89,85 +105,89 @@ export default function Booking() {
             case "Долоо хоногт 1 удаа": factor = 0.9; break; // 10% хөнгөлөлт
             case "2 долоо хоногт 1 удаа": factor = 0.95; break; // 5% хөнгөлөлт
             case "Өдөр бүр": factor = 0.80; break; // 20% хөнгөлөлт
-            default: factor = 1; // 'Нэг удаа' эсвэл 'Сард 1 удаа'
+            default: factor = 1; 
         }
 
         return Math.max(0, Math.round(base * factor));
-    };
+    }, [form]); // form state өөрчлөгдөхөд дахин тооцоолно
+
 
     // Хүсэлт илгээх функц
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
 
-    const totalPrice = calculatePrice();
+        // 1. Токен шалгах
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert("Захиалга хийхийн тулд эхлээд нэвтрэх шаардлагатай!");
+            return;
+        }
 
-    // 1. Токен шалгах
-    const token = localStorage.getItem('token');
-    if (!token) {
-        alert("Захиалга хийхийн тулд эхлээд нэвтрэх шаардлагатай!");
-        return;
-    }
+        // 2. Шаардлагатай талбаруудыг шалгах
+        if (!form.name || !form.phone || !form.city || !form.district || !form.address || !form.date) {
+            alert("Нэр, утас, огноо, хаягийн мэдээллийг бүрэн бөглөнө үү.");
+            return;
+        }
 
+        // 3. Payload бэлтгэх (DB-ийн баганын нэрээр)
+        const payload = {
+            service: form.service,
+            date: form.date, 
 
-    
-    // 2. Шаардлагатай талбаруудыг шалгах
-    if (!form.name || !form.phone || !form.city || !form.district || !form.address || !form.date) {
-        alert("Нэр, утас, огноо, хаягийн мэдээллийг бүрэн бөглөнө үү.");
-        return;
-    }
+            // 💡 DB-д байгаа СӨХ-ийн INT талбарууд:
+            apartments: form.apartments || 0,
+            floors: form.floors || 0,
+            lifts: form.lifts || 0,
+            rooms: form.rooms || 0, // Айлын тоо
 
-    // 3. Payload бэлтгэх
-    const payload = {
-        service: form.service,
-        public_area_size: form.service !== "СӨХ цэвэрлэгээ" ? Number(form.publicAreaSize) : 0,
-        roomsCount: form.roomsCount || {},
-        extrasCount: form.extrasCount || {},
-        suhInfo: form.suhInfo || {},
-        frequency: form.frequency || "Нэг удаа",
-        city: form.city,
-        district: form.district,
-        khoroo: form.khoroo,
-        address: form.address,
-        totalPrice: totalPrice || 0,
+            // Оффис / Олон нийтийн талбайн хэмжээ
+            public_area_size: form.service !== "СӨХ цэвэрлэгээ" ? Number(form.publicAreaSize) : 0, 
+
+            frequency: form.frequency || "Нэг удаа",
+            city: form.city,
+            district: form.district,
+            khoroo: form.khoroo,
+            address: form.address,
+            total_price: totalPrice, // ⚠️ DB-д price гэж байгаа тул totalPrice-ийг price болгов
+            
+            // ❌ roomsCount, extrasCount, suhInfo object-ууд байхгүй
+        };
+
+        try {
+            const res = await fetch(API_URL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
+                body: JSON.stringify(payload),
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                console.log("Backend response:", data);
+                alert(`Захиалга амжилттай илгээгдлээ! Дугаар: ${data.order?.id ?? 'N/A'}`); // DB-ийн id-г ашиглав
+            } else {
+                let errorData: { error?: string } = {};
+                try {
+                    errorData = await res.json();
+                } catch (parseErr) {
+                    console.warn("JSON parse failed, likely empty or non-JSON response:", parseErr);
+                }
+                const errorMessage = errorData.error || `Алдаа гарлаа: ${res.status} ${res.statusText}`;
+                alert(`Захиалга хийхэд алдаа гарлаа: ${errorMessage}`);
+            }
+        } catch (err) {
+            console.error("Fetch failed:", err);
+            alert("Сервертэй холбогдож чадсангүй. Та дараа дахин оролдоно уу.");
+        }
     };
 
-    try {
-        const res = await fetch(API_URL, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`,
-            },
-            body: JSON.stringify(payload),
-        });
 
-        if (res.ok) {
-            const data = await res.json();
-            console.log("Backend response:", data);
-            alert(`Захиалга амжилттай илгээгдлээ! Дугаар: ${data.order?.order_id ?? 'N/A'}`);
-        } else {
-            // JSON parse-д алдаа гарахыг catch хийх
-            let errorData: { error?: string } = {};
-            try {
-                errorData = await res.json();
-            } catch (parseErr) {
-                console.warn("JSON parse failed, likely empty or non-JSON response:", parseErr);
-            }
-
-            // Type-safe алдаа message
-            const errorMessage = errorData?.error ?? res.statusText ?? 'Unknown error';
-            console.error("Server Error:", errorMessage);
-            alert(`Захиалга илгээхэд алдаа гарлаа: ${errorMessage}`);
-        }
-    } catch (err) {
-        console.error("Fetch failed:", err);
-        alert("Сервертэй холбогдож чадсангүй. Та дараа дахин оролдоно уу.");
-    }
-};
-
-
-    // 💡 4. Сонгосон дүүрэгт хамаарах хороог шүүж авах
-    const availableKhoroos = ULAANBAATAR_DISTRICTS.find(d => d.name === form.district)?.khoroos || [];
+    // Сонгосон дүүрэгт хамаарах хороог шүүж авах
+    const availableKhoroos = useMemo(() => {
+        return ULAANBAATAR_DISTRICTS.find(d => d.name === form.district)?.khoroos || [];
+    }, [form.district]);
 
 
     return (
@@ -180,7 +200,7 @@ export default function Booking() {
                         <label className="block mb-2">Нэр</label>
                         <input
                             value={form.name}
-                            onChange={(e) => setForm({ ...form, name: e.target.value })}
+                            onChange={(e) => handleFormChange('name', e.target.value)}
                             className="w-full border p-2 rounded"
                         />
                     </div>
@@ -189,7 +209,7 @@ export default function Booking() {
                         <label className="block mb-2">Утас</label>
                         <input
                             value={form.phone}
-                            onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                            onChange={(e) => handleFormChange('phone', e.target.value)}
                             className="w-full border p-2 rounded"
                         />
                     </div>
@@ -198,7 +218,7 @@ export default function Booking() {
                         <label className="block mb-2">Үйлчилгээ</label>
                         <select
                             value={form.service}
-                            onChange={(e) => setForm({ ...form, service: e.target.value })}
+                            onChange={(e) => handleFormChange('service', e.target.value)}
                             className="w-full border p-2 rounded"
                         >
                             <option>Оффис цэвэрлэгээ</option>
@@ -215,7 +235,7 @@ export default function Booking() {
                                 type="number"
                                 min={1}
                                 value={form.publicAreaSize}
-                                onChange={(e) => setForm({ ...form, publicAreaSize: e.target.value })}
+                                onChange={(e) => handleFormChange('publicAreaSize', e.target.value)}
                                 className="w-full border p-2 rounded"
                             />
                         </div>
@@ -231,8 +251,8 @@ export default function Booking() {
                                     <input
                                         type="number"
                                         min={0}
-                                        value={form.suhInfo.apartments}
-                                        onChange={(e) => handleSuhChange('apartments', Number(e.target.value))}
+                                        value={form.apartments}
+                                        onChange={(e) => handleFormChange('apartments', Number(e.target.value))} // ⚠️ Шууд setForm-ийг ашиглав
                                         className="w-full border p-2 rounded"
                                     />
                                 </div>
@@ -241,8 +261,8 @@ export default function Booking() {
                                     <input
                                         type="number"
                                         min={0}
-                                        value={form.suhInfo.floors}
-                                        onChange={(e) => handleSuhChange('floors', Number(e.target.value))}
+                                        value={form.floors}
+                                        onChange={(e) => handleFormChange('floors', Number(e.target.value))} // ⚠️ Шууд setForm-ийг ашиглав
                                         className="w-full border p-2 rounded"
                                     />
                                 </div>
@@ -251,8 +271,8 @@ export default function Booking() {
                                     <input
                                         type="number"
                                         min={0}
-                                        value={form.suhInfo.lifts}
-                                        onChange={(e) => handleSuhChange('lifts', Number(e.target.value))}
+                                        value={form.lifts}
+                                        onChange={(e) => handleFormChange('lifts', Number(e.target.value))} // ⚠️ Шууд setForm-ийг ашиглав
                                         className="w-full border p-2 rounded"
                                     />
                                 </div>
@@ -262,8 +282,8 @@ export default function Booking() {
                                     <input
                                         type="number"
                                         min={0}
-                                        value={form.suhInfo.rooms}
-                                        onChange={(e) => handleSuhChange('rooms', Number(e.target.value))}
+                                        value={form.rooms}
+                                        onChange={(e) => handleFormChange('rooms', Number(e.target.value))} // ⚠️ Шууд setForm-ийг ашиглав
                                         className="w-full border p-2 rounded"
                                     />
                                 </div>
@@ -276,7 +296,7 @@ export default function Booking() {
                         <input
                             type="date"
                             value={form.date}
-                            onChange={(e) => setForm({ ...form, date: e.target.value })}
+                            onChange={(e) => handleFormChange('date', e.target.value)}
                             className="w-full border p-2 rounded"
                         />
                     </div>
@@ -285,7 +305,7 @@ export default function Booking() {
                         <label className="block mb-2">Давтамж</label>
                         <select
                             value={form.frequency}
-                            onChange={(e) => setForm({ ...form, frequency: e.target.value })}
+                            onChange={(e) => handleFormChange('frequency', e.target.value)}
                             className="w-full border p-2 rounded"
                         >
                             {frequencyOptions.map((f) => (
@@ -295,16 +315,13 @@ export default function Booking() {
                     </div>
 
 
-                    {/* 💡 Address Dropdowns - ШИНЭЧИЛСЭН ХЭСЭГ */}
+                    {/* Address Dropdowns */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label className="block mb-2">Хот / Аймаг</label>
                             <select
                                 value={form.city}
-                                onChange={(e) => {
-                                    // Хот солигдоход Дүүрэг/Хороог цэвэрлэх
-                                    setForm({ ...form, city: e.target.value, district: '', khoroo: '' });
-                                }}
+                                onChange={(e) => handleFormChange('city', e.target.value)} // 💡 handleFormChange нь дотроо reset хийнэ
                                 className="w-full border p-2 rounded"
                             >
 
@@ -318,17 +335,15 @@ export default function Booking() {
                         <div>
                             <label className="block mb-2">{form.city === 'Улаанбаатар' ? 'Дүүрэг' : 'Сум'}</label>
                             <select
-                                disabled={!form.city} // Хот сонгоогүй бол идэвхгүй
+                                disabled={!form.city} 
                                 value={form.district}
-                                onChange={(e) => setForm({ ...form, district: e.target.value, khoroo: '' })}
+                                onChange={(e) => handleFormChange('district', e.target.value)} // 💡 handleFormChange нь дотроо reset хийнэ
                                 className="w-full border p-2 rounded"
                             >
                                 <option value="" disabled>Сонгоно уу</option>
-                                {/* УБ-ын дүүргүүдийг харуулна */}
                                 {form.city === 'Улаанбаатар' && ULAANBAATAR_DISTRICTS.map(d => (
                                     <option key={d.name} value={d.name}>{d.name}</option>
                                 ))}
-                                {/* 💡 Бусад аймгийн сумдыг энд нэмэх шаардлагатай */}
                             </select>
                         </div>
 
@@ -336,16 +351,15 @@ export default function Booking() {
                         <div>
                             <label className="block mb-2">{form.city === 'Улаанбаатар' ? 'Хороо' : 'Баг'}</label>
                             <select
-                                disabled={!form.district} // Дүүрэг/Сум сонгоогүй бол идэвхгүй
+                                disabled={!form.district} 
                                 value={form.khoroo}
-                                onChange={(e) => setForm({ ...form, khoroo: e.target.value })}
+                                onChange={(e) => handleFormChange('khoroo', e.target.value)}
                                 className="w-full border p-2 rounded"
                             >
                                 <option value="" disabled>Сонгоно уу</option>
                                 {availableKhoroos.map(k => (
                                     <option key={k} value={k}>{k}</option>
                                 ))}
-                                {/* 💡 Бусад аймгийн багуудыг энд нэмэх шаардлагатай */}
                             </select>
                         </div>
 
@@ -354,16 +368,16 @@ export default function Booking() {
                             <label className="block mb-2">Байршил / Гудамж</label>
                             <input
                                 value={form.address}
-                                onChange={(e) => setForm({ ...form, address: e.target.value })}
+                                onChange={(e) => handleFormChange('address', e.target.value)}
                                 className="w-full border p-2 rounded"
                             />
                         </div>
                     </div>
-                    {/* 💡 type="submit" -ийн оронд type="button" байсан тул onClick={handleSubmit}-ийг хэвээр үлдээв */}
+                    
+                    {/* type="button" -ийн оронд type="submit" байвал зөв */}
                     <button
-                        type="button"
+                        type="submit"
                         className="w-full border mt-4 border-white/5 shadow-md p-2 rounded bg-[#102B5A] text-white hover:text-amber-400 duration-300"
-                        onClick={handleSubmit}
                     >
                         Захиалах
                     </button>
@@ -371,7 +385,7 @@ export default function Booking() {
             </div>
 
             {/* Price Summary (Үнийн хураангуй) */}
-            <div className="w-96 ml-8 sticky bg-gray-100 top-10 h-fit p-6 border border-black/5  shadow-lg rounded-xl bg-white">
+            <div className="w-96 ml-8 sticky bg-gray-100 top-10 h-fit p-6 border border-black/5  shadow-lg rounded-xl bg-white">
                 <h2 className="text-xl font-semibold mb-4">Таны захиалга</h2>
                 <p className="text-gray-700 mb-2">
                     <strong>Үйлчилгээ:</strong> {form.service}
@@ -385,7 +399,7 @@ export default function Booking() {
                 <div className="border-t pt-4 mt-4">
                     <p className="text-lg font-bold">Нийт үнэ:</p>
                     <p className="text-3xl font-bold text-emerald-600">
-                        {calculatePrice().toLocaleString()} ₮
+                        {totalPrice.toLocaleString()} ₮
                     </p>
                 </div>
             </div>

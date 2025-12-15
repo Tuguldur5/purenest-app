@@ -52,7 +52,7 @@ export default function Home() {
       </section>
 
       {/* Services Section */}
-      <section className="container mx-auto px-6 py-20 border border-black/5 shadow-md rounded-2xl bg-white mt-10 mb-10 relative z-20">
+      <section className="container mx-auto px-6 py-20  mt-10 mb-10 relative z-20">
         <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-900">
           Бидний үйлчилгээ
         </h2>

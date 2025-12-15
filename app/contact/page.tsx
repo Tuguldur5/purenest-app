@@ -18,44 +18,71 @@ export default function ContactPage() {
     const MAP_LAT = 47.9181;
     const MAP_LNG = 106.9170;
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setStatus(null);
+   const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setStatus(null);
 
-        if (!name.trim() || !email.trim() || !message.trim()) {
-            setStatus({ ok: false, text: "Бүх талбарыг бөглөнө үү." });
-            return;
-        }
+    // 1. Утга байгаа эсэхийг шалгах
+    if (!name.trim() || !email.trim() || !message.trim()) {
+        setStatus({ ok: false, text: "Бүх талбарыг бөглөнө үү." });
+        return;
+    }
+    
+    // 2. 📧 Имэйл форматыг шалгах (Нэмэлт сайжруулалт)
+    // Энэ Regex нь энгийн имэйл форматыг шалгадаг.
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; 
+    if (!emailRegex.test(email)) {
+        setStatus({ ok: false, text: "Имэйл хаягийн формат буруу байна." });
+        return;
+    }
 
-        setLoading(true);
-        try {
-            // POST to your backend API that will send the email to company mailbox
-            const res = await fetch("/api/contact", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ name, email, message }),
-            });
+    setLoading(true);
+    try {
+        // POST to your backend API
+        const res = await fetch("http://localhost:4000/api/contact", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, email, message }),
+        });
 
-            if (res.ok) {
-                setStatus({ ok: true, text: "Таны захиаг хүлээн авлаа. Баярлалаа!" });
-                setName("");
-                setEmail("");
-                setMessage("");
-            } else {
+        if (res.ok) {
+            // 3. ✅ Амжилттай хариу
+            setStatus({ ok: true, text: "Таны захиаг хүлээн авлаа. Баярлалаа!" });
+            setName("");
+            setEmail("");
+            setMessage("");
+        } else {
+            // 4. ❌ Бек-эндээс алдаа ирсэн
+            const contentType = res.headers.get("content-type");
+            let errorText = "Серверийн алдаа. Дахин оролдоно уу.";
+            
+            if (contentType && contentType.includes("application/json")) {
+                // Хэрэв JSON хариу ирсэн бол, алдааг нь гаргаж авна
                 const err = await res.json().catch(() => ({}));
-                setStatus({ ok: false, text: err.error || "Серверийн алдаа. Дахин оролдоно уу." });
+                errorText = err.error || errorText;
+            } else {
+                // Хэрэв JSON бус алдаа (жишээ нь, 404, 500 HTML) ирсэн бол
+                console.error(`Бек-эндээс JSON бус алдаа ирлээ. Статус: ${res.status}`);
+                errorText = `Хүсэлт амжилтгүй боллоо (Статус: ${res.status}).`;
             }
-        } catch (err) {
-            setStatus({ ok: false, text: "Сүлжээний алдаа. Интернэтээ шалгана уу." });
-        } finally {
-            setLoading(false);
+
+            // 💡 Хэрэглэгчид алдааг харуулна
+            setStatus({ ok: false, text: errorText });
         }
-    };
+    } catch (err) {
+        // 5. 🛑 Сүлжээний (Fetch) алдаа
+        console.error("Fetch/Сүлжээний алдаа:", err); // Алдааг консолд хэвлэж байна
+        setStatus({ ok: false, text: "Сүлжээний алдаа. Интернэтээ шалгана уу." });
+    } finally {
+        setLoading(false);
+    }
+};
 
     return (
-        <div className="min-h-screen bg-gray-50 p-6">
-            <div className="max-w-6xl mx-auto text-black">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div className="min-h-screen bg-gray-50 px-4 py-14 ">
+            <div className="max-w-6xl mx-auto text-black border border-black/5 rounded-[14] shadow-lg p-8 bg-white">
+                <h2 className="text-4xl font-bold text-[#102B5A] mb-10 text-center">Холбоо барих</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                     {/* LEFT: Company summary / contact quick info */}
                     <div className="bg-white p-6 rounded-2xl shadow">
                         <h1 className="text-2xl text-center font-semibold mb-4">Захиа илгээх</h1>
@@ -66,7 +93,7 @@ export default function ContactPage() {
                                 <input
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
-                                    className="w-full border rounded p-2"
+                                    className="w-full border border-black/20 hover:shadow-lg rounded p-2"
                                     placeholder="Таны нэр"
                                 />
                             </div>
@@ -77,7 +104,7 @@ export default function ContactPage() {
                                     type="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="w-full border rounded p-2"
+                                    className="w-full border border-black/20 hover:shadow-lg rounded p-2"
                                     placeholder="name@example.com"
                                 />
                             </div>
@@ -87,7 +114,7 @@ export default function ContactPage() {
                                 <textarea
                                     value={message}
                                     onChange={(e) => setMessage(e.target.value)}
-                                    className="w-full border rounded p-2 min-h-40"
+                                    className="w-full border border-black/20 hover:shadow-lg rounded p-2 min-h-40"
                                     placeholder="Сэтгэгдэлээ бичнэ үү..."
                                 />
                             </div>
@@ -107,55 +134,55 @@ export default function ContactPage() {
                             )}
                         </form>
                     </div>
-                     <div className="bg-white p-4 rounded-2xl shadow">
-                    <h2 className="text-lg font-semibold mb-3">Бидний байршил</h2>
-                    <div className="w-full h-150 ">
-                        {/* Google Maps iframe — replace lat/lng or use your own embed link */}
-                        <iframe
-                            title="company-map"
-                            width="100%"
-                            height="100%"
-                            style={{ border: 0 }}
-                            loading="lazy"
-                            referrerPolicy="no-referrer-when-downgrade"
-                            src={`https://www.google.com/maps?q=${MAP_LAT},${MAP_LNG}&z=15&output=embed`}
-                        />
+                    <div className="bg-white p-4 rounded-2xl shadow">
+                        <h2 className="text-xl text-center font-semibold mb-3">Бидний байршил</h2>
+                        <div className="w-full h-150 ">
+                            {/* Google Maps iframe — replace lat/lng or use your own embed link */}
+                            <iframe
+                                title="company-map"
+                                width="100%"
+                                height="100%"
+                                style={{ border: 0 }}
+                                loading="lazy"
+                                referrerPolicy="no-referrer-when-downgrade"
+                                src={`https://www.google.com/maps?q=${MAP_LAT},${MAP_LNG}&z=15&output=embed`}
+                            />
+                        </div>
                     </div>
-                </div>
-                    
 
-                    
+
+
                 </div>
                 {/* Bottom: Map */}
-               <div className="bg-white p-6 rounded-2xl shadow">
-                        <h2 className="text-2xl font-semibold mb-3">Холбоо барих</h2>
-                        <p className="text-gray-700 mb-4">
-                            Манай компанитай холбогдох хүсэлтэй бол доорх маягтыг бөглөн илгээнэ үү. Бид 1-3 ажлын хоногийн дотор хариу өгөх болно.
-                        </p>
+                <div className="bg-white p-6 rounded-2xl shadow">
 
-                        <div className="space-y-3">
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                                <div className="bg-white p-4 border border-black/5 rounded-lg shadow text-center hover:shadow-lg transition-shadow ">
-                                    <p className="text-sm text-gray-500">Имэйлээр холбогдох</p>
-                                    <p className="font-medium mt-2">{COMPANY_EMAIL}</p>
-                                </div>
-                                <div className="bg-white p-4 rounded-lg  border border-black/5 shadow text-center hover:shadow-lg transition-shadow">
-                                    <p className="text-sm text-gray-500">Утас</p>
-                                    <p className="font-medium mt-2">{COMPANY_PHONE}</p>
-                                </div>
-                                <div className="bg-white p-4 rounded-lg  border border-black/5 shadow text-center hover:shadow-lg transition-shadow">
-                                    <p className="text-sm text-gray-500">Байршил</p>
-                                    <p className="font-medium mt-2">{COMPANY_ADDRESS}</p>
-                                </div>
+                    <p className="text-gray-700 mb-6 text-center">
+                        Манай компанитай холбогдох хүсэлтэй бол доорх маягтыг бөглөн илгээнэ үү. Бид 1-3 ажлын хоногийн дотор хариу өгөх болно.
+                    </p>
+
+                    <div className="space-y-3">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                            <div className="bg-white p-4 border border-black/5 rounded-lg shadow text-center hover:shadow-lg transition-shadow ">
+                                <p className="text-sm text-gray-500">Имэйлээр холбогдох</p>
+                                <p className="font-medium mt-2">{COMPANY_EMAIL}</p>
                             </div>
-
-                            <hr className="my-6" />
-
-                            <p className="text-xm text-center text-gray-500">Манай ажлын цаг: Даваа - Баасан 09:00 - 18:00</p>
+                            <div className="bg-white p-4 rounded-lg  border border-black/5 shadow text-center hover:shadow-lg transition-shadow">
+                                <p className="text-sm text-gray-500">Утас</p>
+                                <p className="font-medium mt-2">{COMPANY_PHONE}</p>
+                            </div>
+                            <div className="bg-white p-4 rounded-lg  border border-black/5 shadow text-center hover:shadow-lg transition-shadow">
+                                <p className="text-sm text-gray-500">Байршил</p>
+                                <p className="font-medium mt-2">{COMPANY_ADDRESS}</p>
+                            </div>
                         </div>
+
+                        <hr className="my-6" />
+
+                        <p className="text-xm text-center text-gray-500">Манай ажлын цаг: Даваа - Баасан 09:00 - 18:00</p>
                     </div>
                 </div>
             </div>
+        </div>
     );
 }
 

@@ -12,7 +12,7 @@ export default function Header() {
 
     useEffect(() => {
         // Зөвхөн Home page-д scroll event нэмэх
-        if (pathname === '/home') {
+        if (pathname === '/' || '/home') {
             const handleScroll = () => {
                 if (window.scrollY > 50) setScrolled(true)
                 else setScrolled(false)
@@ -21,10 +21,9 @@ export default function Header() {
             return () => window.removeEventListener('scroll', handleScroll)
         }
     }, [pathname])
-
+const isHome = pathname === '/' || pathname === '/home';
     // Home page-д scroll шалгаж классыг өөрчлөх
-    const headerClasses =
-        pathname === '/home'
+    const headerClasses = isHome
             ? `fixed w-full top-0 z-50 transition-colors duration-300 ${scrolled ? 'bg-white border border-black/5 shadow-md text-black' : 'bg-transparent text-white'
             }`
             : 'w-full top-0 z-50 bg-white text-black shadow-md'
@@ -77,14 +76,14 @@ export default function Header() {
 
                 <nav className="hidden md:flex items-center space-x-4 ">
                     {/* Нүүр */}
-                    <Link href="/home" className="flex items-center gap-2 px-3 py-2 rounded-md hover:text-amber-400 transition-colors duration-0">
+                    <Link href="/home" className="flex items-center gap-2 px-3 py-2 hover:text-amber-400  transition-colors duration-0">
                         <Home size={20} /> Нүүр
                     </Link>
 
 
                     {/* Үйлчилгээ */}
                     <div className="relative group z-50">
-                        <button className="flex items-center gap-2 px-4 py-2 hover:text-amber-400 rounded-lg transition-colors">
+                        <button className="flex items-center gap-2 px-4 py-2 hover:text-amber-400  transition-colors">
 
                             {/* Layers / Categories Icon */}
                             <svg xmlns="http://www.w3.org/2000/svg"
@@ -113,7 +112,7 @@ export default function Header() {
                     {/* Захиалга */}
                     <Link
                         href="/booking"
-                        className="flex items-center gap-2 hover:text-amber-400 px-3 py-2 rounded-md transition-colors duration-0"
+                        className="flex items-center gap-2 hover:text-amber-400 px-3 py-2  transition-colors duration-0"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none"
                             viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor"
@@ -128,7 +127,7 @@ export default function Header() {
 
                     {/* Бусад */}
                     <div className="relative group z-50">
-                        <button className="flex items-center gap-2 px-4 py-2 hover:text-amber-400 rounded-lg transition-colors">
+                        <button className="flex items-center gap-2 px-4 py-2 hover:text-amber-400  transition-colors">
                             <MoreHorizontal size={20} /> Бусад
                         </button>
                         <div className="absolute left-0 bg-white rounded-lg w-52 shadow-lg hidden group-hover:block py-2">
