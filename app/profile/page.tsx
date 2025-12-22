@@ -308,7 +308,7 @@ export default function Profile() {
                 </header>
 
                 <div className="sm:space-y-6 lg:grid lg:grid-cols-3 lg:gap-6">
-                    <div className="lg:col-span-1 mr-4">
+                    <div className="h-80 lg:col-span-1 mr-4">
                         <UserDetails details={userDetails} />
                         <div className="text-center">
                             <button

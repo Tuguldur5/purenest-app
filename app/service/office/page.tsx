@@ -89,7 +89,7 @@ export default function ServiceCard() {
                     </a>
                 </div>
 
-                <div className="flex flex-col mt-10 w-full bg-red-700 border border-white/10 shadow-lg p-6 rounded-xl text-white">
+                <div className="flex flex-col mt-10 w-full bg-red-400 border border-white/10 shadow-lg p-6 rounded-xl text-white">
                     <h3 className="text-2xl font-semibold text-center mb-6">
                         Хамаарахгүй үйлчилгээ
                     </h3>
@@ -98,7 +98,7 @@ export default function ServiceCard() {
                     </p>
 
                     <ul className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
-                        <li className="border border-white/20 rounded-lg p-4 bg-white/30 hover:bg-white/20 transition w-full text-center">
+                        <li className="border border-white/20 rounded-lg p-4 bg-white/40 hover:bg-white/20 transition w-full text-center">
                             25кг-аас дээш жинтэй тавилга өргөх, зөөх
                         </li>
                         <li className="border border-white/20 rounded-lg p-4 bg-white/30 hover:bg-white/20 transition w-full text-center">

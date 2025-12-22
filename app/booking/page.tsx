@@ -1,5 +1,5 @@
 'use client'
-import { useState, useMemo } from 'react' // useMemo-г нэмэв
+import { useState, useMemo, useEffect } from 'react' // useMemo-г нэмэв
 
 // Давтамж
 const frequencyOptions = [
@@ -32,20 +32,16 @@ const PROVINCES = [
 const API_URL = "http://localhost:4000/api/booking";
 
 export default function Booking() {
-
+    const today = new Date().toISOString().split('T')[0];
     const [form, setForm] = useState({
         name: '',
-        phone: '',
+        phone_number: '',
         service: 'Оффис цэвэрлэгээ',
         date: '',
-        
-        // ❌ roomsCount, extrasCount, suhInfo object-г устгав.
-        // 💡 DB-ийн INT баганууд:
         apartments: 0, // Байрны тоо
         floors: 0,     // Давхарын тоо
         lifts: 0,      // Лифтийн тоо
         rooms: 0,      // Айлын тоо
-
         publicAreaSize: '',
         frequency: 'Нэг удаа',
         city: 'Улаанбаатар',
@@ -59,57 +55,71 @@ export default function Booking() {
         setForm(prevForm => {
             // Дүүрэг солигдоход хороог цэвэрлэнэ
             if (key === 'district') {
-                 return { ...prevForm, district: value, khoroo: '' };
+                return { ...prevForm, district: value, khoroo: '' };
             }
             // Хот солигдоход дүүрэг, хороог цэвэрлэнэ
             if (key === 'city') {
-                 return { ...prevForm, city: value, district: '', khoroo: '' };
+                return { ...prevForm, city: value, district: '', khoroo: '' };
             }
             return { ...prevForm, [key]: value };
         });
     };
+    // Booking.tsx дотор
+    const [dbPricing, setDbPricing] = useState<any>(null);
 
+    useEffect(() => {
+        // URL нь дээрх нээлттэй API-тай ижил байх ёстой
+        fetch('http://localhost:4000/api/pricing-settings')
+            .then(res => res.json())
+            .then(data => setDbPricing(data))
+            .catch(err => console.error("Үнэ татаж чадсангүй:", err));
+    }, []);
 
-    // PRICE CALCULATION LOGIC (Үнийн тооцооллын логик) - useMemo ашиглаж сайжруулав
+  
+    // Нийт үнийг тооцоолох функц
     const totalPrice = useMemo(() => {
-        let base = 0;
+        if (!dbPricing) return 0; // Үнэ татаж дуустал 0 харуулна
 
+        let base = 0;
         const publicAreaSizeNum = Number(form.publicAreaSize || 0);
 
         // --- Оффис цэвэрлэгээ ---
         if (form.service === "Оффис цэвэрлэгээ") {
-            base = publicAreaSizeNum * 20000;
+            base = publicAreaSizeNum * Number(dbPricing.office_price_per_sqm);
         }
 
         // --- Олон нийтийн талбай ---
         if (form.service === "Олон нийтийн талбай") {
-            base = publicAreaSizeNum * 25000;
+            base = publicAreaSizeNum * Number(dbPricing.public_area_price_per_sqm);
         }
 
         // --- СӨХ цэвэрлэгээ ---
         if (form.service === "СӨХ цэвэрлэгээ") {
-            // ⚠️ form-оос шууд утгыг авлаа
-            const { apartments, floors, lifts, rooms } = form; 
-            
-            // Үнийн томьёо: Байр * 100k + Давхар * 20k + Лифт * 10k + Айлын тоо * 5k
+            const { apartments, floors, lifts, rooms } = form;
             base =
-                apartments * 100000 +
-                floors * 20000 +
-                lifts * 10000 +
-                rooms * 5000;
+                apartments * Number(dbPricing.suh_apartment_base) +
+                floors * Number(dbPricing.suh_floor_price) +
+                lifts * Number(dbPricing.suh_lift_price) +
+                rooms * Number(dbPricing.suh_room_price);
         }
 
         // --- Давтамжийн хөнгөлөлт ---
         let factor = 1;
         switch (form.frequency) {
-            case "Долоо хоногт 1 удаа": factor = 0.9; break; // 10% хөнгөлөлт
-            case "2 долоо хоногт 1 удаа": factor = 0.95; break; // 5% хөнгөлөлт
-            case "Өдөр бүр": factor = 0.80; break; // 20% хөнгөлөлт
-            default: factor = 1; 
+            case "Өдөр бүр":
+                factor = Number(dbPricing.daily_discount); break;
+            case "Долоо хоногт 1 удаа":
+                factor = Number(dbPricing.weekly_discount); break;
+            case "2 долоо хоногт 1 удаа":
+                factor = Number(dbPricing.biweekly_discount); break;
+            case "Сард 1 удаа":
+                factor = Number(dbPricing.monthly_discount); break; // Шинэ давтамж нэмэв
+            default:
+                factor = 1; // "Нэг удаа" бол хөнгөлөлтгүй
         }
 
         return Math.max(0, Math.round(base * factor));
-    }, [form]); // form state өөрчлөгдөхөд дахин тооцоолно
+    }, [form, dbPricing]); // dbPricing өөрчлөгдөх бүрт үнэ шинэчлэгдэнэ 
 
 
     // Хүсэлт илгээх функц
@@ -124,33 +134,30 @@ export default function Booking() {
         }
 
         // 2. Шаардлагатай талбаруудыг шалгах
-        if (!form.name || !form.phone || !form.city || !form.district || !form.address || !form.date) {
-            alert("Нэр, утас, огноо, хаягийн мэдээллийг бүрэн бөглөнө үү.");
+        if (!form.phone_number || !form.city || !form.district || !form.address || !form.date) {
+            alert("Утас, Огноо, Хаягийн мэдээллийг бүрэн бөглөнө үү.");
             return;
         }
 
         // 3. Payload бэлтгэх (DB-ийн баганын нэрээр)
         const payload = {
             service: form.service,
-            date: form.date, 
-
+            date: form.date,
             // 💡 DB-д байгаа СӨХ-ийн INT талбарууд:
             apartments: form.apartments || 0,
             floors: form.floors || 0,
             lifts: form.lifts || 0,
-            rooms: form.rooms || 0, // Айлын тоо
-
-            // Оффис / Олон нийтийн талбайн хэмжээ
-            public_area_size: form.service !== "СӨХ цэвэрлэгээ" ? Number(form.publicAreaSize) : 0, 
-
+            rooms: form.rooms || 0, // Айлын тоо     
+            public_area_size: form.service !== "СӨХ цэвэрлэгээ" ? Number(form.publicAreaSize) : 0,
             frequency: form.frequency || "Нэг удаа",
             city: form.city,
             district: form.district,
             khoroo: form.khoroo,
             address: form.address,
-            total_price: totalPrice, // ⚠️ DB-д price гэж байгаа тул totalPrice-ийг price болгов
-            
-            // ❌ roomsCount, extrasCount, suhInfo object-ууд байхгүй
+            total_price: totalPrice, // 
+            phone_number: form.phone_number,
+            full_name: form.name,
+
         };
 
         try {
@@ -189,6 +196,29 @@ export default function Booking() {
         return ULAANBAATAR_DISTRICTS.find(d => d.name === form.district)?.khoroos || [];
     }, [form.district]);
 
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        // Хэрэглэгчийн мэдээллийг татах
+        fetch("http://localhost:4000/api/booking/user-info", {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+            .then(res => res.json())
+            .then(data => {
+                // 💡 Backend-ээс ирсэн data.full_name болон data.phone-г form-д оноох
+                setForm(prev => ({
+                    ...prev,
+                    name: data.full_name || '',        // full_name гэж ирж байгаа
+                    phone_number: data.phone || ''     // phone гэж ирж байгааг phone_number-т оноов
+                }));
+            })
+            .catch(err => {
+                console.error("User info fetch failed:", err);
+            });
+    }, []);
 
     return (
         <section className="flex justify-center mt-10 mb-10 text-black">
@@ -202,16 +232,18 @@ export default function Booking() {
                             value={form.name}
                             onChange={(e) => handleFormChange('name', e.target.value)}
                             className="w-full border p-2 rounded"
+                            readOnly
                         />
                     </div>
 
                     <div>
                         <label className="block mb-2">Утас</label>
                         <input
-                            value={form.phone}
-                            onChange={(e) => handleFormChange('phone', e.target.value)}
+                            value={form.phone_number}
+                            onChange={(e) => handleFormChange('phone_number', e.target.value)}
                             className="w-full border p-2 rounded"
                         />
+
                     </div>
 
                     <div>
@@ -233,7 +265,7 @@ export default function Booking() {
                             <label className="block mb-2">Талбайн хэмжээ (м²)</label>
                             <input
                                 type="number"
-                                min={1}
+                                min={0}
                                 value={form.publicAreaSize}
                                 onChange={(e) => handleFormChange('publicAreaSize', e.target.value)}
                                 className="w-full border p-2 rounded"
@@ -252,7 +284,7 @@ export default function Booking() {
                                         type="number"
                                         min={0}
                                         value={form.apartments}
-                                        onChange={(e) => handleFormChange('apartments', Number(e.target.value))} // ⚠️ Шууд setForm-ийг ашиглав
+                                        onChange={(e) => handleFormChange('apartments', (e.target.value))} // ⚠️ Шууд setForm-ийг ашиглав
                                         className="w-full border p-2 rounded"
                                     />
                                 </div>
@@ -262,7 +294,7 @@ export default function Booking() {
                                         type="number"
                                         min={0}
                                         value={form.floors}
-                                        onChange={(e) => handleFormChange('floors', Number(e.target.value))} // ⚠️ Шууд setForm-ийг ашиглав
+                                        onChange={(e) => handleFormChange('floors', (e.target.value))} // ⚠️ Шууд setForm-ийг ашиглав
                                         className="w-full border p-2 rounded"
                                     />
                                 </div>
@@ -272,7 +304,7 @@ export default function Booking() {
                                         type="number"
                                         min={0}
                                         value={form.lifts}
-                                        onChange={(e) => handleFormChange('lifts', Number(e.target.value))} // ⚠️ Шууд setForm-ийг ашиглав
+                                        onChange={(e) => handleFormChange('lifts', (e.target.value))} // ⚠️ Шууд setForm-ийг ашиглав
                                         className="w-full border p-2 rounded"
                                     />
                                 </div>
@@ -283,7 +315,7 @@ export default function Booking() {
                                         type="number"
                                         min={0}
                                         value={form.rooms}
-                                        onChange={(e) => handleFormChange('rooms', Number(e.target.value))} // ⚠️ Шууд setForm-ийг ашиглав
+                                        onChange={(e) => handleFormChange('rooms', (e.target.value))} // ⚠️ Шууд setForm-ийг ашиглав
                                         className="w-full border p-2 rounded"
                                     />
                                 </div>
@@ -295,6 +327,7 @@ export default function Booking() {
                         <label className="block mb-2">Огноо</label>
                         <input
                             type="date"
+                            min={today}
                             value={form.date}
                             onChange={(e) => handleFormChange('date', e.target.value)}
                             className="w-full border p-2 rounded"
@@ -335,7 +368,7 @@ export default function Booking() {
                         <div>
                             <label className="block mb-2">{form.city === 'Улаанбаатар' ? 'Дүүрэг' : 'Сум'}</label>
                             <select
-                                disabled={!form.city} 
+                                disabled={!form.city}
                                 value={form.district}
                                 onChange={(e) => handleFormChange('district', e.target.value)} // 💡 handleFormChange нь дотроо reset хийнэ
                                 className="w-full border p-2 rounded"
@@ -351,7 +384,7 @@ export default function Booking() {
                         <div>
                             <label className="block mb-2">{form.city === 'Улаанбаатар' ? 'Хороо' : 'Баг'}</label>
                             <select
-                                disabled={!form.district} 
+                                disabled={!form.district}
                                 value={form.khoroo}
                                 onChange={(e) => handleFormChange('khoroo', e.target.value)}
                                 className="w-full border p-2 rounded"
@@ -373,7 +406,7 @@ export default function Booking() {
                             />
                         </div>
                     </div>
-                    
+
                     {/* type="button" -ийн оронд type="submit" байвал зөв */}
                     <button
                         type="submit"
@@ -385,7 +418,7 @@ export default function Booking() {
             </div>
 
             {/* Price Summary (Үнийн хураангуй) */}
-            <div className="w-96 ml-8 sticky bg-gray-100 top-10 h-fit p-6 border border-black/5  shadow-lg rounded-xl bg-white">
+            <div className="w-96 ml-8 sticky bg-gray-100 top-10 h-fit p-6 border border-black/5 shadow-md rounded-xl bg-white">
                 <h2 className="text-xl font-semibold mb-4">Таны захиалга</h2>
                 <p className="text-gray-700 mb-2">
                     <strong>Үйлчилгээ:</strong> {form.service}

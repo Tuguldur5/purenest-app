@@ -1,13 +1,14 @@
 // server.js
 const bodyParser = require('body-parser');
 const nodemailer = require('nodemailer');
-const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const pool = require('./db.js'); // PostgreSQL холболт
-const port = process.env.PORT || 3001;
+const express = require('express');
+const bcrypt = require('bcrypt');
 const app = express();
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
@@ -19,9 +20,7 @@ app.use(cors({
 
 const JWT_SECRET = process.env.JWT_SECRET || 'YOUR_HIGHLY_SECURE_SECRET_KEY_123';
 
-// ---------------------------
-// Middleware
-// ---------------------------
+
 async function fetchUserDetails(user_id) {
     try {
         const userQuery = await pool.query(
@@ -68,10 +67,10 @@ app.get('/', (req, res) => {
 
 app.use('/auth', require('./route/auth'));
 
-const generateBookingHtml = (data, userDetails) => {  
+const generateBookingHtml = (data, userDetails) => {
 
     const isSuh = data.service === 'СӨХ цэвэрлэгээ';
-    
+
     let suhDetails = '';
     if (isSuh) {
         suhDetails = `
@@ -104,9 +103,8 @@ const generateBookingHtml = (data, userDetails) => {
                 
                 <h3>Хэрэглэгчийн Мэдээлэл</h3>
                 <table>
-                    <tr><th>Нэр</th><td>${userDetails.full_name || 'Нэр тодорхойгүй'}</td></tr> 
-                    <tr><th>Утас</th><td>${userDetails.phone || 'Утасны дугааргүй'}</td></tr>
-                    <tr><th>Хэрэглэгчийн ID</th><td>${userDetails.id}</td></tr>
+                    <tr><th>Нэр</th><td>${userDetails.full_name}</td></tr> 
+                    <tr><th>Утас</th><td>${data.phone_number}</td></tr>
                 </table>
 
                 <h3>Захиалгын Дэлгэрэнгүй</h3>
@@ -127,8 +125,6 @@ const generateBookingHtml = (data, userDetails) => {
                     </tr>
                 </table>
 
-                <p>Захиалгын мэдээлэл (Payload-оос ирсэн):</p>
-                <pre>${JSON.stringify(data, null, 2)}</pre> 
             </div>
         </body>
         </html>
@@ -137,100 +133,119 @@ const generateBookingHtml = (data, userDetails) => {
 };
 
 // =========================================================================
+app.get('/api/pricing', async (req, res) => {
+    const pricing = await PricingSettings.findOne({ order: [['id', 'DESC']] });
+    res.json(pricing);
+});
 
 // (Энэхүү хэсгийг server.js доторх бусад холбогдох хувьсагч, модулиудын хамт байрлуулна)
+app.get('/api/booking/user-info', authMiddleware, async (req, res) => {
+    try {
+        const userId = req.user.id;
+
+        const result = await pool.query(
+            `SELECT full_name, phone FROM users WHERE id = $1`,
+            [userId]
+        );
+
+        res.json(result.rows[0] || { full_name: "", phone: "" });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "User info fetch failed" });
+    }
+});
+
 
 app.post('/api/booking', authMiddleware, async (req, res) => {
     try {
         const user_id = req.user.id;
 
-        // req.user-ээс шууд мэдээллийг авах (Token-оос)
-        const userName = req.user.full_name || 'Нэр тодорхойгүй';
-        const userPhone = req.user.phone || 'Утасны дугааргүй';
+        // 1. DB-ээс хэрэглэгчийн full_name-г automataar шүүж авах
+        const userResult = await pool.query(
+            'SELECT full_name FROM users WHERE id = $1',
+            [user_id]
+        );
 
-        // ⚠️ Frontend-ээс ирж буй талбаруудыг DB-ийн нэрээр зөвөөр татаж авах:
+        if (userResult.rows.length === 0) {
+            return res.status(404).json({ error: "Хэрэглэгч олдсонгүй" });
+        }
+
+        const userName = userResult.rows[0].full_name;
+
+        // 2. Frontend-ээс ирж буй мэдээллүүд
         const {
-            service, date, address, 
-            total_price, 
-            apartments, floors, lifts, rooms, 
-            frequency, city, district, khoroo, public_area_size
+            service, date, address, total_price,
+            apartments, floors, lifts, rooms,
+            frequency, city, district, khoroo, public_area_size, phone_number
         } = req.body;
-        
-        // --- DB INSERT QUERY (Баганын нэр, утгын дарааллыг шалгана уу) ---
+
+        // 3. DB INSERT QUERY
         const orderResult = await pool.query(
             `INSERT INTO orders
              (user_id, service, date, address, total_price, status, 
               apartments, floors, lifts, rooms, 
-              frequency, city, district, khoroo, public_area_size )
+              frequency, city, district, khoroo, public_area_size, phone_number)
              VALUES ($1,$2,$3,$4,$5,'Хүлээгдэж байна',
                      $6,$7,$8,$9, 
-                     $10,$11,$12,$13,$14) 
+                     $10,$11,$12,$13,$14,$15) 
              RETURNING *`,
             [
-                req.user.id, // $1
+                user_id, // $1
                 service || 'Тодорхойгүй үйлчилгээ', // $2
                 date, // $3
                 address || '', // $4
                 total_price || 0, // $5 
-                
                 apartments || 0, // $6
                 floors || 0, // $7
                 lifts || 0, // $8
-                rooms || 0, // $9
-                
+                rooms || 0, // $9  
                 frequency || 'Нэг удаа', // $10
                 city || '', // $11
                 district || '', // $12
                 khoroo || '', // $13
-                public_area_size || 0 // $14
+                public_area_size || 0, // $14
+                phone_number || '' // $15
             ]
         );
 
-        // --- NODEMAILER ХЭСЭГ (өөрчлөлтгүй) ---
+        // 4. NODEMAILER ХЭСЭГ
         const SENDER_USER = process.env.MAIL_USER;
         const SENDER_PASS = process.env.MAIL_PASS;
 
         const transporter = nodemailer.createTransport({
             host: "smtp.gmail.com",
             port: 587,
-            secure: false, 
+            secure: false,
             auth: {
                 user: SENDER_USER,
-                pass: SENDER_PASS, 
+                pass: SENDER_PASS,
             },
         });
 
-        // Имэйлийн HTML агуулгыг үүсгэх
+        // Имэйлийн HTML агуулгыг үүсгэхэд DB-ээс авсан userName-ийг ашиглана
         const emailHtml = generateBookingHtml(
-            req.body, // data нь одоо зөвхөн DB-ийн талбарын нэрсийг агуулж байна
-            { id: user_id, full_name: userName, phone: userPhone } // Хэрэглэгчийн мэдээлэл
+            req.body,
+            { full_name: userName } // Автоматаар авсан нэр
         );
 
         const mailOptions = {
             from: `"Захиалгын систем" <${SENDER_USER}>`,
-            to: process.env.COMPANY_MAIL || "it@silla-group.mn", 
+            to: process.env.COMPANY_MAIL || "tuguldur8000@gmail.com",
             subject: `ШИНЭ ЗАХИАЛГА: ${service} - ${userName}`,
             html: emailHtml,
         };
 
         await transporter.sendMail(mailOptions);
-        // ------------------------------------
 
         res.json({
             success: true,
-            message: 'Захиалга амжилттай хийгдлээ. Баталгаажуулах имэйл илгээсэн.',
+            message: 'Захиалга амжилттай хийгдлээ.',
             order: orderResult.rows[0],
         });
 
     } catch (err) {
-        console.error("Захиалга илгээхэд БОДИТ алдаа:", err); 
-
-        // DB-ийн алдааг илүү нарийвчлан барих
-        if (err.code === '42703') {
-            return res.status(500).json({ error: 'DB Алдаа: INSERT Query-н баганын нэр Payload-той таарахгүй байна.' });
-        }
-        
-        res.status(500).json({ error: 'Захиалга хийхэд алдаа гарлаа. Серверийн логийг шалгана уу.' });
+        console.error("Захиалга алдаа:", err);
+        res.status(500).json({ error: 'Серверт алдаа гарлаа.' });
     }
 });
 
@@ -268,8 +283,9 @@ app.get("/api/admin/users", isAdminMiddleware, async (req, res) => {
 // All orders
 app.get('/api/admin/orders', isAdminMiddleware, async (req, res) => {
     try {
+        // Бүх захиалгыг хамгийн сүүлийнхээс нь эхэлж авна
         const result = await pool.query(
-            `SELECT * FROM orders WHERE user_id = $1`,
+            'SELECT * FROM orders ORDER BY created_at DESC' 
         );
         res.json({ orders: result.rows });
     } catch (err) {
@@ -277,7 +293,6 @@ app.get('/api/admin/orders', isAdminMiddleware, async (req, res) => {
         res.status(500).json({ error: "Серверийн алдаа." });
     }
 });
-// Update order status
 app.put('/api/admin/orders/:id/status', isAdminMiddleware, async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
@@ -288,9 +303,10 @@ app.put('/api/admin/orders/:id/status', isAdminMiddleware, async (req, res) => {
     }
 
     try {
+        // id-г заавал Integer болгож хөрвүүлнэ ($2-т дамжуулахдаа)
         const result = await pool.query(
             'UPDATE orders SET status = $1 WHERE order_id = $2 RETURNING *',
-            [status, id]
+            [status, parseInt(id)] 
         );
 
         if (result.rowCount === 0) {
@@ -300,12 +316,11 @@ app.put('/api/admin/orders/:id/status', isAdminMiddleware, async (req, res) => {
         res.json({ message: "Төлөв амжилттай шинэчлэгдлээ", order: result.rows[0] });
     } catch (err) {
         console.error("Order Status Update Error:", err);
-        res.status(500).json({ error: "Серверийн алдаа." });
+        // Алдааны мессежийг дэлгэрэнгүй харахын тулд err.message-г ашиглаж болно
+        res.status(500).json({ error: "Серверийн алдаа: " + err.message });
     }
 });
 
-// Үнийн тохиргоо хадгалах
-// PUT /api/admin/pricing
 app.get('/api/admin/pricing', isAdminMiddleware, async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM pricing_settings WHERE id = 1');
@@ -328,6 +343,7 @@ app.get('/api/admin/pricing', isAdminMiddleware, async (req, res) => {
         res.status(500).json({ error: "Үнийн тохиргоо авахад алдаа гарлаа" });
     }
 });
+// Үнийн тохиргоог хэн ч уншиж болохоор нээлттэй GET API
 
 app.put('/api/admin/pricing', isAdminMiddleware, async (req, res) => {
     const pricingData = req.body;
@@ -368,21 +384,17 @@ app.put('/api/admin/pricing', isAdminMiddleware, async (req, res) => {
     }
 });
 
-
-// GET /api/admin/pricing (React хуудсанд fetch хийхэд ашиглана)
-// GET /api/admin/pricing
-app.get('/api/admin/pricing', isAdminMiddleware, async (req, res) => {
+// Энэ бол нээлттэй API. Booking.tsx эндээс үнийг уншина.
+app.get('/api/pricing-settings', async (req, res) => {
     try {
-        const result = await pool.query(`SELECT * FROM pricing_settings WHERE id = 1`);
-        if (result.rows.length === 0) {
-            return res.status(404).json({ error: "Үнийн тохиргоо олдсонгүй" });
-        }
+        const result = await pool.query('SELECT * FROM pricing_settings WHERE id = 1');
+        if (result.rows.length === 0) return res.status(404).json({ error: "Үнийн тохиргоо олдсонгүй" });
         res.json(result.rows[0]);
     } catch (err) {
-        console.error("Pricing Fetch Error:", err);
-        res.status(500).json({ error: "Үнийн тохиргоо татаж чадсангүй." });
+        res.status(500).json({ error: "Үнэ авахад алдаа гарлаа" });
     }
 });
+
 
 // server.js доторх /api/contact хэсэг
 
@@ -428,6 +440,118 @@ app.post('/api/contact', async (req, res) => {
     } catch (err) {
         console.error("Имэйл илгээх үед гарсан бодит алдаа:", err); // 💡 Энэ алдааг бид дахин харахгүй байхыг хүсэж байна.
         return res.status(500).json({ error: 'Серверийн алдаа. Дахин оролдоно уу.' });
+    }
+});
+
+
+
+// 1. OTP Илгээх
+app.post('/api/auth/forgot-password', async (req, res) => {
+    const { email } = req.body;
+    try {
+        console.log("Хүсэлт ирлээ:", email); // Консол дээр харах
+
+        const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+        const user = result.rows[0]; // Postgres-д ингэж авна
+
+        if (!user) {
+            return res.status(404).json({ message: 'Хэрэглэгч олдсонгүй' });
+        }
+
+        const otp = Math.floor(100000 + Math.random() * 900000);
+
+        // Postgres-д INTERVAL-ийг '5 minutes' гэж бичнэ
+        await pool.query(
+            "UPDATE users SET otp_code = $1, otp_expires = NOW() + INTERVAL '5 minutes' WHERE email = $2",
+            [otp, email]
+        );
+
+        // Nodemailer... (EMAIL_USER, EMAIL_PASS байгаа эсэхийг шалгаарай)
+        let transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.MAIL_USER,
+                pass: process.env.MAIL_PASS
+            }
+        });
+
+        await transporter.sendMail({
+            from: `"Support" <${process.env.MAIL_USER}>`,
+            to: email,
+            subject: 'Нууц үг сэргээх код',
+            text: `Таны баталгаажуулах код: ${otp}`
+        });
+
+        res.json({ success: true, message: 'OTP илгээгдлээ' });
+    } catch (err) {
+        console.error("Алдааны дэлгэрэнгүй:", err); // Энэ консол дээрх бичгийг хараарай
+        res.status(500).json({ message: 'Серверийн алдаа: ' + err.message });
+    }
+});
+
+// 2. OTP Баталгаажуулах
+app.post('/api/auth/verify-otp', async (req, res) => {
+    const { email, otp } = req.body;
+    try {
+        // 1. Зөвхөн и-мэйлээр нь хайж үзэх (Цаг болон кодыг шалгахгүйгээр)
+        const checkDB = await pool.query('SELECT otp_code, otp_expires, NOW() as current_time FROM users WHERE email = $1', [email]);
+
+        if (checkDB.rows.length === 0) {
+            return res.status(400).json({ message: 'Хэрэглэгч олдсонгүй' });
+        }
+
+        const dbData = checkDB.rows[0];
+        console.log("--- OTP Шалгалт ---");
+        console.log("Ирсэн код:", otp, "(Төрөл:", typeof otp, ")");
+        console.log("DB-д байгаа код:", dbData.otp_code, "(Төрөл:", typeof dbData.otp_code, ")");
+        console.log("DB цаг:", dbData.current_time);
+        console.log("Дуусах цаг:", dbData.otp_expires);
+
+        // 2. Код болон хугацааг харьцуулах (trim() ашиглаж илүү зайг устгах)
+        if (String(dbData.otp_code).trim() !== String(otp).trim()) {
+            return res.status(400).json({ message: 'Код буруу байна' });
+        }
+
+        // 3. Цаг шалгах
+        const now = new Date();
+        const expires = new Date(dbData.otp_expires);
+        if (expires < now) {
+            return res.status(400).json({ message: 'Кодны хугацаа дууссан байна' });
+        }
+
+        // Бүх зүйл зөв бол:
+        res.json({ success: true });
+
+    } catch (err) {
+        console.error("Verify Error:", err);
+        res.status(500).json({ message: 'Серверийн алдаа' });
+    }
+});
+
+// 3. Нууц үг шинэчлэх
+app.post('/api/auth/reset-password', async (req, res) => {
+    const { email, password } = req.body;
+    try {
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // 1. Тэр илүү байсан таслалыг авч хаяв
+        // 2. otp_code-г NULL болгож цэвэрлэх (Дараа нь дахиж ашиглах боломжгүй болгох)
+        const query = `
+            UPDATE users 
+            SET password_hash = $1, otp_code = NULL, otp_expires = NULL
+            WHERE email = $2
+        `;
+
+        const result = await pool.query(query, [hashedPassword, email]);
+
+        if (result.rowCount > 0) {
+            res.json({ success: true, message: 'Нууц үг амжилттай шинэчлэгдлээ' });
+        } else {
+            res.status(404).json({ message: 'Хэрэглэгч олдсонгүй' });
+        }
+    } catch (err) {
+        console.error("Reset Password Error:", err);
+        res.status(500).json({ message: 'Серверийн алдаа' });
     }
 });
 

@@ -61,15 +61,15 @@ const isHome = pathname === '/' || pathname === '/home';
             <div className="container mx-auto px-4 py-4 flex items-center justify-between" style={{ fontFamily: "arial" }}>
                 <Link href="/home" className="flex items-center">
                     <img
-                        src="./nest.jpg"
+                        src="./nest1.png"
                         alt="Logo"
-                        className="w-16 h-16 rounded-full object-cover"
+                        className="w-12 h-12 rounded-full object-cover"
                     />
                     <span
-                        className="ml-4 text-3xl text-[#e2bd6e]"
+                        className="ml-4 text-3xl text-[#"
                         style={{ fontFamily: 'Montserrat' }}
                     >
-                        Purenest Service
+                        
                     </span>
                 </Link>
 

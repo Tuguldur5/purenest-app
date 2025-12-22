@@ -50,7 +50,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 </nav>  
                     <Link
                     href="/home"
-                    className="absolute bottom-5 text-center text-sm text-white hover:text-gray-500  border border-black/5 shadow-md rounded-lg p-2 w-50 bg-red-500"
+                    className="absolute bottom-5 text-center text-sm text-white hover:text-amber-400  border border-black/5 shadow-md rounded-lg p-2 w-50 bg-black"
                 >
                     Гарах
                 </Link>

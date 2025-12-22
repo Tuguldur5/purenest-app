@@ -25,7 +25,7 @@ export default function AboutPage() {
                         үүсгэн байгуулагдсан бөгөөд гэр, албан байгууллага болон олон нийтийн
                         талбайд зориулсан мэргэжлийн цэвэрлэгээний үйлчилгээ үзүүлдэг.
                     </p>
-                
+
                     <p>
                         Манай хамт олон туршлагатай, найдвартай, хариуцлагатай бөгөөд олон улсын
                         стандартын дагуу байгальд ээлтэй бодлого баримтлан үйлчилдэг.
@@ -34,27 +34,42 @@ export default function AboutPage() {
             </div>
 
             {/* Values */}
-            <div className="mt-14 max-w-5xl mx-auto">
-                <h3 className="text-3xl font-semibold text-center text-[#102B5A] mb-6">
+            <div className="mt-16 max-w-6xl mx-auto px-4">
+                <h3 className="text-3xl md:text-4xl font-semibold text-center text-[#102B5A] mb-12">
                     Манай үнэт зүйлс
                 </h3>
 
-                <div className="grid md:grid-cols-4 gap-6 text-center">
+                <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-4 text-center">
                     {[
-                        "Найдвартай байдал",
-                        "Хэрэглэгч төвтэй",
-                        "Хурд ба Шургуу байдал",
-                        "Экологийн хариуцлага",
+                        { title: 'Найдвартай байдал', icon: '🛡️' },
+                        { title: 'Хэрэглэгч төвтэй', icon: '🤝' },
+                        { title: 'Хурд ба Шургуу байдал', icon: '⚡' },
+                        { title: 'Экологийн хариуцлага', icon: '🌱' },
                     ].map((item, index) => (
                         <div
                             key={index}
-                            className="bg-white shadow-lg border border-black/5 rounded-lg p-5 font-medium hover:shadow-xl duration-200"
+                            className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl"
                         >
-                            {item}
+                            {/* Accent bar */}
+                            <div className="absolute left-0 top-0 h-full w-1 bg-[#102B5A] opacity-70 group-hover:opacity-100 transition" />
+
+                            {/* Icon */}
+                            <div className="mb-4 text-4xl">
+                                {item.icon}
+                            </div>
+
+                            {/* Title */}
+                            <h4 className="text-lg font-semibold text-gray-800 leading-snug">
+                                {item.title}
+                            </h4>
+
+                            {/* Hover underline */}
+                            <div className="mt-3 h-0.5 w-0 bg-[#102B5A] transition-all duration-300 group-hover:w-10" />
                         </div>
                     ))}
                 </div>
             </div>
+
         </section>
     );
 }

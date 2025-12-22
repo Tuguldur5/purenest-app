@@ -13,7 +13,7 @@ export default function Login() {
     const router = useRouter()
 
     const handleLogin = async () => {
-        setError('')
+        setError('') // Алдааг эхлээд цэвэрлэх
         setLoading(true)
 
         try {

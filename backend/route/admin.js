@@ -91,5 +91,64 @@ router.put('/orders/:id/status', isAdminMiddleware, async (req, res) => {
         res.status(500).json({ error: "Серверийн алдаа." });
     }
 });
+router.get('/api/admin/pricing', isAdminMiddleware, async (req, res) => {
+    try {
+        const result = await pool.query(`
+            SELECT *
+            FROM pricing_settings
+            ORDER BY id DESC
+            LIMIT 1
+        `);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: "Үнийн тохиргоо олдсонгүй" });
+        }
+
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error("Pricing Fetch Error:", err);
+        res.status(500).json({ error: "Үнийн тохиргоо татаж чадсангүй." });
+    }
+});
+
+router.put('/api/admin/pricing', isAdminMiddleware, async (req, res) => {
+    const pricingData = req.body;
+
+    if (!pricingData.suh || !pricingData.frequency) {
+        return res.status(400).json({ error: "SUH эсвэл Frequency мэдээлэл дутуу байна" });
+    }
+
+    try {
+        await pool.query(
+            `INSERT INTO pricing_settings (
+                office_price_per_sqm,
+                public_area_price_per_sqm,
+                suh_apartment_base,
+                suh_floor_price,
+                suh_lift_price,
+                suh_room_price,
+                daily_discount,
+                weekly_discount,
+                biweekly_discount
+            ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
+            [
+                pricingData.office_price_per_sqm,
+                pricingData.public_area_price_per_sqm,
+                pricingData.suh.apartment,
+                pricingData.suh.floor,
+                pricingData.suh.lift,
+                pricingData.suh.room,
+                pricingData.frequency.daily,
+                pricingData.frequency.weekly,
+                pricingData.frequency.biweekly
+            ]
+        );
+
+        res.json({ message: "Шинэ үнийн тохиргоо амжилттай хадгалагдлаа." });
+    } catch (err) {
+        console.error("Pricing Insert Error:", err);
+        res.status(500).json({ error: "Үнийн тохиргоо хадгалахад алдаа гарлаа." });
+    }
+});
 
 module.exports = router;
