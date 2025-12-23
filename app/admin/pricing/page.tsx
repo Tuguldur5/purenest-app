@@ -100,67 +100,95 @@ export default function PricingAdmin() {
 
     return (
         <section className="p-10 max-w-3xl mx-auto bg-white text-black rounded-xl shadow">
-            <h1 className="text-3xl font-bold mb-6">Үнийн тохиргоо (Admin)</h1>
-
-            {/* Office price */}
-            <div className="mb-4">
-                <label>Оффис цэвэрлэгээ — 1м² үнэ</label>
-                <input type="number" className="border p-2 w-full rounded"
+    <div className="flex container text-center  mb-2">
+        <h1 className="text-3xl font-bold p-2">Үнийн тохиргоо</h1>
+        
+    </div>
+        
+    {/* 1. Үндсэн үйлчилгээний үнэ */}
+    <div className="bg-gray-50 p-6 rounded-xl mb-6">
+        <h2 className="text-xl font-semibold mb-4 border-b pb-2">Үндсэн үнэ (1м²)</h2>
+        <div className="space-y-4">
+            <div>
+                <label className="block text-sm font-medium mb-1">Оффис цэвэрлэгээ</label>
+                <input type="number" className="border p-2 w-full rounded focus:ring-2 focus:ring-blue-500"
                     value={pricing.officePrice}
                     onChange={e => setPricing({ ...pricing, officePrice: Number(e.target.value) })}
                 />
+                <p className="text-xs text-gray-500 mt-1">Оффисын талбайн 1 метр квадрат тутмын суурь үнэ.</p>
             </div>
 
-            {/* Public Area */}
-            <div className="mb-4">
-                <label>Олон нийтийн талбай — 1м² үнэ</label>
-                <input type="number" className="border p-2 w-full rounded"
+            <div>
+                <label className="block text-sm font-medium mb-1">Олон нийтийн талбай</label>
+                <input type="number" className="border p-2 w-full rounded focus:ring-2 focus:ring-blue-500"
                     value={pricing.publicPrice}
                     onChange={e => setPricing({ ...pricing, publicPrice: Number(e.target.value) })}
                 />
+                <p className="text-xs text-gray-500 mt-1">Гадна болон нийтийн эзэмшлийн талбайн 1м² үнэ.</p>
             </div>
+        </div>
+    </div>
 
-            {/* SUH */}
-            <h2 className="text-xl font-semibold mt-6 mb-2">СӨХ цэвэрлэгээний үнэ</h2>
-            <div className="grid grid-cols-2 gap-4">
-                {["apartment", "floor", "lift", "room"].map((k) => (
-                    <div key={k}>
-                        <label>{k.charAt(0).toUpperCase() + k.slice(1)}</label>
-                        <input type="number" className="border p-2 w-full rounded"
-                            value={pricing.suh[k as keyof typeof pricing.suh]}
-                            onChange={e => setPricing({
-                                ...pricing,
-                                suh: { ...pricing.suh, [k]: Number(e.target.value) }
-                            })}
-                        />
-                    </div>
-                ))}
-            </div>
+    {/* 2. СӨХ Цэвэрлэгээ */}
+    <div className="bg-gray-50 p-6 rounded-xl mb-6">
+        <h2 className="text-xl font-semibold mb-4 border-b pb-2">СӨХ цэвэрлэгээний үнэ</h2>
+        <p className="text-xs text-gray-500 mb-4 italic">Доорх утгуудыг нэмж нийт үнэ бодогдоно.</p>
+        <div className="grid grid-cols-2 gap-4">
+            {[
+                { key: "apartment", label: "Орцны тоо" },
+                { key: "floor", label: "Давхрын тоо" },
+                { key: "lift", label: "Лифтний тоо" },
+                { key: "room", label: "Айл бүрээс" }
+            ].map((item) => (
+                <div key={item.key}>
+                    <label className="block text-sm font-medium mb-1">{item.label}</label>
+                    <input type="number" className="border p-2 w-full rounded focus:ring-2 focus:ring-blue-500"
+                        value={pricing.suh[item.key as keyof typeof pricing.suh]}
+                        onChange={e => setPricing({
+                            ...pricing,
+                            suh: { ...pricing.suh, [item.key]: Number(e.target.value) }
+                        })}
+                    />
+                </div>
+            ))}
+        </div>
+    </div>
 
-            {/* Frequency */}
-            <h2 className="text-xl font-semibold mt-6 mb-2">Давтамжийн хөнгөлөлт</h2>
-            <div className="grid grid-cols-2 gap-4">
-                {["once", "daily", "weekly", "biweekly", "monthly"].map((k) => (
-                    <div key={k}>
-                        <label>{k}</label>
-                        <input type="number" step="0.01" className="border p-2 w-full rounded"
-                            value={pricing.frequency[k as keyof typeof pricing.frequency]}
-                            onChange={e => setPricing({
-                                ...pricing,
-                                frequency: { ...pricing.frequency, [k]: Number(e.target.value) }
-                            })}
-                        />
-                    </div>
-                ))}
-            </div>
+    {/* 3. Давтамжийн хөнгөлөлт */}
+    <div className="bg-gray-50 p-6 rounded-xl mb-6">
+        <h2 className="text-xl font-semibold mb-2 border-b pb-2">Давтамжийн коэффициент</h2>
+        <div className="bg-blue-50 p-3 rounded text-xs text-blue-700 mb-4">
+            💡 <b>Тайлбар:</b> Утга 1-ээс бага байвал хөнгөлөлт болно. (Жишээ нь: 0.9 гэвэл 10% хямдарна. 1.0 гэвэл хямдрахгүй).
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+            {[
+                { key: "once", label: "Ганц удаа" },
+                { key: "daily", label: "Өдөр бүр" },
+                { key: "weekly", label: "7 хоногт 1" },
+                { key: "biweekly", label: "14 хоногт 1" },
+                { key: "monthly", label: "Сар бүр" }
+            ].map((item) => (
+                <div key={item.key}>
+                    <label className="block text-sm font-medium mb-1">{item.label}</label>
+                    <input type="number" step="0.01" className="border p-2 w-full rounded focus:ring-2 focus:ring-blue-500"
+                        value={pricing.frequency[item.key as keyof typeof pricing.frequency]}
+                        onChange={e => setPricing({
+                            ...pricing,
+                            frequency: { ...pricing.frequency, [item.key]: Number(e.target.value) }
+                        })}
+                    />
+                </div>
+            ))}
+        </div>
+    </div>
 
-            <button
-                disabled={loading}
-                onClick={handleSave}
-                className="mt-6 w-full py-3 bg-blue-600 text-white rounded hover:bg-blue-700"
-            >
-                {loading ? "Хадгалж байна..." : "Хадгалах"}
-            </button>
-        </section>
+    <button
+        disabled={loading}
+        onClick={handleSave}
+        className="mt-4 w-full py-4 bg-blue-600 text-white rounded-xl font-bold shadow-lg hover:bg-blue-700 transition-all disabled:bg-gray-400"
+    >
+        {loading ? "Хадгалж байна..." : "ӨӨРЧЛӨЛТИЙГ ХАДГАЛАХ"}
+    </button>
+</section>
     );
 }

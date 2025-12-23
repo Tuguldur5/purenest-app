@@ -10,7 +10,7 @@ import {
 const API_BASE_URL = "http://localhost:4000/api/admin";
 
 interface Order {
-    order_id: number;
+    id: number;
     service: string;
     city: string;
     district: string;
@@ -24,6 +24,9 @@ interface Order {
     status: string;
     date: string;
     created_at: string;
+}
+interface User {
+    full_name: string, 
 }
 
 const STATUS_OPTIONS = ['Хүлээгдэж байна', 'Баталгаажсан', 'Дууссан', 'Цуцлагдсан'];
@@ -56,9 +59,13 @@ export default function AdminDashboardPage() {
     useEffect(() => { fetchAdminData(); }, []);
 
     // Статус шинэчлэх функц
-    const handleStatusUpdate = async (orderId: number, newStatus: string) => {
-        // URL-аа бүрэн бичиж шалгах
-        const url = `http://localhost:4000/api/admin/orders/${orderId}/status`;
+    const handleStatusUpdate = async (id: number, newStatus: string) => {
+        // ХУУЧИН: const url = `http://localhost:4000/api/admin/orders/:id/status`;
+
+        // ШИНЭ: Жинхэнэ id-г нь url дотор нь ингэж хийнэ
+        const url = `http://localhost:4000/api/admin/orders/${id}/status`;
+
+        console.log("Хүсэлт илгээж буй URL:", url); // Шалгах зорилгоор
 
         try {
             const token = localStorage.getItem("token");
@@ -74,10 +81,8 @@ export default function AdminDashboardPage() {
             const data = await res.json();
 
             if (res.ok) {
-                setOrders(prev => prev.map(o => o.order_id === orderId ? { ...o, status: newStatus } : o));
-                // Амжилттай болсныг мэдэгдэх (заавал alert хэрэггүй болсон)
+                setOrders(prev => prev.map(o => o.id === id ? { ...o, status: newStatus } : o));
             } else {
-                // Энд яг ямар алдаа ирж байгааг харуулна
                 alert(`Алдаа: ${data.error || "Шинэчилж чадсангүй"}`);
             }
         } catch (error) {
@@ -85,7 +90,6 @@ export default function AdminDashboardPage() {
             alert("Сервертэй холбогдож чадсангүй.");
         }
     };
-    // --- Analytics Data ---
     const statsData = useMemo(() => {
         const totalRevenue = orders.reduce((sum, o) => sum + (o.status === "Дууссан" ? Number(o.total_price) : 0), 0);
         const statusCounts = STATUS_OPTIONS.map(status => ({
@@ -119,7 +123,7 @@ export default function AdminDashboardPage() {
                 <h1 className="text-3xl font-extrabold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
                     Админ Удирдах Хэсэг
                 </h1>
-                <div className="flex bg-white p-1 rounded-2xl shadow-sm border">
+                <div className="flex bg-white p-1 rounded-2xl shadow-sm border border-black/5">
                     {['dashboard', 'orders', 'analytics'].map((tab) => (
                         <button
                             key={tab}
@@ -136,30 +140,39 @@ export default function AdminDashboardPage() {
             {/* Content Tabs */}
             {activeTab === 'dashboard' && (
                 <div className="space-y-8">
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                        <StatCard title="Нийт Орлого" value={`${statsData.totalRevenue.toLocaleString()} ₮`} color="text-emerald-600" bg="bg-emerald-50" />
+                    <div className="grid grid-cols-1 md:grid-cols-5 gap-6 text-center">
+                        <StatCard title="Нийт Орлого" value={`${statsData.totalRevenue.toLocaleString()} ₮`} color="text-emerald-600 text-xl" bg="bg-emerald-50" />
                         <StatCard title="Шинэ Захиалга" value={orders.filter(o => o.status === "Хүлээгдэж байна").length} color="text-amber-600" bg="bg-amber-50" />
                         <StatCard title="Баталгаажсан" value={orders.filter(o => o.status === "Баталгаажсан").length} color="text-blue-600" bg="bg-blue-50" />
                         <StatCard title="Цуцлагдсан" value={orders.filter(o => o.status === "Цуцлагдсан").length} color="text-red-600" bg="bg-red-50" />
+                        <StatCard title="Дууссан" value={orders.filter(o => o.status === "Дууссан").length} color="text-emerald-600" bg="bg-emerald-100" />
                     </div>
 
                     <div className="bg-white p-6 rounded-3xl shadow-sm border">
-                        <h3 className="text-xl font-bold mb-4">Сүүлийн 5 захиалга</h3>
+                        <h3 className="text-xl font-bold mb-4">Сүүлийн 10 захиалга</h3>
                         <div className="overflow-x-auto">
                             <table className="w-full text-left">
                                 <thead className="text-slate-400 text-xs uppercase tracking-wider border-b">
                                     <tr>
                                         <th className="pb-4 px-2">Хэрэглэгч</th>
+                                        <th className="pb-4 px-2">Хэзээ</th>
                                         <th className="pb-4 px-2">Үйлчилгээ</th>
                                         <th className="pb-4 px-2">Нийт</th>
                                         <th className="pb-4 px-2">Төлөв</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y">
-                                    {orders.slice(0, 5).map((o, idx) => (
+                                    {orders.slice(0, 10).map((o, idx) => (
                                         // order_id байхгүй бол индекс ашиглах, эсвэл хослуулах нь аюулгүй
-                                        <tr key={`recent-${o.order_id || idx}`} className="text-sm hover:bg-slate-50 transition-colors">
+                                        <tr key={`recent-${o.id || idx}`} className="text-sm hover:bg-slate-50 transition-colors">
                                             <td className="py-4 px-2 font-medium">{o.full_name}</td>
+                                            <td className="py-4 px-2 font-medium">
+                                                {new Date(o.date).toLocaleString('mn-MN', {
+                                                    year: 'numeric',
+                                                    month: '2-digit',
+                                                    day: '2-digit'
+                                                })}
+                                            </td>
                                             <td className="py-4 px-2">{o.service}</td>
                                             <td className="py-4 px-2 font-bold">{Number(o.total_price).toLocaleString()} ₮</td>
                                             <td className="py-4 px-2">
@@ -182,6 +195,7 @@ export default function AdminDashboardPage() {
                             <thead className="bg-slate-50 border-b">
                                 <tr className="text-xs font-bold text-slate-500">
                                     <th className="p-4">ID</th>
+                                    <th className="p-4">Нэр</th>
                                     <th className="p-4">Үйлчилгээ</th>
                                     <th className="p-4">Хаяг</th>
                                     <th className="p-4">Төлбөр</th>
@@ -190,19 +204,24 @@ export default function AdminDashboardPage() {
                             </thead>
                             <tbody className="divide-y">
                                 {orders.map((o) => (
-                                    <tr key={o.order_id} className="hover:bg-slate-50 transition-colors">
-                                        <td className="p-4 text-xs">#{o.order_id}</td>
+                                    <tr key={o.id} className="hover:bg-slate-50 transition-colors">
+                                        <td className="p-4 text-xs">#{o.id}</td>
+                                        <td className="p-4 text-xm">{o.full_name}</td>
                                         <td className="p-4">
                                             <p className="font-bold text-sm">{o.service}</p>
-                                            <p className="text-[10px] text-slate-400">{o.date}</p>
+                                            <p className="text-[12px] text-gray-600">{new Date(o.date).toLocaleString('mn-MN', {
+                                                    year: 'numeric',
+                                                    month: '2-digit',
+                                                    day: '2-digit'
+                                                })}</p>
                                         </td>
-                                        <td className="p-4 text-xs text-slate-500 truncate max-w-[200px]">{o.district},{o.khoroo},{o.address}</td>
+                                        <td className="p-4 text-sm text-black truncate max-w-[200px]">{o.district},{o.khoroo},{o.address}</td>
                                         <td className="p-4 font-bold text-blue-600">{Number(o.total_price).toLocaleString()} ₮</td>
                                         <td className="p-4">
                                             <select
                                                 value={o.status}
-                                                onChange={(e) => handleStatusUpdate(o.order_id, e.target.value)}
-                                                className="text-xs border rounded-lg p-2 bg-white shadow-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                                                onChange={(e) => handleStatusUpdate(o.id, e.target.value)}
+                                                className="text-xs border border-black/5 rounded-lg p-2 bg-white shadow-lg focus:ring-2 focus:ring-blue-500 outline-none"
                                             >
                                                 {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
                                             </select>

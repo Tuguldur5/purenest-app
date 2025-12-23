@@ -280,47 +280,6 @@ app.get("/api/admin/users", isAdminMiddleware, async (req, res) => {
     }
 });
 
-// All orders
-app.get('/api/admin/orders', isAdminMiddleware, async (req, res) => {
-    try {
-        // Бүх захиалгыг хамгийн сүүлийнхээс нь эхэлж авна
-        const result = await pool.query(
-            'SELECT * FROM orders ORDER BY created_at DESC' 
-        );
-        res.json({ orders: result.rows });
-    } catch (err) {
-        console.error("Admin Orders Fetch Error:", err);
-        res.status(500).json({ error: "Серверийн алдаа." });
-    }
-});
-app.put('/api/admin/orders/:id/status', isAdminMiddleware, async (req, res) => {
-    const { id } = req.params;
-    const { status } = req.body;
-    const validStatuses = ['Хүлээгдэж байна', 'Баталгаажсан', 'Дууссан', 'Цуцлагдсан'];
-
-    if (!validStatuses.includes(status)) {
-        return res.status(400).json({ error: "Буруу төлөв илгээсэн." });
-    }
-
-    try {
-        // id-г заавал Integer болгож хөрвүүлнэ ($2-т дамжуулахдаа)
-        const result = await pool.query(
-            'UPDATE orders SET status = $1 WHERE order_id = $2 RETURNING *',
-            [status, parseInt(id)] 
-        );
-
-        if (result.rowCount === 0) {
-            return res.status(404).json({ error: "Захиалга олдсонгүй." });
-        }
-
-        res.json({ message: "Төлөв амжилттай шинэчлэгдлээ", order: result.rows[0] });
-    } catch (err) {
-        console.error("Order Status Update Error:", err);
-        // Алдааны мессежийг дэлгэрэнгүй харахын тулд err.message-г ашиглаж болно
-        res.status(500).json({ error: "Серверийн алдаа: " + err.message });
-    }
-});
-
 app.get('/api/admin/pricing', isAdminMiddleware, async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM pricing_settings WHERE id = 1');

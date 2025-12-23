@@ -46,16 +46,23 @@ router.get('/users', isAdminMiddleware, async (req, res) => {
 });
 
 // -------------------- ADMIN: ORDERS ROUTE --------------------
-router.get('/orders', isAdminMiddleware, async (req, res) => {
+// Backend (Node.js/Express)
+router.get('/orders', async (req, res) => {
     try {
-        const result = await pool.query(`
-            SELECT * FROM orders 
-        `);
-
-        res.json({ orders: result.rows });
+        const query = `
+            SELECT 
+                o.*, 
+                u.full_name, 
+                u.email 
+            FROM orders o
+            JOIN users u ON o.user_id = u.id
+            ORDER BY o.created_at DESC
+        `;
+        const { rows } = await pool.query(query);
+        res.json({ orders: rows });
     } catch (err) {
-        console.error("Admin Orders Fetch Error:", err);
-        res.status(500).json({ error: "Серверийн алдаа." });
+        console.error(err);
+        res.status(500).json({ error: "Server error" });
     }
 });
 
@@ -64,21 +71,17 @@ router.put('/orders/:id/status', isAdminMiddleware, async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
-    const validStatuses = [
-        'Хүлээгдэж байна',
-        'Баталгаажсан',
-        'Дууссан',
-        'Цуцлагдсан'
-    ];
+    const validStatuses = ['Хүлээгдэж байна', 'Баталгаажсан', 'Дууссан', 'Цуцлагдсан'];
 
     if (!validStatuses.includes(status)) {
         return res.status(400).json({ error: "Буруу төлөв илгээсэн." });
     }
 
     try {
+        // ЭНД АНХААР: id-г тоо руу хөрвүүлж (parseInt) дамжуулж байна
         const result = await pool.query(
-            'UPDATE orders SET status = $1 WHERE order_id = $2 RETURNING *',
-            [status, id]
+            'UPDATE orders SET status = $1 WHERE id = $2 RETURNING *',
+            [status, parseInt(id)] 
         );
 
         if (result.rowCount === 0) {
@@ -87,10 +90,12 @@ router.put('/orders/:id/status', isAdminMiddleware, async (req, res) => {
 
         res.json({ message: "Төлөв амжилттай шинэчлэгдлээ", order: result.rows[0] });
     } catch (err) {
-        console.error("Order Status Update Error:", err);
-        res.status(500).json({ error: "Серверийн алдаа." });
+        // Алдааг илүү тодорхой харахын тулд err.message-г нэмлээ
+        console.error("Order Status Update Error Details:", err.message);
+        res.status(500).json({ error: "Серверийн алдаа: " + err.message });
     }
 });
+
 router.get('/api/admin/pricing', isAdminMiddleware, async (req, res) => {
     try {
         const result = await pool.query(`

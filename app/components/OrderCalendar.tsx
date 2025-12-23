@@ -10,7 +10,7 @@ interface CalendarProps {
 }
 
 export default function OrderCalendar({ orders }: CalendarProps) {
-    
+
     // Захиалга дээр дарахад ажиллах функц
     const handleEventClick = (info: any) => {
         const props = info.event.extendedProps;
@@ -20,13 +20,22 @@ export default function OrderCalendar({ orders }: CalendarProps) {
             title: `<div style="color: ${color}; font-size: 1.5rem; font-weight: bold;">${info.event.title}</div>`,
             html: `
                 <div style="text-align: left; padding: 10px; font-family: sans-serif; line-height: 1.8;">
-                    <div style="margin-bottom: 8px;"><b>👤 Захиалагч:</b> ${props.full_name}</div>
-                    <div style="margin-bottom: 8px;"><b>📞 Утас:</b> ${props.phone_number || 'Мэдээлэлгүй'}</div>
-                    <div style="margin-bottom: 8px;"><b>📏 Хэмжээ:</b> ${props.size} м²</div>
-                    <div style="margin-bottom: 8px;"><b>🔄 Давтамж:</b> ${props.frequency}</div>
-                    <div style="margin-bottom: 8px;"><b>📍 Хаяг:</b> ${props.district,props.khoroo,props.address}</div>
+                    <div style="margin-bottom: 8px;"><b>Захиалагч:</b> ${props.full_name}</div>
+                    <div style="margin-bottom: 8px;"><b>Утас:</b> ${props.phone_number || 'Мэдээлэлгүй'}</div>
+                    <div style="margin-bottom: 8px;"><b>И-мэйл:</b> ${props.email || 'Мэдээлэлгүй'}</div>
+                    <div style="margin-bottom: 8px;"><b>Давтамж:</b> ${props.frequency}</div>
+            
+                    ${props.service === 'СӨХ цэвэрлэгээ' ? `
+                        <div style="margin-bottom: 8px;"><b>Орцны тоо:</b> ${props.apartments}</div>
+                        <div style="margin-bottom: 8px;"><b>Давхар:</b> ${props.floors}</div>
+                        <div style="margin-bottom: 8px;"><b>Лифт:</b> ${props.lifts}</div>
+                        <div style="margin-bottom: 8px;"><b>Өрөөний тоо:</b> ${props.rooms}</div>
+                    ` : `
+                        <div style="margin-bottom: 8px;"><b>Хэмжээ:</b> ${props.public_area_size} м²</div>
+                    `}
+                    <div style="margin-bottom: 8px;"><b>Хаяг:</b> ${props.district}, ${props.khoroo}, ${props.address}</div>
                     <div style="margin-top: 15px; padding-top: 10px; border-top: 1px dashed #ddd; font-size: 1.2rem; color: #e11d48;">
-                        <b>💰 Нийт үнэ:</b> ${Number(props.total_price).toLocaleString()} ₮
+                        <b>Нийт үнэ:</b> ${Number(props.total_price).toLocaleString()} ₮
                     </div>
                 </div>
             `,
