@@ -37,7 +37,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 {/* Logo Section */}
                 <Link href="/admin" className="flex items-center space-x-3 mb-10 px-2 group">
                     <div className="relative">
-                        <img src="/nest.jpg" alt="Logo" className="w-12 h-12 rounded-xl object-cover shadow-md group-hover:scale-105 transition-transform" />
+                        <img src="/nest1.png" alt="Logo" className="w-12 h-12 rounded-full object-cover shadow-md group-hover:scale-105 transition-transform" />
                         <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></div>
                     </div>
                     <div>

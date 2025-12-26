@@ -1,5 +1,6 @@
 'use client';
 
+import Partner from '../components/partner';
 import ServiceCard from '../components/ServiceCard';
 import Link from 'next/link';
 
@@ -29,7 +30,7 @@ export default function Home() {
   ];
 
   return (
-    <main className="bg-gray-50 text-black relative font-sans">
+    <main className="bg-white text-black relative font-sans">
       {/* Hero Section */}
       <section className="relative w-full min-h-screen">
         <img
@@ -39,26 +40,26 @@ export default function Home() {
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/30 to-black/10"></div>
         <div className="relative z-10 flex flex-col justify-center items-center h-full text-center py-50 px-4">
-          <h1 className="text-4xl md:text-6xl font-extrabold text-white drop-shadow-lg mb-4">
+          <h1 className="text-3xl md:text-5xl font-extrabold text-white drop-shadow-lg mb-4">
             Тавтай морилно уу — <span className="text-amber-300">Purenest</span>
           </h1>
           <p className="text-lg md:text-2xl text-white drop-shadow-md mb-6 max-w-2xl">
             Бидний найдвартай цэвэрлэгээ үйлчилгээ таны <strong>Оффис</strong>, <strong>СӨХ</strong> болон <strong>Олон нийтийн талбай</strong>-г цэвэр, эрүүл болгоно.
           </p>
           <Link href="/booking" className="mt-6 max-w-150 px-10 py-4 rounded-[14px] bg-emerald-400 hover:bg-emerald-500 text-white text-lg font-semibold transition-all duration-300">
-             Захиалга өгөх
-            </Link>
+            Захиалга өгөх
+          </Link>
         </div>
       </section>
 
       {/* Services Section */}
-      <section className="container mx-auto px-6 py-20  mt-10 mb-10 relative z-20">
+      <section className="container mx-auto px-6 py-20 mt-10 mb-10 relative z-20">
         <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-900">
           Бидний үйлчилгээ
         </h2>
         <div className="grid md:grid-cols-3 gap-8 ">
           {services.map((service, idx) => (
-            <ServiceCard 
+            <ServiceCard
               key={idx}
               title={service.title}
               desc={service.desc}
@@ -70,6 +71,9 @@ export default function Home() {
         </div>
       </section>
 
+      <div className='mt-4'>
+        <Partner />
+      </div>
       {/* CTA Section */}
       <section className="bg-gradient-to-r from-amber-200 to-amber-300 py-20">
         <div className="container mx-auto text-center px-4">

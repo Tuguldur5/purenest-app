@@ -231,7 +231,7 @@ export default function ServiceSidebar() {
           <button onClick={addToCart} className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded">
             Сагсанд нэмэх — ₮ {totalForLine.toLocaleString()}
           </button>
-          <button onClick={() => { setArea(50); setFloors(1); setRooms(1); setExtras({ deepClean:false, fridge:false, windows:false }); setFrequency('one-time'); setSessions(1); setNotes('') }} className="px-4 py-2 border rounded">
+          <button onClick={() => { setArea(50); setFloors(1); setRooms(1); setExtras({ deepClean: false, fridge: false, windows: false }); setFrequency('one-time'); setSessions(1); setNotes('') }} className="px-4 py-2 border rounded">
             Reset
           </button>
         </div>

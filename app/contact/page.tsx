@@ -91,7 +91,7 @@ export default function ContactPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
 
                     {/* 1. RIGHT: Quick Contact Info (Зүүн талын хэсэг - БОДИТ УТГУУД) */}
-                    <div className="order-2 md:order-1 max-h-130 flex flex-col justify-between p-6 bg-[#102B5A] rounded-xl shadow-inner text-white">
+                    <div className="order-2 md:order-1 max-h-130 flex flex-col justify-between p-6 bg-[#102B5A] rounded-xl shadow-lg shadow-inner text-white">
                         <div className="space-y-8">
                             <h3 className="text-3xl font-bold border-b border-amber-400 pb-3">Мэдээлэл</h3>
 
@@ -193,7 +193,7 @@ export default function ContactPage() {
 
                 {/* 3. BOTTOM: Google Map (Газрын зураг - БОДИТ УТГУУД) */}
                 <div className="mt-10 p-6 bg-white rounded-xl shadow-lg border border-gray-100">
-                    <h3 className="text-2xl font-bold text-center text-gray-800 mb-4">Манай Байршил (Газрын зураг)</h3>
+                    <h3 className="text-3xl font-bold text-center text-gray-800 mb-4">Манай Байршил</h3>
                     <div className="w-full" style={{ height: '400px' }}>
                         {/* MAP_LAT/MAP_LNG-ийг бодит утгаар солив */}
                         <iframe

@@ -1,6 +1,7 @@
+'use client'
 import Link from 'next/link'
-
-export default function PublicSpaceService() {
+import Partner from "../../components/partner"
+export default function SukhService() {
     const title = 'СӨХ'
     return (
         <section className="container mx-auto px-4 py-10 text-black">
@@ -87,63 +88,72 @@ export default function PublicSpaceService() {
                     </a>
                 </div>
 
-                <div className="mt-10 w-full p-6 bg-red-50 border border-red-200 rounded-lg shadow-md">
-                    {/* Гарчиг */}
-                    <h3 className="text-2xl font-bold text-gray-800 text-center mb-6">
-                        ❌ Үйлчилгээнд Хамаарахгүй Зүйлс
-                    </h3>
-
-                    {/* 6 баганатай Grid загвар */}
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-
-                        {/* Карт 1: 25кг-аас дээш жинтэй тавилга зөөх */}
-                        <div className="flex flex-col items-center justify-center p-4 bg-white border border-gray-200 rounded-lg shadow-lg text-gray-700 
-                        transition duration-300 ease-in-out hover:bg-red-50 hover:shadow-xl hover:border-red-400 cursor-default">
-                            <svg className="w-8 h-8 text-red-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-                            <p className="text-xs font-semibold text-center leading-tight">25кг-аас дээш жинтэй тавилга зөөх</p>
-                        </div>
-
-                        {/* Карт 2: Гадна өндөр цонх цэвэрлэгээ */}
-                        <div className="flex flex-col items-center justify-center p-4 bg-white border border-gray-200 rounded-lg shadow-lg text-gray-700
-                        transition duration-300 ease-in-out hover:bg-red-50 hover:shadow-xl hover:border-red-400 cursor-default">
-                            {/* Icon: Өндөрлөг/Аюул (Exclamation mark in Triangle) */}
-                            <svg className="w-8 h-8 text-red-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.368 18c-.77 1.333.192 3 1.732 3z"></path></svg>
-                            <p className="text-xs font-semibold text-center leading-tight">Гадна өндөр цонх цэвэрлэгээ</p>
-                        </div>
-
-                        {/* Карт 3: Био-аюултай бохирдол */}
-                        <div className="flex flex-col items-center justify-center p-4 bg-white border border-gray-200 rounded-lg shadow-lg text-gray-700
-                        transition duration-300 ease-in-out hover:bg-red-50 hover:shadow-xl hover:border-red-400 cursor-default">
-                            {/* Icon: Аюулын тэмдэг (Biohazard/Radiation symbol) */}
-                            <svg className="w-8 h-8 text-red-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            <p className="text-xs font-semibold text-center leading-tight">Био-аюултай бохирдол</p>
-                        </div>
-
-                        {/* Карт 4: Барилгын дараах цэвэрлэгээ */}
-                        <div className="flex flex-col items-center justify-center p-4 bg-white border border-gray-200 rounded-lg shadow-lg text-gray-700
-                        transition duration-300 ease-in-out hover:bg-red-50 hover:shadow-xl hover:border-red-400 cursor-default">
-                            {/* Icon: Хүрз (Shovel/Construction) */}
-                            <svg className="w-8 h-8 text-red-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            <p className="text-xs font-semibold text-center leading-tight">Барилгын дараах цэвэрлэгээ</p>
-                        </div>
-
-                        {/* Карт 5: Онцгой толбо арилгах тусгай бодис */}
-                        <div className="flex flex-col items-center justify-center p-4 bg-white border border-gray-200 rounded-lg shadow-lg text-gray-700
-                        transition duration-300 ease-in-out hover:bg-red-50 hover:shadow-xl hover:border-red-400 cursor-default">
-                            {/* Icon: Титэм (Special/Crown) эсвэл химийн шингэн */}
-                            <svg className="w-8 h-8 text-red-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 21h4V3h-4v18zm8-18h4v18h-4V3zM2 3h4v18H2V3z"></path></svg>
-                            <p className="text-xs font-semibold text-center leading-tight">Онцгой толбо арилгах тусгай бодис</p>
-                        </div>
-
-                        {/* Карт 6: Хэт их хогтой талбай */}
-                        <div className="flex flex-col items-center justify-center p-4 bg-white border border-gray-200 rounded-lg shadow-lg text-gray-700
-                        transition duration-300 ease-in-out hover:bg-red-50 hover:shadow-xl hover:border-red-400 cursor-default">
-                            {/* Icon: Хогийн сав (Trash Bin) */}
-                            <svg className="w-8 h-8 text-red-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                            <p className="text-xs font-semibold text-center leading-tight">Хэт их хогтой талбай</p>
-                        </div>
-
+                <div className="mt-12 w-full max-w-8xl mx-auto px-4 border border-black/5 p-8 rounded-2xl shadow-xl shadow-inner">
+                    {/* Гарчиг хэсэг */}
+                    <div className="text-center mb-8">
+                        <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+                             Үйлчилгээнд хамаарахгүй зүйлс
+                        </h3>
+                        <p className="text-gray-500 max-w-2xl mx-auto text-sm md:text-base">
+                            Аюулгүй байдал болон техникийн зааврын дагуу манай хамт олон дараах ажлуудыг гүйцэтгэх боломжгүйг анхаарна уу.
+                        </p>
                     </div>
+
+                    {/* Картнуудын Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
+                        {[
+                            {
+                                title: 'Хүнд ачаа зөөвөрлөлт',
+                                desc: '25кг-аас дээш жинтэй тавилга, тоног төхөөрөмжийг зөөж байршлыг өөрчлөхгүй.',
+                                icon: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10'
+                            },
+                            {
+                                title: 'Аюултай өндрийн цэвэрлэгээ',
+                                desc: 'Барилгын гадна талын болон хүрч үл болох өндөр цонх, ханын цэвэрлэгээ хийхгүй.',
+                                icon: 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.368 18c-.77 1.333.192 3 1.732 3z'
+                            },
+                            {
+                                title: 'Биологийн болон химийн бохирдол',
+                                desc: 'Хортой, био-аюултай, эрүүл мэндэд аюул учруулах бохирдол, хаягдлыг цэвэрлэхгүй.',
+                                icon: 'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'
+                            },
+                            {
+                                title: 'Барилгын дараах хог хаягдал',
+                                desc: 'Хүнд даацын барилгын хог, хатуу хаягдлыг зайлуулах үйлчилгээнд хамаарахгүй.',
+                                icon: 'M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16'
+                            },
+                            {
+                                title: 'Тусгай химийн бодис',
+                                desc: 'Хэвийн цэвэрлэгээнд хэрэглэдэггүй, тусгай химийн бодис шаардсан толбо арилгах.',
+                                icon: 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z'
+                            },
+                            {
+                                title: 'Хэт их хог хаягдал',
+                                desc: 'Зориулалтын хогийн саванд багтахгүй хэмжээний хэт их хуримтлагдсан хог зөөхгүй.',
+                                icon: 'M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16'
+                            }
+                        ].map((item, i) => (
+                            <div key={i} className="group flex bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-xl hover:shadow-red-500/10 transition-all duration-300 overflow-hidden">
+                                <div className="w-2 bg-red-500 group-hover:w-3 transition-all duration-300"></div>
+                                <div className="p-6">
+                                    <div className="flex items-center mb-3">
+                                        <div className="p-2 bg-red-50 rounded-lg mr-4 text-red-600">
+                                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={item.icon} />
+                                            </svg>
+                                        </div>
+                                        <h4 className="font-bold text-gray-800 text-lg leading-tight">{item.title}</h4>
+                                    </div>
+                                    <p className="text-gray-600 text-sm leading-relaxed">
+                                        {item.desc}
+                                    </p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+                <div className='mt-12'>
+                    <Partner/>
                 </div>
             </div>
         </section>

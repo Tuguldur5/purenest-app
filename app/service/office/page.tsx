@@ -1,4 +1,6 @@
+'use client'
 import { RiH4 } from "react-icons/ri"
+import Partner from "../../components/partner"
 
 export default function ServiceCard() {
     const title = 'Оффис цэвэрлэгээ'
@@ -83,44 +85,78 @@ export default function ServiceCard() {
                 <div className="mt-8 text-center">
                     <a
                         href="/booking"
-                        className="inline-block px-6 py-3 pr-15 pl-15 rounded-lg border border-white/5 shadow-md bg-[#102B5A] text-white hover:text-amber-400 transition-colors duration-200"
+                        className="inline-block px-6 py-3 pr-15 pl-15 rounded-lg border border-white/5 hover:shadow-md bg-[#102B5A] text-white hover:text-amber-400 transition-colors duration-200"
                     >
                         Захиалах
                     </a>
                 </div>
+                <div className="mt-12 w-full max-w-8xl mx-auto px-4 border border-black/5 p-8 rounded-2xl shadow-xl shadow-inner">
+                    {/* Гарчиг хэсэг */}
+                    <div className="text-center mb-8">
+                        <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+                             Үйлчилгээнд хамаарахгүй зүйлс
+                        </h3>
+                        <p className="text-gray-500 max-w-2xl mx-auto text-sm md:text-base">
+                            Аюулгүй байдал болон техникийн зааврын дагуу манай хамт олон дараах ажлуудыг гүйцэтгэх боломжгүйг анхаарна уу.
+                        </p>
+                    </div>
 
-                <div className="flex flex-col mt-10 w-full bg-red-400 border border-white/10 shadow-lg p-6 rounded-xl text-white">
-                    <h3 className="text-2xl font-semibold text-center mb-6">
-                        Хамаарахгүй үйлчилгээ
-                    </h3>
-                    <p className="text-sm text-white/90 mb-6 text-center">
-                        Аюулгүй байдал болон техникийн зааврын дагуу бид дараах ажлыг хийх боломжгүй:
-                    </p>
-
-                    <ul className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
-                        <li className="border border-white/20 rounded-lg p-4 bg-white/40 hover:bg-white/20 transition w-full text-center">
-                            25кг-аас дээш жинтэй тавилга өргөх, зөөх
-                        </li>
-                        <li className="border border-white/20 rounded-lg p-4 bg-white/30 hover:bg-white/20 transition w-full text-center">
-                            Хүрэх боломжгүй өндөр талбай, гадна цонх угаах
-                        </li>
-                        <li className="border border-white/20 rounded-lg p-4 bg-white/30 hover:bg-white/20 transition w-full text-center">
-                            Био-аюултай бохирдол (нүдэнд харагдах аюултай материал)
-                        </li>
-                        <li className="border border-white/20 rounded-lg p-4 bg-white/30 hover:bg-white/20 transition w-full text-center">
-                            Барилгын дараах гүн цэвэрлэгээ
-                        </li>
-                        <li className="border border-white/20 rounded-lg p-4 bg-white/30 hover:bg-white/20 transition w-full text-center">
-                            Гүн тогтсон, химийн тусгай бүтээгдэхүүн шаардсан толбо
-                        </li>
-                        <li className="border border-white/20 rounded-lg p-4 bg-white/30 hover:bg-white/20 transition w-full text-center">
-                            Илүү их хог хуримтлагдсан, онцгой нөхцөлтэй аж ахуйн нэгж
-                        </li>
-                    </ul>
+                    {/* Картнуудын Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
+                        {[
+                            {
+                                title: 'Хүнд ачаа зөөвөрлөлт',
+                                desc: '25кг-аас дээш жинтэй тавилга, тоног төхөөрөмжийг зөөж байршлыг өөрчлөхгүй.',
+                                icon: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10'
+                            },
+                            {
+                                title: 'Аюултай өндрийн цэвэрлэгээ',
+                                desc: 'Барилгын гадна талын болон хүрч үл болох өндөр цонх, ханын цэвэрлэгээ хийхгүй.',
+                                icon: 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.368 18c-.77 1.333.192 3 1.732 3z'
+                            },
+                            {
+                                title: 'Биологийн болон химийн бохирдол',
+                                desc: 'Хортой, био-аюултай, эрүүл мэндэд аюул учруулах бохирдол, хаягдлыг цэвэрлэхгүй.',
+                                icon: 'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'
+                            },
+                            {
+                                title: 'Барилгын дараах хог хаягдал',
+                                desc: 'Хүнд даацын барилгын хог, хатуу хаягдлыг зайлуулах үйлчилгээнд хамаарахгүй.',
+                                icon: 'M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16'
+                            },
+                            {
+                                title: 'Тусгай химийн бодис',
+                                desc: 'Хэвийн цэвэрлэгээнд хэрэглэдэггүй, тусгай химийн бодис шаардсан толбо арилгах.',
+                                icon: 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z'
+                            },
+                            {
+                                title: 'Хэт их хог хаягдал',
+                                desc: 'Зориулалтын хогийн саванд багтахгүй хэмжээний хэт их хуримтлагдсан хог зөөхгүй.',
+                                icon: 'M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16'
+                            }
+                        ].map((item, i) => (
+                            <div key={i} className="group flex bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-xl hover:shadow-red-500/10 transition-all duration-300 overflow-hidden">
+                                <div className="w-2 bg-red-500 group-hover:w-3 transition-all duration-300"></div>
+                                <div className="p-6">
+                                    <div className="flex items-center mb-3">
+                                        <div className="p-2 bg-red-50 rounded-lg mr-4 text-red-600">
+                                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={item.icon} />
+                                            </svg>
+                                        </div>
+                                        <h4 className="font-bold text-gray-800 text-lg leading-tight">{item.title}</h4>
+                                    </div>
+                                    <p className="text-gray-600 text-sm leading-relaxed">
+                                        {item.desc}
+                                    </p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
-
-
-
+                <div   className='mt-12'>
+                    <Partner/>
+                </div>
             </div>
 
 

@@ -59,7 +59,7 @@ export default function Login() {
                 // Зарим үед Header component-ийг шинэчлэхийн тулд refresh хийх шаардлагатай болдог
                 setTimeout(() => {
                     router.refresh();
-                }, 100);
+                }, 1000);
             }
 
         } catch (err) {

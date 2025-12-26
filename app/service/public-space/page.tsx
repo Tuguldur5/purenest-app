@@ -1,4 +1,6 @@
+';use client'
 import Link from 'next/link'
+import Partner from "../../components/partner"
 
 export default function PublicSpaceService() {
     const title = 'Олон нийтийн талбай'
@@ -87,86 +89,73 @@ export default function PublicSpaceService() {
                         Захиалах
                     </a>
                 </div>
-                <div className="mt-10 w-full border border-red-200 rounded-lg shadow-md p-6 bg-red-50">
-                    {/* Гарчиг */}
-                    <h3 className="text-3xl font-bold text-red-700 text-center mb-10 tracking-wide">
-                        🛑 Хамаарахгүй үйлчилгээнүүд
-                    </h3>
+               <div className="mt-12 w-full max-w-8xl mx-auto px-4 border border-black/5 p-8 rounded-2xl shadow-xl shadow-inner">
+                    {/* Гарчиг хэсэг */}
+                    <div className="text-center mb-8">
+                        <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+                             Үйлчилгээнд хамаарахгүй зүйлс
+                        </h3>
+                        <p className="text-gray-500 max-w-2xl mx-auto text-sm md:text-base">
+                            Аюулгүй байдал болон техникийн зааврын дагуу манай хамт олон дараах ажлуудыг гүйцэтгэх боломжгүйг анхаарна уу.
+                        </p>
+                    </div>
 
-                    {/* 6 баганатай Grid загвар (Урт, хөндлөн карт) */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-
+                    {/* Картнуудын Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
                         {[
                             {
                                 title: 'Хүнд ачаа зөөвөрлөлт',
-                                description: '25кг-аас дээш жинтэй тавилга, тоног төхөөрөмжийг зөөж, байршлыг нь өөрчлөхгүй.',
-                                icon: (
-                                    <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14.752 11.168l-3.197-3.197m0 0l-3.197 3.197m3.197-3.197v4.524m7.341 4.525a1 1 0 01-1.414 0l-4.243-4.243a1 1 0 010-1.414l4.243-4.243a1 1 0 011.414 0l4.243 4.243a1 1 0 010 1.414l-4.243 4.243z"></path></svg>
-                                )
+                                desc: '25кг-аас дээш жинтэй тавилга, тоног төхөөрөмжийг зөөж байршлыг өөрчлөхгүй.',
+                                icon: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10'
                             },
                             {
                                 title: 'Аюултай өндрийн цэвэрлэгээ',
-                                description: 'Барилгын гадна талын болон хүрч үл болох өндөр цонх, ханын цэвэрлэгээг хийхгүй.',
-                                icon: (
-                                    <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.368 18c-.77 1.333.192 3 1.732 3z"></path></svg>
-                                )
+                                desc: 'Барилгын гадна талын болон хүрч үл болох өндөр цонх, ханын цэвэрлэгээ хийхгүй.',
+                                icon: 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.368 18c-.77 1.333.192 3 1.732 3z'
                             },
                             {
                                 title: 'Биологийн болон химийн бохирдол',
-                                description: 'Хортой, био-аюултай, эрүүл мэндэд аюул учруулах бохирдол, хаягдлыг цэвэрлэхгүй.',
-                                icon: (
-                                    <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                )
+                                desc: 'Хортой, био-аюултай, эрүүл мэндэд аюул учруулах бохирдол, хаягдлыг цэвэрлэхгүй.',
+                                icon: 'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'
                             },
                             {
                                 title: 'Барилгын дараах хог хаягдал',
-                                description: 'Хүнд даацын, барилгын ажлын дараах тоос, шороо, хатуу хог хаягдлыг зайлуулах үйлчилгээнд хамаарахгүй.',
-                                icon: (
-                                    <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-                                )
+                                desc: 'Хүнд даацын барилгын хог, хатуу хаягдлыг зайлуулах үйлчилгээнд хамаарахгүй.',
+                                icon: 'M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16'
                             },
                             {
                                 title: 'Тусгай химийн бодис',
-                                description: 'Хэвийн цэвэрлэгээнд хэрэглэдэггүй, онцгой толбо арилгах зориулалттай тусгай химийн бодис шаардах.',
-                                icon: (
-                                    <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                                )
+                                desc: 'Хэвийн цэвэрлэгээнд хэрэглэдэггүй, тусгай химийн бодис шаардсан толбо арилгах.',
+                                icon: 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z'
                             },
                             {
                                 title: 'Хэт их хог хаягдал',
-                                description: 'Хэвийн хэмжээнээс хэтэрсэн, зориулалтын хогийн саванд багтахгүй хэмжээний хог хаягдлыг зөөхгүй.',
-                                icon: (
-                                    <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                )
+                                desc: 'Зориулалтын хогийн саванд багтахгүй хэмжээний хэт их хуримтлагдсан хог зөөхгүй.',
+                                icon: 'M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16'
                             }
-                        ].map((item, index) => (
-                            <div
-                                key={index}
-                                className="flex rounded-xl overflow-hidden shadow-xl transition duration-300 ease-in-out cursor-default 
-                           hover:shadow-red-500/30 hover:scale-[1.02] bg-white border border-gray-200"
-                            >
-                                {/* Зүүн талын Хориглох тэмдэг */}
-                                <div className="flex-shrink-0 w-20 flex items-center justify-center bg-red-600/90">
-                                    {/* Хориглох тэмдэгний SVG */}
-                                    <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
-                                </div>
-
-                                {/* Баруун талын Мэдээлэл */}
-                                <div className="p-4 flex flex-col justify-center">
-                                    <h4 className="text-lg font-bold text-gray-800 mb-1 flex items-center">
-                                        <span className="mr-2 text-red-600">{item.icon}</span>
-                                        {item.title}
-                                    </h4>
-                                    <p className="text-sm text-gray-600 leading-snug">
-                                        {item.description}
+                        ].map((item, i) => (
+                            <div key={i} className="group flex bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-xl hover:shadow-red-500/10 transition-all duration-300 overflow-hidden">
+                                <div className="w-2 bg-red-500 group-hover:w-3 transition-all duration-300"></div>
+                                <div className="p-6">
+                                    <div className="flex items-center mb-3">
+                                        <div className="p-2 bg-red-50 rounded-lg mr-4 text-red-600">
+                                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={item.icon} />
+                                            </svg>
+                                        </div>
+                                        <h4 className="font-bold text-gray-800 text-lg leading-tight">{item.title}</h4>
+                                    </div>
+                                    <p className="text-gray-600 text-sm leading-relaxed">
+                                        {item.desc}
                                     </p>
                                 </div>
                             </div>
                         ))}
                     </div>
                 </div>
-
-
+                <div className='mt-12'>
+                    <Partner/>
+                </div>
             </div>
         </section>
     )

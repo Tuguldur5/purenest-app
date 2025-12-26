@@ -221,9 +221,38 @@ export default function Booking() {
     }, []);
 
     return (
-        <section className="flex justify-center mt-10 mb-10 text-black">
-            <div className="w-full max-w-3xl p-10 bg-gray-50 border border-black/5 shadow-md rounded-xl space-y-6">
-                <h1 className="text-2xl font-semibold text-center mb-6">Захиалах</h1>
+        
+       <section className="flex flex-col items-center mt-10 mb-10 px-4 text-black">
+        
+        {/* 1. ГАРЧИГ ХЭСЭГ - Одоо хамгийн дээр нь Header хэлбэрээр байрлана */}
+        <div className="w-full max-w-7xl text-center md:text-left mb-10">
+            <h1 className="text-4xl text-center font-bold text-gray-800">
+                Захиалга өгөх 
+            </h1>
+        </div>
+
+        {/* 2. ҮНДСЭН КОНТЕНТ - Форм болон Үнийн хэсгийг хажуу хажууд нь байрлуулна */}
+        <div className="flex flex-col md:flex-row justify-center items-start gap-10 w-full max-w-7xl">
+             <div className="w-96 ml-8 sticky bg-gray-100 top-10 h-fit p-6 border border-black/5 shadow-md rounded-xl bg-white">
+                <h2 className="text-xl font-semibold mb-4">Таны захиалга</h2>
+                <p className="text-gray-700 mb-2">
+                    <strong>Үйлчилгээ:</strong> {form.service}
+                </p>
+                <p className="text-gray-700 mb-2">
+                    <strong>Давтамж:</strong> {form.frequency}
+                </p>
+                <p className="text-gray-700 mb-2">
+                    <strong>Огноо:</strong> {form.date}
+                </p>
+                <div className="border-t pt-4 mt-4">
+                    <p className="text-lg font-bold">Нийт үнэ:</p>
+                    <p className="text-3xl font-bold text-emerald-600">
+                        {totalPrice.toLocaleString()} ₮
+                    </p>
+                </div>
+            </div>
+            <div className="w-full max-w-3xl p-10 bg-white border border-black/5 shadow-md rounded-xl space-y-6">
+               
 
                 <form className="space-y-4" onSubmit={handleSubmit}>
                     <div>
@@ -418,23 +447,7 @@ export default function Booking() {
             </div>
 
             {/* Price Summary (Үнийн хураангуй) */}
-            <div className="w-96 ml-8 sticky bg-gray-100 top-10 h-fit p-6 border border-black/5 shadow-md rounded-xl bg-white">
-                <h2 className="text-xl font-semibold mb-4">Таны захиалга</h2>
-                <p className="text-gray-700 mb-2">
-                    <strong>Үйлчилгээ:</strong> {form.service}
-                </p>
-                <p className="text-gray-700 mb-2">
-                    <strong>Давтамж:</strong> {form.frequency}
-                </p>
-                <p className="text-gray-700 mb-2">
-                    <strong>Огноо:</strong> {form.date}
-                </p>
-                <div className="border-t pt-4 mt-4">
-                    <p className="text-lg font-bold">Нийт үнэ:</p>
-                    <p className="text-3xl font-bold text-emerald-600">
-                        {totalPrice.toLocaleString()} ₮
-                    </p>
-                </div>
+           
             </div>
         </section>
     )

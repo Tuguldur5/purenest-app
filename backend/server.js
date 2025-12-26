@@ -21,7 +21,7 @@ app.use(cors({
 const JWT_SECRET = process.env.JWT_SECRET || 'YOUR_HIGHLY_SECURE_SECRET_KEY_123';
 
 
-async function fetchUserDetails(user_id) {
+async function UserDetails(user_id) {
     try {
         const userQuery = await pool.query(
             `SELECT full_name, phone FROM users WHERE id = $1`,
@@ -155,6 +155,36 @@ app.get('/api/booking/user-info', authMiddleware, async (req, res) => {
     }
 });
 
+app.put('/api/users/update', authMiddleware, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { full_name, phone, email } = req.body;
+
+        // 1. И-мэйл аль хэдийн өөр хэрэглэгч дээр бүртгэлтэй байгаа эсэхийг шалгах
+        const emailCheck = await pool.query(
+            'SELECT id FROM users WHERE email = $1 AND id != $2',
+            [email, userId]
+        );
+
+        if (emailCheck.rows.length > 0) {
+            return res.status(400).json({ error: "Энэ и-мэйл хаяг аль хэдийн бүртгэгдсэн байна." });
+        }
+
+        // 2. Мэдээллийг шинэчлэх
+        const result = await pool.query(
+            `UPDATE users 
+             SET full_name = $1, phone = $2, email = $3 
+             WHERE id = $4 
+             RETURNING id, full_name, email, phone, address`,
+            [full_name, phone, email, userId]
+        );
+
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Серверийн алдаа гарлаа." });
+    }
+});
 
 app.post('/api/booking', authMiddleware, async (req, res) => {
     try {
@@ -401,8 +431,6 @@ app.post('/api/contact', async (req, res) => {
         return res.status(500).json({ error: 'Серверийн алдаа. Дахин оролдоно уу.' });
     }
 });
-
-
 
 // 1. OTP Илгээх
 app.post('/api/auth/forgot-password', async (req, res) => {
