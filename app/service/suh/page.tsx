@@ -152,9 +152,7 @@ export default function SukhService() {
                         ))}
                     </div>
                 </div>
-                <div className='mt-12'>
-                    <Partner/>
-                </div>
+                
             </div>
         </section>
     )

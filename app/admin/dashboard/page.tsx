@@ -6,6 +6,7 @@ import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
     LineChart, Line, PieChart, Pie, Cell
 } from 'recharts';
+import Loading from '@/app/loading';
 
 const API_BASE_URL = "http://localhost:4000/api/admin";
 
@@ -26,11 +27,11 @@ interface Order {
     created_at: string;
 }
 interface User {
-    full_name: string, 
+    full_name: string,
 }
 
-const STATUS_OPTIONS = ['Хүлээгдэж байна', 'Баталгаажсан', 'Дууссан', 'Цуцлагдсан'];
-const COLORS = ['#FBBF24', '#3B82F6', '#10B981', '#EF4444']; // Төлөвт тохирох өнгөнүүд
+const STATUS_OPTIONS = ['Оффис цэвэрлэгээ', 'СӨХ цэвэрлэгээ', 'Олон нийтийн талбай'];
+const COLORS = ['#102B5A', '#FFBB28', '#00C49F']; // Төлөвт тохирох өнгөнүүд
 
 export default function AdminDashboardPage() {
     const router = useRouter();
@@ -91,17 +92,24 @@ export default function AdminDashboardPage() {
         }
     };
     const statsData = useMemo(() => {
-        const totalRevenue = orders.reduce((sum, o) => sum + (o.status === "Дууссан" ? Number(o.total_price) : 0), 0);
-        const statusCounts = STATUS_OPTIONS.map(status => ({
-            name: status,
-            value: orders.filter(o => o.status === status).length
+        // 1. Нийт орлого (Дууссан захиалгууд дээр)
+        const totalRevenue = orders.reduce((sum, o) =>
+            sum + (o.status === "Дууссан" ? Number(o.total_price) : 0), 0
+        );
+
+        // 2. Үйлчилгээний төрлөөр тоолох (PieChart-д зориулсан)
+        const SERVICE_TYPES = ["Оффис цэвэрлэгээ", "СӨХ цэвэрлэгээ", "Олон нийтийн талбай"];
+
+        const serviceCounts = SERVICE_TYPES.map(serviceName => ({
+            name: serviceName.replace(" цэвэрлэгээ", ""), // График дээр богино харагдуулахын тулд
+            value: orders.filter(o => o.service === serviceName).length
         }));
 
-        // Сүүлийн 7 хоногийн орлого (Жишээлбэл)
+        // 3. Сүүлийн 7 хоногийн орлогын дата (LineChart-д зориулсан)
         const revenueByDate = orders
             .filter(o => o.status === "Дууссан")
             .reduce((acc: any, o) => {
-                const day = new Date(o.created_at).toLocaleDateString();
+                const day = new Date(o.created_at).toLocaleDateString('mn-MN', { month: 'numeric', day: 'numeric' });
                 acc[day] = (acc[day] || 0) + Number(o.total_price);
                 return acc;
             }, {});
@@ -109,12 +117,12 @@ export default function AdminDashboardPage() {
         const chartData = Object.keys(revenueByDate).map(date => ({
             date,
             amount: revenueByDate[date]
-        })).slice(-7);
+        })).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()).slice(-7);
 
-        return { totalRevenue, statusCounts, chartData };
+        return { totalRevenue, serviceCounts, chartData };
     }, [orders]);
 
-    if (loading) return <div className="flex h-screen items-center justify-center font-bold text-blue-600">Уншиж байна...</div>;
+    if (loading) return <Loading />;
 
     return (
         <div className="p-4 md:p-8 bg-[#f8fafc] min-h-screen text-slate-800">
@@ -210,10 +218,10 @@ export default function AdminDashboardPage() {
                                         <td className="p-4">
                                             <p className="font-bold text-sm">{o.service}</p>
                                             <p className="text-[12px] text-gray-600">{new Date(o.date).toLocaleString('mn-MN', {
-                                                    year: 'numeric',
-                                                    month: '2-digit',
-                                                    day: '2-digit'
-                                                })}</p>
+                                                year: 'numeric',
+                                                month: '2-digit',
+                                                day: '2-digit'
+                                            })}</p>
                                         </td>
                                         <td className="p-4 text-sm text-black truncate max-w-[200px]">{o.district},{o.khoroo},{o.address}</td>
                                         <td className="p-4 font-bold text-blue-600">{Number(o.total_price).toLocaleString()} ₮</td>
@@ -251,25 +259,39 @@ export default function AdminDashboardPage() {
                         </div>
                     </div>
 
+
                     <div className="bg-white p-6 rounded-3xl shadow-sm border">
-                        <h3 className="text-lg font-bold mb-6">Захиалгын төлөв</h3>
+                        <h3 className="text-lg font-bold mb-6">Үйлчилгээний төрөл</h3>
                         <div className="h-[300px]">
                             <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
-                                    <Pie data={statsData.statusCounts} innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
-                                        {statsData.statusCounts.map((entry, index) => (
+                                    <Pie
+                                        data={statsData.serviceCounts} // Service-ийн датаг энд холбоно
+                                        innerRadius={60}
+                                        outerRadius={80}
+                                        paddingAngle={5}
+                                        dataKey="value"
+                                    >
+                                        {statsData.serviceCounts.map((entry, index) => (
                                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                         ))}
                                     </Pie>
-                                    <Tooltip />
+                                    <Tooltip
+                                        contentStyle={{ borderRadius: '15px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                                    />
                                 </PieChart>
                             </ResponsiveContainer>
                         </div>
-                        <div className="grid grid-cols-2 gap-2 mt-4">
-                            {statsData.statusCounts.map((s, i) => (
-                                <div key={s.name} className="flex items-center text-xs space-x-2">
-                                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[i] }} />
-                                    <span className="text-slate-500">{s.name}: {s.value}</span>
+
+                        {/* Тайлбар хэсэг (Legend) */}
+                        <div className="flex flex-col gap-3 mt-4">
+                            {statsData.serviceCounts.map((s, i) => (
+                                <div key={s.name} className="flex items-center justify-between text-sm">
+                                    <div className="flex items-center space-x-2">
+                                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
+                                        <span className="text-slate-600 font-medium">{s.name}</span>
+                                    </div>
+                                    <span className="text-slate-400 font-bold">{s.value} захиалга</span>
                                 </div>
                             ))}
                         </div>

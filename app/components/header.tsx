@@ -35,26 +35,25 @@ const isHome = pathname === '/' || pathname === '/home';
     const [open, setOpen] = useState(false);
     const router = useRouter(); // useRouter-ийг дуудах
 
-    useEffect(() => {
-        // 💡 Токенг шалгах
-        const token = localStorage.getItem('token');
-        if (token) {
-            setIsLoggedIn(true);
-        } else {
-            setIsLoggedIn(false);
-        }
+   useEffect(() => {
+    // 💡 pathname өөрчлөгдөх болгонд токен байгаа эсэхийг дахин шалгана
+    const token = localStorage.getItem('token');
+    if (token) {
+        setIsLoggedIn(true);
+    } else {
+        setIsLoggedIn(false);
+    }
+}, [pathname]); // 💡 pathname-г энд нэмж өгснөөр хуудас солигдох бүрт ажиллана
 
-        // Хэрэглэгч нэвтэрсний дараа Header-ийг шууд шинэчлэх сонсогчийг энд нэмж болно.
-        // Гэхдээ `router.push()` хийхэд useEffect дахин ажиллах тул энэ нь ихэвчлэн шаардлагагүй.
-    }, []);
 
     const handleLogout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        setIsLoggedIn(false);
-        // ✅ Гарсны дараа нүүр хуудас руу шилжих
-        router.push('/');
-    };
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    
+    // 💡 Header-ийн useEffect-ийг ажиллуулахын тулд router.push ашиглана
+    // Хэрэв ажиллахгүй бол window.location.href = '/' ашиглаарай
+    window.location.href = '/'; 
+};
 
     return (
         <header className={headerClasses}>

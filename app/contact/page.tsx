@@ -82,7 +82,7 @@ export default function ContactPage() {
         <div className="min-h-screen bg-gray-50 px-4 py-16">
             <div className="max-w-6xl mx-auto text-black rounded-[18px] shadow-2xl p-6 md:p-10 bg-white border border-gray-100">
                 <h2 className="text-4xl font-bold text-[#102B5A] mb-4 text-center">
-                    Холбоо Барих
+                    Холбоо барих
                 </h2>
                 <p className="text-gray-600 mb-12 text-center max-w-2xl mx-auto">
                     Асуулт, санал хүсэлт, эсвэл үйлчилгээний талаарх мэдээлэл авахыг хүсвэл доорх маягтыг бөглөнө үү.

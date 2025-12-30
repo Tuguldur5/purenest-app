@@ -6,12 +6,9 @@ import { useRouter } from 'next/navigation'
 export default function ForgotPassword() {
     const [email, setEmail] = useState('')
     const [otp, setOtp] = useState('')
-    const [step, setStep] = useState(1) // 1: Email, 2: OTP
+    const [step, setStep] = useState(1) 
     const router = useRouter()
-
-    // 1. И-мэйл илгээх функц
-    // handleSendOTP функц доторх fetch URL-ийг засах:
-    // ForgotPassword.tsx дотор
+    // 1. OTP илгээх функц
     const handleSendOTP = async () => {
         try {
             const res = await fetch('http://localhost:4000/api/auth/forgot-password', { // 4000 порт нэмэв

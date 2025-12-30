@@ -1,31 +1,28 @@
 'use client';
 
-import Partner from '../components/partner';
-import ServiceCard from '../components/ServiceCard';
+import { motion } from 'framer-motion';
 import Link from 'next/link';
-
+import Partner from './../components/partner';
+import { link } from 'fs';
 export default function Home() {
   const services = [
     {
       title: 'Оффис цэвэрлэгээ',
       desc: 'Бидний найдвартай оффис цэвэрлэгээ таны ажлын орчинг цэвэр, эрүүл болгоно.',
-      included: ["Шал угаах / шүүрдэх", "Ширээ, тавилга цэвэрлэх", "Компьютер, тоног төхөөрөмж цэвэрлэх"],
-      extras: ["Хөргөгч, шүүгээ дотор цэвэрлэх", "Нүүж орох / гарах цэвэрлэгээ"],
-      excluded: ["11.3 кг-аас хүнд зүйл өргөх", "Гадаах экстерьер цэвэрлэгээ"],
+      image: '/office.jpg', 
+      link: '/service/office',   
     },
     {
       title: 'СӨХ цэвэрлэгээ',
-      desc: 'Орон сууцны СӨХ-ийн нийтлэг талбайн цэвэрлэгээ.',
-      included: ["Коридор, шатны шал цэвэрлэх", "Суудал, тавилга тоос арчих", "Ширээ, сандал арчих"],
-      extras: ["Хивс / шалыг нэмэлт цэвэрлэх"],
-      excluded: ["Био-аюултай бохирдол", "Том арга хэмжээний дараах их цэвэрлэгээ"],
+      desc: 'Орон сууцны СӨХ-ийн нийтлэг талбайн цэвэрлэгээг мэргэжлийн түвшинд гүйцэтгэнэ.',
+      image: '/ONT.jpg',
+      link: '/service/suh',
     },
     {
       title: 'Олон нийтийн талбай',
-      desc: 'Олон нийтийн талбайн цэвэрлэгээ, ажилбар, гадаргуу.',
-      included: ["Шал, гадаргуу цэвэрлэх", "Тоног төхөөрөмж арчих", "Цонх, хаалга арчих"],
-      extras: ["Нэмэлт тоног төхөөрөмж цэвэрлэх"],
-      excluded: ["Барилгын дараах их цэвэрлэгээ", "Hoarding нөхцөлтэй байшин"],
+      desc: 'Олон нийтийн талбайн цэвэрлэгээ, ажилбар, гадаргуу арчилгаа.',
+      image: '/ОНТ.jpg',
+      link: '/service             /public-space',
     },
   ];
 
@@ -53,27 +50,61 @@ export default function Home() {
       </section>
 
       {/* Services Section */}
-      <section className="container mx-auto px-6 py-20 mt-10 mb-10 relative z-20">
-        <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-900">
-          Бидний үйлчилгээ
-        </h2>
-        <div className="grid md:grid-cols-3 gap-8 ">
-          {services.map((service, idx) => (
-            <ServiceCard
-              key={idx}
-              title={service.title}
-              desc={service.desc}
-              included={service.included}
-              extras={service.extras}
-              excluded={service.excluded}
-            />
-          ))}
+     {/* Services Section */}
+      <section className="py-24 bg-gray-50">
+        <div className="container mx-auto px-6">
+          <motion.h2 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-3xl md:text-4xl font-bold text-center mb-16 text-gray-900"
+          >
+            Бидний үйлчилгээ
+          </motion.h2>
+
+          <div className="grid md:grid-cols-3 gap-10">
+            {services.map((service, idx) => (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                whileHover={{ y: -10 }} // Дээшээ бага зэрэг нүүх
+                transition={{ duration: 0.3 }}
+                className="relative group h-[450px] overflow-hidden rounded-3xl shadow-2xl cursor-pointer"
+              >
+                {/* Background Image */}
+                <img
+                  src={service.image}
+                  alt={service.title}
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                />
+                
+                {/* Overlay - Эхлээд харанхуй, hover хийхэд илүү тодорно */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent transition-opacity duration-300 group-hover:from-black/95"></div>
+
+                {/* Content */}
+                <div className="absolute inset-0 p-8 flex flex-col justify-end text-white">
+                  <h3 className="text-2xl font-bold mb-3 transition-transform duration-300 group-hover:-translate-y-2">
+                    {service.title}
+                  </h3>
+                  
+                  {/* Hover хийхэд гарч ирэх текст */}
+                  <div className="max-h-0 opacity-0 overflow-hidden transition-all duration-500 group-hover:max-h-40 group-hover:opacity-100">
+                    <p className="text-gray-200 text-sm md:text-base leading-relaxed mb-4">
+                      {service.desc}
+                    </p>
+                    <Link href={service.link} className="inline-block text-emerald-400 font-semibold hover:underline">
+                      Дэлгэрэнгүй ➔
+                    </Link>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 
-      <div className='mt-4'>
-        <Partner />
-      </div>
+  
       {/* CTA Section */}
       <section className="bg-gradient-to-r from-amber-200 to-amber-300 py-20">
         <div className="container mx-auto text-center px-4">

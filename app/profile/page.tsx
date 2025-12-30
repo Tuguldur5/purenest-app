@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-
+import Loading from '../loading';
 // ===========================================
 // 1. INTERFACES
 // ===========================================
@@ -28,7 +28,7 @@ function UserDetails({ details, onUpdate }: { details: UserDetail | null, onUpda
 
     const [isEditing, setIsEditing] = useState(false);
     const [form, setForm] = useState(details);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     // UserDetails доторх handleSave функц
     const handleSave = async () => {
@@ -349,12 +349,7 @@ export default function Profile() {
     };
 
     if (loading) return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50">
-            <div className="flex flex-col items-center gap-4">
-                <div className="w-12 h-12 border-4 border-[#102B5A] border-t-transparent rounded-[14px] animate-spin"></div>
-                <p className="text-[#102B5A] font-medium animate-pulse">Түр хүлээнэ үү...</p>
-            </div>
-        </div>
+        <Loading />
     );
 
     return (

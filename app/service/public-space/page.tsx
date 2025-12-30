@@ -153,9 +153,7 @@ export default function PublicSpaceService() {
                         ))}
                     </div>
                 </div>
-                <div className='mt-12'>
-                    <Partner/>
-                </div>
+               
             </div>
         </section>
     )

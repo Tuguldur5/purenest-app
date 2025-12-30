@@ -154,9 +154,7 @@ export default function ServiceCard() {
                         ))}
                     </div>
                 </div>
-                <div   className='mt-12'>
-                    <Partner/>
-                </div>
+               
             </div>
 
 
