@@ -6,7 +6,7 @@ import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
     LineChart, Line, PieChart, Pie, Cell
 } from 'recharts';
-import Loading from '@/app/loading';
+import Loading from '../../loading';
 
 const API_BASE_URL = "http://localhost:4000/api/admin";
 

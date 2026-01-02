@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 // 💡 Өөрийн лоудер компонентыг импортлох (Замыг нь зөв зааж өгөөрэй)
-import Loading from '../loading' 
+import Loading from '../loading' ;
 
 export default function Login() {
     const [email, setEmail] = useState('')

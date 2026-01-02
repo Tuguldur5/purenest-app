@@ -75,7 +75,7 @@ export default function Booking() {
             .catch(err => console.error("Үнэ татаж чадсангүй:", err));
     }, []);
 
-  
+
     // Нийт үнийг тооцоолох функц
     const totalPrice = useMemo(() => {
         if (!dbPricing) return 0; // Үнэ татаж дуустал 0 харуулна
@@ -221,233 +221,213 @@ export default function Booking() {
     }, []);
 
     return (
-        
-       <section className="flex flex-col items-center mt-10 mb-10 px-4 text-black">
-        
-        {/* 1. ГАРЧИГ ХЭСЭГ - Одоо хамгийн дээр нь Header хэлбэрээр байрлана */}
-        <div className="w-full max-w-7xl text-center md:text-left mb-10">
-            <h1 className="text-4xl text-center font-bold text-gray-800">
-                Захиалга өгөх 
-            </h1>
-        </div>
-
-        {/* 2. ҮНДСЭН КОНТЕНТ - Форм болон Үнийн хэсгийг хажуу хажууд нь байрлуулна */}
-        <div className="flex flex-col md:flex-row justify-center items-start gap-10 w-full max-w-7xl">
-             <div className="w-96 ml-8 sticky bg-gray-100 top-10 h-fit p-6 border border-black/5 shadow-md rounded-xl bg-white">
-                <h2 className="text-xl font-semibold mb-4">Таны захиалга</h2>
-                <p className="text-gray-700 mb-2">
-                    <strong>Үйлчилгээ:</strong> {form.service}
-                </p>
-                <p className="text-gray-700 mb-2">
-                    <strong>Давтамж:</strong> {form.frequency}
-                </p>
-                <p className="text-gray-700 mb-2">
-                    <strong>Огноо:</strong> {form.date}
-                </p>
-                <div className="border-t pt-4 mt-4">
-                    <p className="text-lg font-bold">Нийт үнэ:</p>
-                    <p className="text-3xl font-bold text-emerald-600">
-                        {totalPrice.toLocaleString()} ₮
-                    </p>
-                </div>
+        <section className="flex flex-col items-center mt-10 mb-20 px-4 text-black bg-gray-50/50">
+            {/* 1. ГАРЧИГ ХЭСЭГ */}
+            <div className="w-full max-w-7xl text-center mb-12">
+                <h1 className="text-4xl font-bold text-gray-800 tracking-tight">
+                    Захиалга өгөх
+                </h1>
+                <div className="h-1 w-20 bg-amber-400 mx-auto mt-4 rounded-full"></div>
             </div>
-            <div className="w-full max-w-3xl p-10 bg-white border border-black/5 shadow-md rounded-xl space-y-6">
-               
 
-                <form className="space-y-4" onSubmit={handleSubmit}>
-                    <div>
-                        <label className="block mb-2">Нэр</label>
-                        <input
-                            value={form.name}
-                            onChange={(e) => handleFormChange('name', e.target.value)}
-                            className="w-full border p-2 rounded"
-                            readOnly
-                        />
-                    </div>
+            {/* 2. ҮНДСЭН КОНТЕНТ */}
+            <div className="flex flex-col md:flex-row justify-center items-start gap-8 w-full max-w-7xl">
 
-                    <div>
-                        <label className="block mb-2">Утас</label>
-                        <input
-                            value={form.phone_number}
-                            onChange={(e) => handleFormChange('phone_number', e.target.value)}
-                            className="w-full border p-2 rounded"
-                        />
+                {/* ЗҮҮН ТАЛ: Захиалгын Форм */}
+                <div className="w-full md:flex-1 p-6 md:p-10 bg-white border border-gray-100 shadow-xl rounded-2xl space-y-6">
+                    <form className="space-y-5" onSubmit={handleSubmit}>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <label className="text-sm font-semibold text-gray-600 ml-1">Нэр</label>
+                                <input
+                                    value={form.name}
+                                    onChange={(e) => handleFormChange('name', e.target.value)}
+                                    className="w-full border border-gray-200 p-3 rounded-xl bg-gray-50 outline-none"
+                                    readOnly // Анхны код дээр readOnly байсан тул хэвээр үлдээв
+                                />
+                            </div>
 
-                    </div>
-
-                    <div>
-                        <label className="block mb-2">Үйлчилгээ</label>
-                        <select
-                            value={form.service}
-                            onChange={(e) => handleFormChange('service', e.target.value)}
-                            className="w-full border p-2 rounded"
-                        >
-                            <option>Оффис цэвэрлэгээ</option>
-                            <option>СӨХ цэвэрлэгээ</option>
-                            <option>Олон нийтийн талбай</option>
-                        </select>
-                    </div>
-
-                    {/* House cleaning / Public Area: Area size input */}
-                    {(form.service === 'Оффис цэвэрлэгээ' || form.service === 'Олон нийтийн талбай') && (
-                        <div>
-                            <label className="block mb-2">Талбайн хэмжээ (м²)</label>
-                            <input
-                                type="number"
-                                min={0}
-                                value={form.publicAreaSize}
-                                onChange={(e) => handleFormChange('publicAreaSize', e.target.value)}
-                                className="w-full border p-2 rounded"
-                            />
-                        </div>
-                    )}
-
-                    {/* SUH cleaning: Building details */}
-                    {form.service === 'СӨХ цэвэрлэгээ' && (
-                        <div className="space-y-4">
-                            <h2 className="font-semibold text-lg">Барилгын мэдээлэл</h2>
-                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                <div>
-                                    <label>Байрны тоо</label>
-                                    <input
-                                        type="number"
-                                        min={0}
-                                        value={form.apartments}
-                                        onChange={(e) => handleFormChange('apartments', (e.target.value))} // ⚠️ Шууд setForm-ийг ашиглав
-                                        className="w-full border p-2 rounded"
-                                    />
-                                </div>
-                                <div>
-                                    <label>Давхарын тоо</label>
-                                    <input
-                                        type="number"
-                                        min={0}
-                                        value={form.floors}
-                                        onChange={(e) => handleFormChange('floors', (e.target.value))} // ⚠️ Шууд setForm-ийг ашиглав
-                                        className="w-full border p-2 rounded"
-                                    />
-                                </div>
-                                <div>
-                                    <label>Lift-ийн тоо</label>
-                                    <input
-                                        type="number"
-                                        min={0}
-                                        value={form.lifts}
-                                        onChange={(e) => handleFormChange('lifts', (e.target.value))} // ⚠️ Шууд setForm-ийг ашиглав
-                                        className="w-full border p-2 rounded"
-                                    />
-                                </div>
-
-                                <div>
-                                    <label>Айлын тоо</label>
-                                    <input
-                                        type="number"
-                                        min={0}
-                                        value={form.rooms}
-                                        onChange={(e) => handleFormChange('rooms', (e.target.value))} // ⚠️ Шууд setForm-ийг ашиглав
-                                        className="w-full border p-2 rounded"
-                                    />
-                                </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-semibold text-gray-600 ml-1">Утас</label>
+                                <input
+                                    value={form.phone_number}
+                                    onChange={(e) => handleFormChange('phone_number', e.target.value)}
+                                    className="w-full border border-gray-200 p-3 rounded-xl focus:ring-2 focus:ring-[#102B5A] outline-none transition-all"
+                                />
                             </div>
                         </div>
-                    )}
 
-                    <div>
-                        <label className="block mb-2">Огноо</label>
-                        <input
-                            type="date"
-                            min={today}
-                            value={form.date}
-                            onChange={(e) => handleFormChange('date', e.target.value)}
-                            className="w-full border p-2 rounded"
-                        />
-                    </div>
-                    {/* Frequency */}
-                    <div>
-                        <label className="block mb-2">Давтамж</label>
-                        <select
-                            value={form.frequency}
-                            onChange={(e) => handleFormChange('frequency', e.target.value)}
-                            className="w-full border p-2 rounded"
-                        >
-                            {frequencyOptions.map((f) => (
-                                <option key={f}>{f}</option>
-                            ))}
-                        </select>
-                    </div>
-
-
-                    {/* Address Dropdowns */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label className="block mb-2">Хот / Аймаг</label>
+                        <div className="space-y-2">
+                            <label className="text-sm font-semibold text-gray-600 ml-1">Үйлчилгээ</label>
                             <select
-                                value={form.city}
-                                onChange={(e) => handleFormChange('city', e.target.value)} // 💡 handleFormChange нь дотроо reset хийнэ
-                                className="w-full border p-2 rounded"
+                                value={form.service}
+                                onChange={(e) => handleFormChange('service', e.target.value)}
+                                className="w-full border border-gray-200 p-3 rounded-xl bg-white outline-none cursor-pointer"
                             >
-
-                                {PROVINCES.map(p => (
-                                    <option key={p} value={p}>{p}</option>
-                                ))}
+                                <option>Оффис цэвэрлэгээ</option>
+                                <option>СӨХ цэвэрлэгээ</option>
+                                <option>Олон нийтийн талбай</option>
                             </select>
                         </div>
 
-                        {/* Дүүрэг / Сум */}
-                        <div>
-                            <label className="block mb-2">{form.city === 'Улаанбаатар' ? 'Дүүрэг' : 'Сум'}</label>
-                            <select
-                                disabled={!form.city}
-                                value={form.district}
-                                onChange={(e) => handleFormChange('district', e.target.value)} // 💡 handleFormChange нь дотроо reset хийнэ
-                                className="w-full border p-2 rounded"
-                            >
-                                <option value="" disabled>Сонгоно уу</option>
-                                {form.city === 'Улаанбаатар' && ULAANBAATAR_DISTRICTS.map(d => (
-                                    <option key={d.name} value={d.name}>{d.name}</option>
-                                ))}
-                            </select>
+                        {/* dynamic inputs - таны ложик хэвээрээ */}
+                        {(form.service === 'Оффис цэвэрлэгээ' || form.service === 'Олон нийтийн талбай') && (
+                            <div className="p-4 bg-gray-50 rounded-xl space-y-2">
+                                <label className="text-sm font-semibold text-gray-600">Талбайн хэмжээ (м²)</label>
+                                <input
+                                    type="number"
+                                    min={0}
+                                    value={form.publicAreaSize}
+                                    onChange={(e) => handleFormChange('publicAreaSize', e.target.value)}
+                                    className="w-full border border-gray-200 p-3 rounded-xl outline-none bg-white"
+                                />
+                            </div>
+                        )}
+
+                        {form.service === 'СӨХ цэвэрлэгээ' && (
+                            <div className="p-5 bg-gray-50 rounded-xl space-y-4">
+                                <h2 className="font-bold text-gray-700">Барилгын мэдээлэл</h2>
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    {[
+                                        { label: "Байрны тоо", key: "apartments" as const },
+                                        { label: "Давхарын тоо", key: "floors" as const },
+                                        { label: "Lift-ийн тоо", key: "lifts" as const },
+                                        { label: "Айлын тоо", key: "rooms" as const }
+                                    ].map((item) => (
+                                        <div key={item.key}>
+                                            <label className="text-xs font-medium text-gray-500">{item.label}</label>
+                                            <input
+                                                type="number"
+                                                min={0}
+                                                // Одоо энд алдаа заахгүй
+                                                value={form[item.key]}
+                                                onChange={(e) => handleFormChange(item.key, e.target.value)}
+                                                className="w-full border border-gray-200 p-2 rounded-lg mt-1 outline-none"
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <label className="text-sm font-semibold text-gray-600 ml-1">Огноо</label>
+                                <input
+                                    type="date"
+                                    min={today}
+                                    value={form.date}
+                                    onChange={(e) => handleFormChange('date', e.target.value)}
+                                    className="w-full border border-gray-200 p-3 rounded-xl outline-none"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-semibold text-gray-600 ml-1">Давтамж</label>
+                                <select
+                                    value={form.frequency}
+                                    onChange={(e) => handleFormChange('frequency', e.target.value)}
+                                    className="w-full border border-gray-200 p-3 rounded-xl bg-white outline-none cursor-pointer"
+                                >
+                                    {frequencyOptions.map((f) => (
+                                        <option key={f}>{f}</option>
+                                    ))}
+                                </select>
+                            </div>
                         </div>
 
-                        {/* Хороо / Баг */}
-                        <div>
-                            <label className="block mb-2">{form.city === 'Улаанбаатар' ? 'Хороо' : 'Баг'}</label>
-                            <select
-                                disabled={!form.district}
-                                value={form.khoroo}
-                                onChange={(e) => handleFormChange('khoroo', e.target.value)}
-                                className="w-full border p-2 rounded"
-                            >
-                                <option value="" disabled>Сонгоно уу</option>
-                                {availableKhoroos.map(k => (
-                                    <option key={k} value={k}>{k}</option>
-                                ))}
-                            </select>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border-t pt-6 mt-6">
+                            <div>
+                                <label className="text-xs font-bold text-gray-400 uppercase">Хот / Аймаг</label>
+                                <select
+                                    value={form.city}
+                                    onChange={(e) => handleFormChange('city', e.target.value)}
+                                    className="w-full border border-gray-200 p-3 rounded-xl bg-white mt-1"
+                                >
+                                    {PROVINCES.map(p => (
+                                        <option key={p} value={p}>{p}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="text-xs font-bold text-gray-400 uppercase">
+                                    {form.city === 'Улаанбаатар' ? 'Дүүрэг' : 'Сум'}
+                                </label>
+                                <select
+                                    disabled={!form.city}
+                                    value={form.district}
+                                    onChange={(e) => handleFormChange('district', e.target.value)}
+                                    className="w-full border border-gray-200 p-3 rounded-xl bg-white mt-1 disabled:bg-gray-100"
+                                >
+                                    <option value="" disabled>Сонгоно уу</option>
+                                    {form.city === 'Улаанбаатар' && ULAANBAATAR_DISTRICTS.map(d => (
+                                        <option key={d.name} value={d.name}>{d.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="text-xs font-bold text-gray-400 uppercase">
+                                    {form.city === 'Улаанбаатар' ? 'Хороо' : 'Баг'}
+                                </label>
+                                <select
+                                    disabled={!form.district}
+                                    value={form.khoroo}
+                                    onChange={(e) => handleFormChange('khoroo', e.target.value)}
+                                    className="w-full border border-gray-200 p-3 rounded-xl bg-white mt-1 disabled:bg-gray-100"
+                                >
+                                    <option value="" disabled>Сонгоно уу</option>
+                                    {availableKhoroos.map(k => (
+                                        <option key={k} value={k}>{k}</option>
+                                    ))}
+                                </select>
+                            </div>
                         </div>
 
-                        {/* Үлдсэн Байршил / Гудамж - Input хэвээр үлдэнэ */}
-                        <div>
-                            <label className="block mb-2">Байршил / Гудамж</label>
+                        <div className="space-y-2">
+                            <label className="text-sm font-semibold text-gray-600 ml-1">Байршил / Гудамж</label>
                             <input
                                 value={form.address}
                                 onChange={(e) => handleFormChange('address', e.target.value)}
-                                className="w-full border p-2 rounded"
+                                className="w-full border border-gray-200 p-3 rounded-xl outline-none focus:ring-2 focus:ring-[#102B5A]"
+                                placeholder="Дэлгэрэнгүй хаяг..."
                             />
                         </div>
+
+                        <button
+                            type="submit"
+                            className="w-full bg-[#102B5A] text-white py-4 rounded-xl font-bold text-lg shadow-lg hover:bg-[#1a3f7a] transition-all duration-300 mt-4"
+                        >
+                            Захиалах
+                        </button>
+                    </form>
+                </div>
+
+                {/* БАРУУН ТАЛ: Үнийн хэсэг (Sticky) */}
+                <div className="w-full md:w-80 lg:sticky lg:top-10">
+                    <div className="bg-white border border-gray-100 shadow-xl rounded-2xl p-6">
+                        <h2 className="text-xl font-bold text-gray-800 mb-6 pb-2 border-b">Таны захиалга</h2>
+                        <div className="space-y-4">
+                            <div className="flex flex-col">
+                                <span className="text-xs font-bold text-gray-400 uppercase">Үйлчилгээ</span>
+                                <span className="text-gray-700 font-medium">{form.service}</span>
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-xs font-bold text-gray-400 uppercase">Давтамж</span>
+                                <span className="text-gray-700 font-medium">{form.frequency}</span>
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-xs font-bold text-gray-400 uppercase">Огноо</span>
+                                <span className="text-gray-700 font-medium">{form.date || "Сонгоогүй"}</span>
+                            </div>
+
+                            <div className="pt-6 mt-6 border-t">
+                                <p className="text-sm font-bold text-gray-400 uppercase">Нийт төлөх дүн</p>
+                                <p className="text-3xl font-black text-emerald-600">
+                                    {totalPrice.toLocaleString()} ₮
+                                </p>
+                            </div>
+                        </div>
                     </div>
-
-                    {/* type="button" -ийн оронд type="submit" байвал зөв */}
-                    <button
-                        type="submit"
-                        className="w-full border mt-4 border-white/5 shadow-md p-2 rounded bg-[#102B5A] text-white hover:text-amber-400 duration-300"
-                    >
-                        Захиалах
-                    </button>
-                </form>
-            </div>
-
-            {/* Price Summary (Үнийн хураангуй) */}
-           
+                </div>
             </div>
         </section>
     )

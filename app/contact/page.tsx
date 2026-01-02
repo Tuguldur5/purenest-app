@@ -132,7 +132,7 @@ export default function ContactPage() {
                         {/* Ажлын цаг */}
                         <div className="mt-8 pt-4 border-t border-gray-600">
                             <p className="text-sm font-medium text-amber-400">Ажлын цаг:</p>
-                            <p className="text-sm text-gray-300">Даваа - Баасан 09:00 - 18:00</p>
+                            <p className="text-sm text-gray-300">Өдөр бүр 09:00 - 18:00</p>
                         </div>
                     </div>
 
@@ -192,70 +192,22 @@ export default function ContactPage() {
                 </div>
 
                 {/* 3. BOTTOM: Google Map (Газрын зураг - БОДИТ УТГУУД) */}
-                <div className="mt-10 p-6 bg-white rounded-xl shadow-lg border border-gray-100">
-                    <h3 className="text-3xl font-bold text-center text-gray-800 mb-4">Манай Байршил</h3>
-                    <div className="w-full" style={{ height: '400px' }}>
-                        {/* MAP_LAT/MAP_LNG-ийг бодит утгаар солив */}
+                <div className="mt-10 p-6 bg-white rounded-3xl shadow-xl border border-gray-100">
+                    <h3 className="text-2xl font-bold text-center text-gray-800 mb-6">Манай байршил</h3>
+                    <div className="w-full overflow-hidden rounded-2xl shadow-md" style={{ height: '400px' }}>
                         <iframe
-                            title="company-map"
+                            title="anun-center-location"
                             width="100%"
                             height="100%"
-                            style={{ border: 0, borderRadius: '10px' }}
+                            style={{ border: 0 }}
                             loading="lazy"
                             referrerPolicy="no-referrer-when-downgrade"
-                            src={`https://maps.google.com/maps?q=47.918,106.918&z=15&output=embed`}
+                            // Энэ src нь Анун төвийн яг бодит байршлыг зааж тэмдэглэгээ зоосон байгаа:
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2673.818318258525!2d106.8252033768829!3d47.92055556620579!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x5d96ebe082379895%3A0xc3f8e5d0f1712a32!2sAnun%20Center!5e0!3m2!1sen!2smn!4v1715600000000!5m2!1sen!2smn"
                         />
                     </div>
                 </div>
-
             </div>
         </div>
     );
 }
-
-/*
-  --- Backend example (Next.js API route or Express) ---
-  This is a sample Node.js + Nodemailer handler you can put at /api/contact.
-
-  // pages/api/contact.ts (Next.js) or /api/contact (Express)
-
-  import nodemailer from 'nodemailer';
-
-  export default async function handler(req, res) {
-    if (req.method !== 'POST') return res.status(405).end();
-
-    const { name, email, message } = req.body || {};
-    if (!name || !email || !message) return res.status(400).json({ error: 'Missing fields' });
-
-    // Configure transporter (use env vars)
-    const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: Number(process.env.SMTP_PORT || 587),
-      secure: false,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    });
-
-    const mailOptions = {
-      from: `Website <${process.env.SMTP_USER}>`,
-      to: process.env.COMPANY_MAIL || 'info@your-company.mn',
-      subject: `Шинэ холбоо барих захиа — ${name}`,
-      text: `Нэр: ${name}\nИмэйл: ${email}\n\n${message}`,
-      html: `<p><strong>Нэр:</strong> ${name}</p><p><strong>Имэйл:</strong> ${email}</p><p>${message}</p>`
-    };
-
-    try {
-      await transporter.sendMail(mailOptions);
-      return res.status(200).json({ ok: true });
-    } catch (err) {
-      console.error(err);
-      return res.status(500).json({ error: 'Failed to send email' });
-    }
-  }
-
-  --- Notes ---
-  • Use environment variables for SMTP credentials (SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, COMPANY_MAIL).
-  • If deploying to Vercel, configure environment variables in the project settings.
-*/
