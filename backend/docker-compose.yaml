@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  # Өгөгдлийн сангийн сервис
+  db:
+    image: postgres:15-alpine
+    container_name: pureset_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 254613
+      POSTGRES_DB: purenest
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:

@@ -1,0 +1,16 @@
+# 1. Ямар үйлдлийн систем/суурь дээр ажиллахыг заана
+FROM node:20-alpine
+# 2. Контейнер доторх ажлын хавтас
+WORKDIR /app
+# 3. Сангуудын жагсаалтыг хуулна
+COPY package*.json ./
+# 4. Сангуудыг суулгана
+RUN npm install
+# 5. Бүх кодоо хуулна
+COPY . .
+# 6. TypeScript кодыг JavaScript руу хөрвүүлнэ (build)
+RUN npm run build
+# 7. Гадагшаа нээх порт
+EXPOSE 3000
+# 8. Ажиллуулах команд
+CMD ["npm", "start"]

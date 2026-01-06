@@ -18,7 +18,7 @@ interface Order {
     khoroo: string;
     full_name: string;
     email: string;
-    phone: string;
+    phone_number: string;
     address: string;
     frequency: string;
     total_price: number;
@@ -29,8 +29,14 @@ interface Order {
 interface User {
     full_name: string,
 }
-
-const STATUS_OPTIONS = ['Оффис цэвэрлэгээ', 'СӨХ цэвэрлэгээ', 'Олон нийтийн талбай'];
+// Үйлчилгээний нэр биш, захиалгын явцын статусуудыг энд бичнэ
+const STATUS_OPTIONS = ['Хүлээгдэж байна', 'Баталгаажсан', 'Дууссан', 'Цуцлагдсан'];
+const STATUS_STYLES: Record<string, string> = {
+    "Дууссан": "bg-green-100 text-green-700",
+    "Баталгаажсан": "bg-blue-100 text-blue-700",
+    "Хүлээгдэж байна": "bg-amber-100 text-amber-700",
+    "Цуцлагдсан": "bg-red-100 text-red-700",
+};
 const COLORS = ['#102B5A', '#FFBB28', '#00C49F']; // Төлөвт тохирох өнгөнүүд
 
 export default function AdminDashboardPage() {
@@ -163,6 +169,7 @@ export default function AdminDashboardPage() {
                                 <thead className="text-slate-400 text-xs uppercase tracking-wider border-b">
                                     <tr>
                                         <th className="pb-4 px-2">Хэрэглэгч</th>
+                                        <th className='pb-4 px-2'>Утас</th>
                                         <th className="pb-4 px-2">Хэзээ</th>
                                         <th className="pb-4 px-2">Үйлчилгээ</th>
                                         <th className="pb-4 px-2">Нийт</th>
@@ -174,6 +181,7 @@ export default function AdminDashboardPage() {
                                         // order_id байхгүй бол индекс ашиглах, эсвэл хослуулах нь аюулгүй
                                         <tr key={`recent-${o.id || idx}`} className="text-sm hover:bg-slate-50 transition-colors">
                                             <td className="py-4 px-2 font-medium">{o.full_name}</td>
+                                            <td className="py-4 px-2">{o.phone_number}</td>
                                             <td className="py-4 px-2 font-medium">
                                                 {new Date(o.date).toLocaleString('mn-MN', {
                                                     year: 'numeric',
@@ -184,8 +192,10 @@ export default function AdminDashboardPage() {
                                             <td className="py-4 px-2">{o.service}</td>
                                             <td className="py-4 px-2 font-bold">{Number(o.total_price).toLocaleString()} ₮</td>
                                             <td className="py-4 px-2">
-                                                <span className={`px-3 py-1 rounded-full text-[10px] font-bold ${o.status === "Дууссан" ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"
-                                                    }`}>{o.status}</span>
+                                                <span className={`px-3 py-1 rounded-full text-[10px] font-bold ${STATUS_STYLES[o.status] || "bg-slate-100 text-slate-700"
+                                                    }`}>
+                                                    {o.status}
+                                                </span>
                                             </td>
                                         </tr>
                                     ))}
@@ -245,16 +255,53 @@ export default function AdminDashboardPage() {
             {activeTab === 'analytics' && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="bg-white p-6 rounded-3xl shadow-sm border">
-                        <h3 className="text-lg font-bold mb-6">Орлогын өсөлт</h3>
+                        <div className="flex justify-between items-center mb-6">
+                            <h3 className="text-lg font-bold">Орлогын өсөлт</h3>
+                            <span className="text-xs text-slate-400">Сүүлийн 7 хоног</span>
+                        </div>
                         <div className="h-[300px]">
                             <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={statsData.chartData}>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                    <XAxis dataKey="date" fontSize={12} tickLine={false} axisLine={false} />
-                                    <YAxis fontSize={12} tickLine={false} axisLine={false} />
-                                    <Tooltip cursor={{ fill: '#f1f5f9' }} />
-                                    <Bar dataKey="amount" fill="#3B82F6" radius={[4, 4, 0, 0]} />
-                                </BarChart>
+                                <LineChart data={statsData.chartData}>
+                                    {/* Сүлжээний шугамыг бүдгэрүүлэх */}
+                                    <CartesianGrid strokeDasharray="5 5" vertical={false} stroke="#f1f5f9" />
+
+                                    <XAxis
+                                        dataKey="date"
+                                        fontSize={12}
+                                        tickLine={false}
+                                        axisLine={false}
+                                        dy={10}
+                                        stroke="#94a3b8"
+                                    />
+
+                                    <YAxis
+                                        fontSize={12}
+                                        tickLine={false}
+                                        axisLine={false}
+                                        stroke="#94a3b8"
+                                        tickFormatter={(value) => `${(value / 1000000).toLocaleString()} сая`} // 10,000 -> 10k
+                                    />
+
+                                    <Tooltip
+                                        contentStyle={{
+                                            borderRadius: '12px',
+                                            border: 'none',
+                                            boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'
+                                        }}
+                                        // value-г optional (number | undefined) байж болно гэж зааж өгнө
+                                        formatter={(value: any) => [`${Number(value).toLocaleString()} ₮`, "Орлого"]}
+                                    />
+
+                                    {/* Илүү гоё харагдуулахын тулд Line-ийг smooth (monotone) болгох */}
+                                    <Line
+                                        type="monotone"
+                                        dataKey="amount"
+                                        stroke="#3B82F6"
+                                        strokeWidth={3}
+                                        dot={{ r: 4, fill: "#3B82F6", strokeWidth: 2, stroke: "#fff" }}
+                                        activeDot={{ r: 6, strokeWidth: 0 }}
+                                    />
+                                </LineChart>
                             </ResponsiveContainer>
                         </div>
                     </div>

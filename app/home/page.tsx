@@ -4,13 +4,14 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Partner from './../components/partner';
 import { link } from 'fs';
+import BubbleBackground from '../components/BubbleBackground';
 export default function Home() {
   const services = [
     {
       title: 'Оффис цэвэрлэгээ',
       desc: 'Бидний найдвартай оффис цэвэрлэгээ таны ажлын орчинг цэвэр, эрүүл болгоно.',
-      image: '/office.jpg', 
-      link: '/service/office',   
+      image: '/office.jpg',
+      link: '/service/office',
     },
     {
       title: 'СӨХ цэвэрлэгээ',
@@ -35,7 +36,9 @@ export default function Home() {
           alt="Cleaning Service"
           className="absolute inset-0 w-full h-full object-cover brightness-75"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/30 to-black/10"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-black/30 to-black/10">
+          <BubbleBackground />
+        </div>
         <div className="relative z-10 flex flex-col justify-center items-center h-full text-center py-50 px-4">
           <h1 className="text-3xl md:text-5xl font-extrabold text-white drop-shadow-lg mb-4">
             Тавтай морилно уу — <span className="text-amber-300">Purenest</span>
@@ -50,11 +53,11 @@ export default function Home() {
       </section>
 
       {/* Services Section */}
-     {/* Services Section */}
+      {/* Services Section */}
       <section className="py-24 bg-gray-50">
         <div className="container mx-auto px-6">
-          <motion.h2 
-            initial={{ opacity: 0, y: 20 }}
+          <motion.h2
+            initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             className="text-3xl md:text-4xl font-bold text-center mb-16 text-gray-900"
@@ -68,9 +71,10 @@ export default function Home() {
                 key={idx}
                 initial={{ opacity: 0, scale: 0.9 }}
                 whileInView={{ opacity: 1, scale: 1 }}
-                whileHover={{ y: -10 }} // Дээшээ бага зэрэг нүүх
+                whileHover={{ y: -15 }}
                 transition={{ duration: 0.3 }}
-                className="relative group h-[450px] overflow-hidden rounded-3xl shadow-2xl cursor-pointer"
+                // Өндрийг tablet дээр арай өндөр (500px) болгож өөрчилж болно
+                className="relative group h-[450px] md:h-[500px] overflow-hidden rounded-3xl shadow-2xl cursor-pointer"
               >
                 {/* Background Image */}
                 <img
@@ -78,19 +82,20 @@ export default function Home() {
                   alt={service.title}
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                 />
-                
-                {/* Overlay - Эхлээд харанхуй, hover хийхэд илүү тодорно */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent transition-opacity duration-300 group-hover:from-black/95"></div>
+
+                {/* Overlay - Hover үед харанхуй хэсэг нь илүү дээшээ гарна */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent transition-all duration-500 group-hover:via-black/70"></div>
 
                 {/* Content */}
-                <div className="absolute inset-0 p-8 flex flex-col justify-end text-white">
-                  <h3 className="text-2xl font-bold mb-3 transition-transform duration-300 group-hover:-translate-y-2">
+                <div className="absolute inset-0 p-6 md:p-8 flex flex-col justify-end text-white">
+                  {/* Гарчиг: Hover үед илүү дээшээ шилжинэ (-translate-y-12) */}
+                  <h3 className="text-2xl font-bold mb-3 transition-transform duration-500 group-hover:-translate-y-4">
                     {service.title}
                   </h3>
-                  
-                  {/* Hover хийхэд гарч ирэх текст */}
-                  <div className="max-h-0 opacity-0 overflow-hidden transition-all duration-500 group-hover:max-h-40 group-hover:opacity-100">
-                    <p className="text-gray-200 text-sm md:text-base leading-relaxed mb-4">
+
+                  {/* Description хэсэг */}
+                  <div className="max-h-0 opacity-0 overflow-hidden transition-all duration-500 group-hover:max-h-60 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0">
+                    <p className="text-gray-200 text-sm md:text-base leading-snug mb-4">
                       {service.desc}
                     </p>
                     <Link href={service.link} className="inline-block text-emerald-400 font-semibold hover:underline">
@@ -104,7 +109,7 @@ export default function Home() {
         </div>
       </section>
 
-  
+
       {/* CTA Section */}
       <section className="bg-gradient-to-r from-amber-200 to-amber-300 py-20">
         <div className="container mx-auto text-center px-4">
