@@ -56,7 +56,7 @@ export default function PublicSpaceService() {
                         </h4>
                         <ul className="list-disc list-inside space-y-2 text-sm mb-6">
                             <li>Коридор, хүлээлгийн өрөө, нээлттэй талбай</li>
-                            <li>Ширээ, сандал, төхөөрөмжийн гадаргуу арчих</li>
+                            <li>Ширээ, сандал гадаргуу арчих</li>
                             <li>Ханын булан, хаалганы хүрээ, тоос арчих</li>
                         </ul>
 

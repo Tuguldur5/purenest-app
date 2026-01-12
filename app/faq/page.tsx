@@ -8,7 +8,7 @@ export default function FAQPage() {
     const [openIndex, setOpenIndex] = useState<number | null>(null);
 
     const faqData = [
-        { q: "Та бүхэн ямар үйлчилгээ үзүүлдэг вэ?", a: "Гэр, СӨХ, Олон нийтийн талбайн ерөнхий болон гүн цэвэрлэгээний үйлчилгээ үзүүлдэг." },
+        { q: "Та бүхэн ямар үйлчилгээ үзүүлдэг вэ?", a: "Оффис, СӨХ, Олон нийтийн талбайн ерөнхий болон гүн цэвэрлэгээний үйлчилгээ үзүүлдэг." },
         { q: "Цэвэрлэгээний үнэ хэрхэн тооцогдох вэ?", a: "Талбайн хэмжээ, бохирдол болон үйлчилгээний төрөлд үндэслэн үнэ тогтооно." },
         { q: "Баталгаат үйлчилгээтэй юу?", a: "Тийм, үйлчилгээндээ 100% сэтгэл ханамжийн баталгаа өгдөг." },
         { q: "Бэлэн мөнгөөр төлж болох уу?", a: "Тийм, бэлэн мөнгө болон дижитал төлбөрийн бүх төрлийг хүлээн авна." },
@@ -22,7 +22,7 @@ export default function FAQPage() {
     const toggleFAQ = (index: number) => setOpenIndex(openIndex === index ? null : index);
 
     return (
-        <section className="max-w-5xl mx-auto px-6 py-14 text-black font-sans">
+        <section className="max-w-5xl mx-auto px-6 py-14 text-black">
             <h2 className="text-4xl font-bold text-center mb-10 text-[#102B5A]">Түгээмэл асуултууд</h2>
 
             <div className="space-y-4 max-w-5xl mx-auto">

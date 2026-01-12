@@ -19,7 +19,7 @@ export default function AboutPage() {
                     className="w-full rounded-xl shadow-lg object-cover"
                 />
 
-                <div className="space-y-4 text-lg leading-relaxed">
+                <div className="space-y-4 text-lg leading-relaxed -mt-60 ">
                     <p>
                         <strong className="text-[#102B5A] text-bold">Purenest</strong> нь 2025 онд
                         үүсгэн байгуулагдсан бөгөөд гэр, албан байгууллага болон олон нийтийн

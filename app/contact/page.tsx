@@ -123,7 +123,7 @@ export default function ContactPage() {
                                     <div>
                                         <p className="text-sm font-light text-gray-300">Байршил</p>
                                         {/* {COMPANY_ADDRESS}-ийг бодит утгаар солив */}
-                                        <p className="text-lg font-medium">Улаанбаатар, Сүхбаатарын талбай 9</p>
+                                        <p className="text-lg font-medium">Хан-Уул дүүрэг, 3-р хороо, Чингисийн өргөн чөлөө, Анун төв</p>
                                     </div>
                                 </div>
                             </div>
@@ -202,8 +202,8 @@ export default function ContactPage() {
                             style={{ border: 0 }}
                             loading="lazy"
                             referrerPolicy="no-referrer-when-downgrade"
-                            // Энэ src нь Анун төвийн яг бодит байршлыг зааж тэмдэглэгээ зоосон байгаа:
-                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2673.818318258525!2d106.8252033768829!3d47.92055556620579!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x5d96ebe082379895%3A0xc3f8e5d0f1712a32!2sAnun%20Center!5e0!3m2!1sen!2smn!4v1715600000000!5m2!1sen!2smn"
+                            // Зассан src код:
+                            src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d2675.762194954005!2d106.88428437637841!3d47.897519886286766!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zNDfCsDUzJzUxLjEiTiAxMDbCsDUzJzEyLjciRQ!5e0!3m2!1smn!2smn!4v1715600000000!5m2!1smn!2smn"
                         />
                     </div>
                 </div>

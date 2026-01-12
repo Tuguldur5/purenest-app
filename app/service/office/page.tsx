@@ -57,7 +57,7 @@ export default function ServiceCard() {
                         </h4>
                         <ul className="list-disc list-inside space-y-2 text-sm mb-6">
                             <li>Коридор, шат, хүлээлгийн өрөө</li>
-                            <li>Ширээ, тавилга, төхөөрөмжийн гадаргуу арчих</li>
+                            <li>Ширээ, тавилга гадаргуу арчих</li>
                             <li>Ханын булан, хэл эн зэрэгт гарсан тоос цэвэрлэх</li>
                         </ul>
 

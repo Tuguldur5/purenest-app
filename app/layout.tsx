@@ -22,8 +22,8 @@ export const metadata: Metadata = {
     default: "Purenest - Цэвэрлэгээ үйлчилгээ",
     template: "%s | Purenest"
   },
-  description: "Purenest: Мэргэжлийн цэвэрлэгээ, айл гэр, албан байгууллагын цэвэрлэгээний үйлчилгээ",
-  keywords: ["цэвэрлэгээ", "cleaning service mongolia", "purenest", "айлын цэвэрлэгээ"],
+  description: "Purenest: Мэргэжлийн цэвэрлэгээ, Оффис, СӨХ, Олон нийтийн талбайн цэвэрлэгээ үйлчилгээ",
+  keywords: ["цэвэрлэгээ", "cleaning service mongolia", "purenest", "Office цэвэрлэгээ", "office cleaning", "СӨХ цэвэрлэгээ", "Олон нийтийн талбай цэвэрлэгээ"],
   openGraph: {
     title: "Purenest Cleaning Service",
     description: "Мэргэжлийн цэвэрлэгээний нэгдсэн үйлчилгээ",

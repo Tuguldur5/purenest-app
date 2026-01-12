@@ -439,7 +439,7 @@ export default function Booking() {
                             </div>
                             <div className="mt-6 p-4 bg-emerald-50 rounded-xl border border-emerald-100">
                                 <p className="text-xs text-emerald-800 text-center font-medium">
-                                    Таны захиалгыг баталгаажуулахаар манай оператор тантай холбогдох болно.
+                                    Таны захиалгыг баталгаажуулахаар манай ажилтан тантай холбогдох болно.
                                 </p>
                             </div>
                         </div>
