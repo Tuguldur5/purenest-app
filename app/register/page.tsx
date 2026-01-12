@@ -92,9 +92,9 @@ export default function Register() {
                 {loading ? "Уншиж байна..." : "Бүртгүүлэх"}
             </button>
 
-            <p className="mt-3">
-                Бүртгэлтэй? 
-                <Link href="/login" className="hover-mustard text-[#102B5A] ml-1">
+            <p className="mt-3 text-center">
+                Бүртгэлтэй юу?
+                <Link href="/login" className="hover-mustard text-[#102B5A] font-bold hover:underline ml-1">
                         Нэвтрэх
                 </Link>
             </p>

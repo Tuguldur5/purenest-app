@@ -3,8 +3,9 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { signIn } from 'next-auth/react'
 // 💡 Өөрийн лоудер компонентыг импортлох (Замыг нь зөв зааж өгөөрэй)
-import Loading from '../loading' ;
+import Loading from '../loading';
 
 export default function Login() {
     const [email, setEmail] = useState('')
@@ -32,7 +33,7 @@ export default function Login() {
             if (!res.ok) {
                 setError(data.error || "Нэвтрэхэд алдаа гарлаа.")
                 setLoading(false) // ❌ Алдаа гарвал лоудерыг зогсоох
-                return 
+                return
             }
 
             localStorage.setItem("token", data.token)
@@ -65,11 +66,11 @@ export default function Login() {
 
             <section className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 max-w-md items-center text-black 
             border border-black/5 shadow-md p-10 rounded-2xl transition-opacity ${loading ? 'opacity-20' : 'opacity-100'}`}>
-                
+
                 <h2 className="text-2xl font-semibold mb-4 text-center text-[#102B5A]">Нэвтрэх</h2>
 
                 {error && <p className="text-red-600 text-sm mb-2 text-center">{error}</p>}
-                
+
                 <form onSubmit={(e) => { e.preventDefault(); handleLogin(); }}>
                     <input
                         placeholder="И-мэйл"
@@ -87,18 +88,38 @@ export default function Login() {
                         className="w-full border p-2 rounded mb-3"
                         disabled={loading}
                     />
+                    <div className="flex items-center justify-between"><br />
+                    <Link href="/forgot-password" className="text-sm text-red-500 hover:text-red-700">
+                        Нууц үгээ мартсан?
+                    </Link>
+                </div>
 
                     <button
                         type="submit"
-                        className="mt-3 p-2 border border-gray-300 shadow-md rounded-lg text-white w-full bg-[#102B5A] disabled:opacity-50"
+                        className="mt-3 p-2 border border-black/5 rounded-lg text-white w-full bg-[#102B5A] disabled:opacity-50 hover:shadow-lg transition-all font-medium"
                         disabled={loading}
                     >
                         {loading ? "Уншиж байна..." : "Нэвтрэх"}
                     </button>
+
+                    <div className="relative flex items-center mb-4 mt-4">
+                        <div className="flex-grow border-t border-gray-200"></div>
+                        <span className="flex-shrink mx-4 text-gray-400 text-xs uppercase">Эсвэл</span>
+                        <div className="flex-grow border-t border-gray-200"></div>
+                    </div>
+
+                    {/* Google товч */}
+                    <button
+                        onClick={() => signIn('google', { callbackUrl: '/' })}
+                        className="w-full flex items-center justify-center gap-3 border border-gray-300 p-2.5 rounded-lg mb-6 hover:shadow-md hover:bg-gray-50 transition-all font-medium"
+                    >
+                        <img src="https://www.svgrepo.com/show/355037/google.svg" className="w-5 h-5" alt="Google" />
+                        Google-ээр нэвтрэх
+                    </button>
                 </form>
 
                 <p className="mt-4 text-center">
-                    Бүртгэлгүй? <Link href="/register" className="text-[#102B5A] font-medium hover:text-blue-700">Бүртгүүлэх</Link>
+                    Бүртгэлгүй юу? <Link href="/register" className="text-[#102B5A] font-bold hover:underline ">Бүртгүүлэх</Link>
                 </p>
             </section>
         </>

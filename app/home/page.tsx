@@ -23,7 +23,7 @@ export default function Home() {
       title: 'Олон нийтийн талбай',
       desc: 'Олон нийтийн талбайн цэвэрлэгээ, ажилбар, гадаргуу арчилгаа.',
       image: '/ОНТ.jpg',
-      link: '/service             /public-space',
+      link: '/service/public-space',
     },
   ];
 

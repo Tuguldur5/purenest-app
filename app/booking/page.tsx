@@ -240,16 +240,18 @@ export default function Booking() {
                             <div className="space-y-2">
                                 <label className="text-sm font-semibold text-gray-600 ml-1">Нэр</label>
                                 <input
+                                    required // Нэмэгдсэн
                                     value={form.name}
                                     onChange={(e) => handleFormChange('name', e.target.value)}
                                     className="w-full border border-gray-200 p-3 rounded-xl bg-gray-50 outline-none"
-                                    readOnly // Анхны код дээр readOnly байсан тул хэвээр үлдээв
                                 />
                             </div>
 
                             <div className="space-y-2">
                                 <label className="text-sm font-semibold text-gray-600 ml-1">Утас</label>
                                 <input
+                                    required // Нэмэгдсэн
+                                    type="tel" // Утасны дугаар тул төрлийг нь зааж өгвөл зүгээр
                                     value={form.phone_number}
                                     onChange={(e) => handleFormChange('phone_number', e.target.value)}
                                     className="w-full border border-gray-200 p-3 rounded-xl focus:ring-2 focus:ring-[#102B5A] outline-none transition-all"
@@ -260,6 +262,7 @@ export default function Booking() {
                         <div className="space-y-2">
                             <label className="text-sm font-semibold text-gray-600 ml-1">Үйлчилгээ</label>
                             <select
+                                required // Нэмэгдсэн
                                 value={form.service}
                                 onChange={(e) => handleFormChange('service', e.target.value)}
                                 className="w-full border border-gray-200 p-3 rounded-xl bg-white outline-none cursor-pointer"
@@ -270,13 +273,14 @@ export default function Booking() {
                             </select>
                         </div>
 
-                        {/* dynamic inputs - таны ложик хэвээрээ */}
+                        {/* Динамик талбарууд - Үйлчилгээ сонгосон үед гарч ирнэ */}
                         {(form.service === 'Оффис цэвэрлэгээ' || form.service === 'Олон нийтийн талбай') && (
                             <div className="p-4 bg-gray-50 rounded-xl space-y-2">
                                 <label className="text-sm font-semibold text-gray-600">Талбайн хэмжээ (м²)</label>
                                 <input
+                                    required // Нэмэгдсэн
                                     type="number"
-                                    min={0}
+                                    min={1}
                                     value={form.publicAreaSize}
                                     onChange={(e) => handleFormChange('publicAreaSize', e.target.value)}
                                     className="w-full border border-gray-200 p-3 rounded-xl outline-none bg-white"
@@ -289,18 +293,19 @@ export default function Booking() {
                                 <h2 className="font-bold text-gray-700">Барилгын мэдээлэл</h2>
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                     {[
-                                        { label: "Байрны тоо", key: "apartments" as const },
-                                        { label: "Давхарын тоо", key: "floors" as const },
-                                        { label: "Lift-ийн тоо", key: "lifts" as const },
-                                        { label: "Айлын тоо", key: "rooms" as const }
+                                        { label: "Байрны тоо", key: "apartments" },
+                                        { label: "Давхарын тоо", key: "floors" },
+                                        { label: "Lift-ийн тоо", key: "lifts" },
+                                        { label: "Айлын тоо", key: "rooms" }
                                     ].map((item) => (
                                         <div key={item.key}>
                                             <label className="text-xs font-medium text-gray-500">{item.label}</label>
                                             <input
+                                                required
                                                 type="number"
                                                 min={0}
-                                                // Одоо энд алдаа заахгүй
-                                                value={form[item.key]}
+                                                // Энд keyof typeof form ашиглан TypeScript алдааг засна
+                                                value={form[item.key as keyof typeof form]}
                                                 onChange={(e) => handleFormChange(item.key, e.target.value)}
                                                 className="w-full border border-gray-200 p-2 rounded-lg mt-1 outline-none"
                                             />
@@ -314,20 +319,23 @@ export default function Booking() {
                             <div className="space-y-2">
                                 <label className="text-sm font-semibold text-gray-600 ml-1">Огноо</label>
                                 <input
+                                    required // Нэмэгдсэн
                                     type="date"
                                     min={today}
                                     value={form.date}
                                     onChange={(e) => handleFormChange('date', e.target.value)}
-                                    className="w-full border border-gray-200 p-3 rounded-xl outline-none"
+                                    className="w-full border border-gray-200 p-2.5 rounded-xl outline-none cursor-pointer"
                                 />
                             </div>
                             <div className="space-y-2">
                                 <label className="text-sm font-semibold text-gray-600 ml-1">Давтамж</label>
                                 <select
+                                    required // Нэмэгдсэн
                                     value={form.frequency}
                                     onChange={(e) => handleFormChange('frequency', e.target.value)}
                                     className="w-full border border-gray-200 p-3 rounded-xl bg-white outline-none cursor-pointer"
                                 >
+                                    <option value="">Сонгоно уу</option>
                                     {frequencyOptions.map((f) => (
                                         <option key={f}>{f}</option>
                                     ))}
@@ -339,10 +347,12 @@ export default function Booking() {
                             <div>
                                 <label className="text-xs font-bold text-gray-400 uppercase">Хот / Аймаг</label>
                                 <select
+                                    required // Нэмэгдсэн
                                     value={form.city}
                                     onChange={(e) => handleFormChange('city', e.target.value)}
                                     className="w-full border border-gray-200 p-3 rounded-xl bg-white mt-1"
                                 >
+                                    <option value="">Сонгох</option>
                                     {PROVINCES.map(p => (
                                         <option key={p} value={p}>{p}</option>
                                     ))}
@@ -353,12 +363,13 @@ export default function Booking() {
                                     {form.city === 'Улаанбаатар' ? 'Дүүрэг' : 'Сум'}
                                 </label>
                                 <select
+                                    required // Нэмэгдсэн
                                     disabled={!form.city}
                                     value={form.district}
                                     onChange={(e) => handleFormChange('district', e.target.value)}
                                     className="w-full border border-gray-200 p-3 rounded-xl bg-white mt-1 disabled:bg-gray-100"
                                 >
-                                    <option value="" disabled>Сонгоно уу</option>
+                                    <option value="">Сонгоно уу</option>
                                     {form.city === 'Улаанбаатар' && ULAANBAATAR_DISTRICTS.map(d => (
                                         <option key={d.name} value={d.name}>{d.name}</option>
                                     ))}
@@ -369,12 +380,13 @@ export default function Booking() {
                                     {form.city === 'Улаанбаатар' ? 'Хороо' : 'Баг'}
                                 </label>
                                 <select
+                                    required // Нэмэгдсэн
                                     disabled={!form.district}
                                     value={form.khoroo}
                                     onChange={(e) => handleFormChange('khoroo', e.target.value)}
                                     className="w-full border border-gray-200 p-3 rounded-xl bg-white mt-1 disabled:bg-gray-100"
                                 >
-                                    <option value="" disabled>Сонгоно уу</option>
+                                    <option value="">Сонгоно уу</option>
                                     {availableKhoroos.map(k => (
                                         <option key={k} value={k}>{k}</option>
                                     ))}
@@ -385,6 +397,7 @@ export default function Booking() {
                         <div className="space-y-2">
                             <label className="text-sm font-semibold text-gray-600 ml-1">Байршил / Гудамж</label>
                             <input
+                                required // Нэмэгдсэн
                                 value={form.address}
                                 onChange={(e) => handleFormChange('address', e.target.value)}
                                 className="w-full border border-gray-200 p-3 rounded-xl outline-none focus:ring-2 focus:ring-[#102B5A]"
@@ -418,11 +431,15 @@ export default function Booking() {
                                 <span className="text-xs font-bold text-gray-400 uppercase">Огноо</span>
                                 <span className="text-gray-700 font-medium">{form.date || "Сонгоогүй"}</span>
                             </div>
-
                             <div className="pt-6 mt-6 border-t">
                                 <p className="text-sm font-bold text-gray-400 uppercase">Нийт төлөх дүн</p>
                                 <p className="text-3xl font-black text-emerald-600">
                                     {totalPrice.toLocaleString()} ₮
+                                </p>
+                            </div>
+                            <div className="mt-6 p-4 bg-emerald-50 rounded-xl border border-emerald-100">
+                                <p className="text-xs text-emerald-800 text-center font-medium">
+                                    Таны захиалгыг баталгаажуулахаар манай оператор тантай холбогдох болно.
                                 </p>
                             </div>
                         </div>

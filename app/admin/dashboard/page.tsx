@@ -169,10 +169,11 @@ export default function AdminDashboardPage() {
                                 <thead className="text-slate-400 text-xs uppercase tracking-wider border-b">
                                     <tr>
                                         <th className="pb-4 px-2">Хэрэглэгч</th>
+                                        <th className="pb-4 px-2">И-мэйл</th>
                                         <th className='pb-4 px-2'>Утас</th>
                                         <th className="pb-4 px-2">Хэзээ</th>
                                         <th className="pb-4 px-2">Үйлчилгээ</th>
-                                        <th className="pb-4 px-2">Нийт</th>
+                                        <th className="pb-4 px-2">Нийт үнэ</th>
                                         <th className="pb-4 px-2">Төлөв</th>
                                     </tr>
                                 </thead>
@@ -181,6 +182,7 @@ export default function AdminDashboardPage() {
                                         // order_id байхгүй бол индекс ашиглах, эсвэл хослуулах нь аюулгүй
                                         <tr key={`recent-${o.id || idx}`} className="text-sm hover:bg-slate-50 transition-colors">
                                             <td className="py-4 px-2 font-medium">{o.full_name}</td>
+                                            <td className="py-4 px-2 text-blue-600 underline">{o.email}</td>
                                             <td className="py-4 px-2">{o.phone_number}</td>
                                             <td className="py-4 px-2 font-medium">
                                                 {new Date(o.date).toLocaleString('mn-MN', {
@@ -214,6 +216,7 @@ export default function AdminDashboardPage() {
                                 <tr className="text-xs font-bold text-slate-500">
                                     <th className="p-4">ID</th>
                                     <th className="p-4">Нэр</th>
+                                    <th className="p-4">Утас</th>
                                     <th className="p-4">Үйлчилгээ</th>
                                     <th className="p-4">Хаяг</th>
                                     <th className="p-4">Төлбөр</th>
@@ -225,6 +228,7 @@ export default function AdminDashboardPage() {
                                     <tr key={o.id} className="hover:bg-slate-50 transition-colors">
                                         <td className="p-4 text-xs">#{o.id}</td>
                                         <td className="p-4 text-xm">{o.full_name}</td>
+                                        <td className="p-4 text-xm">{o.phone_number}</td>
                                         <td className="p-4">
                                             <p className="font-bold text-sm">{o.service}</p>
                                             <p className="text-[12px] text-gray-600">{new Date(o.date).toLocaleString('mn-MN', {
