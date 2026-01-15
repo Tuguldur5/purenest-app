@@ -13,7 +13,12 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cors({
-    origin: "https://purenest.mn", 
+    origin: [
+        "https://purenest.mn", 
+        "https://www.purenest.mn",
+        "https://purenest-frontend-xxx.vercel.app", // Өөрийн Vercel хаягийг энд нэмээрэй
+        "http://localhost:3000" // Локал дээр туршихад хэрэгтэй
+    ], 
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"]
 }));
