@@ -39,7 +39,7 @@ export default function ContactPage() {
         setLoading(true);
         try {
             // POST to your backend API
-            const res = await fetch("http://localhost:4000/api/contact", {
+            const res = await fetch("https://purenest-app.onrender.com/api/contact", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ name, email, message }),

@@ -37,7 +37,7 @@ function UserDetails({ details, onUpdate }: { details: UserDetail | null, onUpda
             const token = localStorage.getItem('token');
             if (!token) throw new Error("Нэвтрэх эрхгүй байна.");
 
-            const res = await fetch(`http://localhost:4000/api/users/update`, {
+            const res = await fetch(`https://purenest-app.onrender.com/api/users/update`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -328,7 +328,7 @@ export default function Profile() {
                 const storedUser = localStorage.getItem('user');
                 if (storedUser) setUserDetails(JSON.parse(storedUser));
 
-                const ordersResponse = await fetch(`http://localhost:4000/api/orders/history`, {
+                const ordersResponse = await fetch(`https://purenest-app.onrender.com/api/orders/history`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
 

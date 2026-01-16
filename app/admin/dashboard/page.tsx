@@ -8,7 +8,7 @@ import {
 } from 'recharts';
 import Loading from '../../loading';
 
-const API_BASE_URL = "http://localhost:4000/api/admin";
+const API_BASE_URL = "https://purenest-app.onrender.com/api/admin";
 
 interface Order {
     id: number;
@@ -67,10 +67,10 @@ export default function AdminDashboardPage() {
 
     // Статус шинэчлэх функц
     const handleStatusUpdate = async (id: number, newStatus: string) => {
-        // ХУУЧИН: const url = `http://localhost:4000/api/admin/orders/:id/status`;
+        // ХУУЧИН: const url = `https://purenest-app.onrender.com/api/admin/orders/:id/status`;
 
         // ШИНЭ: Жинхэнэ id-г нь url дотор нь ингэж хийнэ
-        const url = `http://localhost:4000/api/admin/orders/${id}/status`;
+        const url = `https://purenest-app.onrender.com/api/admin/orders/${id}/status`;
 
         console.log("Хүсэлт илгээж буй URL:", url); // Шалгах зорилгоор
 

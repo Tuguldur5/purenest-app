@@ -32,7 +32,7 @@ export default function AdminLayout() {
             }
 
             try {
-                const res = await fetch("http://localhost:4000/api/admin/orders", {
+                const res = await fetch("https://purenest-app.onrender.com/api/admin/orders", {
                     headers: { "Authorization": `Bearer ${token}` }
                 });
 

@@ -11,7 +11,7 @@ export default function ForgotPassword() {
     // 1. OTP илгээх функц
     const handleSendOTP = async () => {
         try {
-            const res = await fetch('http://localhost:4000/api/auth/forgot-password', { // 4000 порт нэмэв
+            const res = await fetch('https://purenest-app.onrender.com/api/auth/forgot-password', { // 4000 порт нэмэв
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email })
@@ -31,7 +31,7 @@ export default function ForgotPassword() {
 
     // 2. OTP шалгах функц
     const handleVerifyOTP = async () => {
-        const res = await fetch('http://localhost:4000/api/auth/verify-otp', {
+        const res = await fetch('https://purenest-app.onrender.com/api/auth/verify-otp', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, otp })

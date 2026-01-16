@@ -18,7 +18,7 @@ export default function Register() {
         setLoading(true)
 
         try {
-            const res = await fetch("http://localhost:4000/auth/register", {
+            const res = await fetch("https://purenest-app.onrender.com/auth/register", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({

@@ -11,7 +11,7 @@ export default function UsersPage() {
         async function loadUsers() {
             try {
                 const token = localStorage.getItem("token");
-                const res = await fetch("http://localhost:4000/api/admin/users", {
+                const res = await fetch("https://purenest-app.onrender.com/api/admin/users", {
                     headers: { "Authorization": `Bearer ${token}` }
                 });
                 const data = await res.json();

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { text } from 'stream/consumers';
 
-const API_URL = "http://localhost:4000/api/admin/pricing";
+const API_URL = "https://purenest-app.onrender.com/api/admin/pricing";
 
 export default function PricingAdmin() {
     const [pricing, setPricing] = useState({

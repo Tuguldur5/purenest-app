@@ -19,7 +19,7 @@ export default function Login() {
         setLoading(true) // 💡 Лоудерыг эхлүүлэх
 
         try {
-            const res = await fetch("http://localhost:4000/auth/login", {
+            const res = await fetch("https://purenest-app.onrender.com/auth/login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({

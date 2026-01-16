@@ -29,7 +29,7 @@ const PROVINCES = [
 ];
 
 
-const API_URL = "http://localhost:4000/api/booking";
+const API_URL = "https://purenest-app.onrender.com/api/booking";
 
 export default function Booking() {
     const today = new Date().toISOString().split('T')[0];
@@ -69,7 +69,7 @@ export default function Booking() {
 
     useEffect(() => {
         // URL нь дээрх нээлттэй API-тай ижил байх ёстой
-        fetch('http://localhost:4000/api/pricing-settings')
+        fetch('https://purenest-app.onrender.com/api/pricing-settings')
             .then(res => res.json())
             .then(data => setDbPricing(data))
             .catch(err => console.error("Үнэ татаж чадсангүй:", err));
@@ -201,7 +201,7 @@ export default function Booking() {
         if (!token) return;
 
         // Хэрэглэгчийн мэдээллийг татах
-        fetch("http://localhost:4000/api/booking/user-info", {
+        fetch("https://purenest-app.onrender.com/api/booking/user-info", {
             headers: {
                 Authorization: `Bearer ${token}`
             }
