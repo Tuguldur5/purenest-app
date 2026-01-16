@@ -16,7 +16,7 @@ app.use(cors({
     origin: [
         "https://purenest.mn", 
         "https://www.purenest.mn",
-        "https://purenest-frontend-xxx.vercel.app", // Өөрийн Vercel хаягийг энд нэмээрэй
+        "https://purenest-app.vercel.app", // Өөрийн Vercel хаягийг энд нэмээрэй
         "http://localhost:3000" // Локал дээр туршихад хэрэгтэй
     ], 
     methods: ["GET", "POST", "PUT", "DELETE"],
@@ -26,10 +26,11 @@ app.use(cors({
 const JWT_SECRET = process.env.JWT_SECRET || 'YOUR_HIGHLY_SECURE_SECRET_KEY_123';
 
 
+// Бакэнд (server.js эсвэл харгалзах файл)
 async function UserDetails(user_id) {
     try {
         const userQuery = await pool.query(
-            `SELECT full_name, phone FROM users WHERE id = $1`,
+            `SELECT full_name, email, phone FROM users WHERE id = $1`, // 'email' нэмэв
             [user_id]
         );
         return userQuery.rows[0];
@@ -206,7 +207,6 @@ app.post('/api/booking', authMiddleware, async (req, res) => {
         }
 
         const userName = userResult.rows[0].full_name;
-
         // 2. Frontend-ээс ирж буй мэдээллүүд
         const {
             service, date, address, total_price,
@@ -555,5 +555,5 @@ app.listen(4000, async () => {
     } catch (err) {
         console.error("DB холболтын алдаа:", err);
     }
-    console.log('Server running on port 4000');
+    console.log('Server on');
 });

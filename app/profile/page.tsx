@@ -24,13 +24,28 @@ interface Order {
 // 2. USER DETAILS COMPONENT
 // ===========================================
 function UserDetails({ details, onUpdate }: { details: UserDetail | null, onUpdate: (newData: UserDetail) => void }) {
+    const [isEditing, setIsEditing] = useState(false);
+    const [form, setForm] = useState<UserDetail>({
+        full_name: '',
+        email: '',
+        phone: ''
+    });
+    const [loading, setLoading] = useState(false);
+
+    // 1. Пропсоор өгөгдөл ирэх эсвэл өөрчлөгдөх үед form state-ийг шинэчлэх
+    // Энэ хэсэг нь утасны дугаар болон бусад мэдээлэл харагдахгүй байх асуудлыг шийднэ.
+    useEffect(() => {
+        if (details) {
+            setForm({
+                full_name: details.full_name || '',
+                email: details.email || '',
+                phone: details.phone || ''
+            });
+        }
+    }, [details]);
+
     if (!details) return <div className="animate-pulse bg-gray-200 h-64 rounded-2xl"></div>;
 
-    const [isEditing, setIsEditing] = useState(false);
-    const [form, setForm] = useState(details);
-    const [loading, setLoading] = useState(true);
-
-    // UserDetails доторх handleSave функц
     const handleSave = async () => {
         setLoading(true);
         try {
@@ -43,35 +58,34 @@ function UserDetails({ details, onUpdate }: { details: UserDetail | null, onUpda
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify(form) 
+                body: JSON.stringify(form)
             });
 
             const data = await res.json();
 
             if (!res.ok) {
-                // Backend-ээс ирж буй алдааны мессежийг (жишээ нь: и-мэйл бүртгэлтэй байна) харуулах
                 throw new Error(data.error || "Шинэчлэхэд алдаа гарлаа");
             }
 
-            // Амжилттай болбол
+            // 2. Амжилттай болбол Parent компонент болон LocalStorage-ийг шинэчлэх
             onUpdate(data);
-            localStorage.setItem('user', JSON.stringify(data)); // LocalStorage-оо шинэчлэх
+            localStorage.setItem('user', JSON.stringify(data)); 
+            
             setIsEditing(false);
             alert("Мэдээлэл амжилттай шинэчлэгдлээ.");
-
         } catch (error: any) {
-            console.error("Хадгалахад алдаа гарлаа:", error);
-            alert(error.message); // Хэрэглэгчид алдааг харуулах
+            console.error("Save error:", error);
+            alert(error.message);
         } finally {
             setLoading(false);
         }
     };
+
     return (
         <div className="bg-white rounded-[14px] shadow-sm border border-gray-100 -mt-10 overflow-hidden transition-all duration-300 hover:shadow-md">
             <div className="p-6">
-                <div className="flex justify-between justify-center mb-6">
-                    <h2 className="text-xl font-bold text-gray-800 tracking-tight ">Хувийн мэдээлэл</h2>
-                   
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-xl font-bold text-gray-800 tracking-tight">Хувийн мэдээлэл</h2>
                 </div>
 
                 <div className="space-y-5">
@@ -81,6 +95,7 @@ function UserDetails({ details, onUpdate }: { details: UserDetail | null, onUpda
                         isEditing={isEditing}
                         onChange={(val) => setForm({ ...form, full_name: val })}
                         placeholder="Нэр оруулах"
+                        
                     />
                     <EditableField
                         label="И-мэйл хаяг"
@@ -97,34 +112,36 @@ function UserDetails({ details, onUpdate }: { details: UserDetail | null, onUpda
                         placeholder="Дугаар оруулах"
                     />
                 </div>
-                
             </div>
-            <div className="p-4 flex justify-center">
-             {!isEditing ? (
+            <div className="p-4 flex justify-center border-t border-gray-50">
+                {!isEditing ? (
+                    <button
+                        onClick={() => setIsEditing(true)}
+                        className="px-6 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 rounded-[14px] hover:bg-indigo-100 transition-colors"
+                    >
+                        Засах
+                    </button>
+                ) : (
+                    <div className="flex gap-2">
                         <button
-                            onClick={() => setIsEditing(true)}
-                            className="px-4 py-1.5 text-sm font-medium text-indigo-600 bg-indigo-50 rounded-[14px] hover:bg-indigo-100 transition-colors"
+                            onClick={handleSave}
+                            disabled={loading}
+                            className="px-6 py-2 text-sm font-medium text-white bg-indigo-600 rounded-[14px] hover:bg-indigo-700 disabled:opacity-50 transition-colors"
                         >
-                            Засах
+                            {loading ? "Хадгалж байна..." : "Хадгалах"}
                         </button>
-                    ) : (
-                        <div className="flex gap-2">
-                            <button
-                                onClick={handleSave}
-                                disabled={loading}
-                                className="px-4 py-1.5 text-sm font-medium text-white bg-indigo-600 rounded-[14px] hover:bg-indigo-700 disabled:opacity-50 transition-colors"
-                            >
-                                {loading ? "..." : "Хадгалах"}
-                            </button>
-                            <button
-                                onClick={() => { setIsEditing(false); setForm(details); }}
-                                className="px-4 py-1.5 text-sm font-medium text-gray-500 bg-gray-100 rounded-[14px] hover:bg-gray-200 transition-colors"
-                            >
-                                Болих
-                            </button>
-                        </div>
-                    )}
+                        <button
+                            onClick={() => { 
+                                setIsEditing(false); 
+                                setForm(details); // Болих үед хуучин утгыг нь буцааж оноох
+                            }}
+                            className="px-6 py-2 text-sm font-medium text-gray-500 bg-gray-100 rounded-[14px] hover:bg-gray-200 transition-colors"
+                        >
+                            Болих
+                        </button>
                     </div>
+                )}
+            </div>
         </div>
     );
 }
@@ -171,7 +188,7 @@ const StatusBadge: React.FC<{ status: string; type?: 'service' | 'order' }> = ({
         },
         order: {
             'Хүлээгдэж байна': { text: 'Хүлээгдэж байна', bg: 'bg-orange-50 text-orange-600 border-orange-100' },
-           'Баталгаажсан': { text: 'Баталгаажсан', bg: 'bg-blue-50 text-blue-600 border-blue-100' },
+            'Баталгаажсан': { text: 'Баталгаажсан', bg: 'bg-blue-50 text-blue-600 border-blue-100' },
             'Дууссан': { text: 'Дууссан', bg: 'bg-green-50 text-green-600 border-green-100' },
             'Цуцлагдсан': { text: 'Цуцлагдсан', bg: 'bg-red-50 text-red-600 border-red-100' },
         }
@@ -227,7 +244,7 @@ function OrderHistory({ orders }: { orders: Order[] }) {
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2">
-                        <select 
+                        <select
                             value={filterService}
                             onChange={(e) => setFilterService(e.target.value)}
                             className="bg-slate-50 border border-black/5 shadow-md  rounded-[14px] text-slate-600 text-[11px] font-bold px-3 py-2 outline-none hover:bg-slate-100 transition-colors cursor-pointer"
@@ -238,7 +255,7 @@ function OrderHistory({ orders }: { orders: Order[] }) {
                             <option value="Олон нийтийн талбай">Олон нийтийн</option>
                         </select>
 
-                        <select 
+                        <select
                             value={filterStatus}
                             onChange={(e) => setFilterStatus(e.target.value)}
                             className="bg-slate-50 border border-black/5 shadow-md rounded-[14px] text-slate-600 text-[11px] font-bold px-3 py-2 outline-none hover:bg-slate-100 transition-colors cursor-pointer"
@@ -268,7 +285,7 @@ function OrderHistory({ orders }: { orders: Order[] }) {
                         filteredOrders.map((order) => (
                             <div key={order.id} className="px-8 py-5 hover:bg-slate-50/50 transition-all group">
                                 <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-6 items-center">
-                                    
+
                                     {/* ID багана */}
                                     <div className="md:col-span-2 flex items-center justify-between md:block">
                                         <p className="md:hidden text-[10px] font-bold text-slate-300 uppercase">ID</p>
@@ -380,7 +397,7 @@ export default function Profile() {
                             </svg>
                         </button>
 
-                        
+
                     </div>
 
                     {/* Right Column (Order History) */}
@@ -389,7 +406,7 @@ export default function Profile() {
                     </div>
                 </div>
 
-               
+
             </div>
         </div>
     );

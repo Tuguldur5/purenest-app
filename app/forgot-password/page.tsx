@@ -6,12 +6,16 @@ import { useRouter } from 'next/navigation'
 export default function ForgotPassword() {
     const [email, setEmail] = useState('')
     const [otp, setOtp] = useState('')
-    const [step, setStep] = useState(1) 
+    const [loading, setLoading] = useState(false) 
+    const [step, setStep] = useState(1) // 1: Email, 2: OTP
     const router = useRouter()
-    // 1. OTP илгээх функц
+
+    // 1. И-мэйл илгээх функц
+    // handleSendOTP функц доторх fetch URL-ийг засах:
+    // ForgotPassword.tsx дотор
     const handleSendOTP = async () => {
         try {
-            const res = await fetch('https://purenest-app.onrender.com/api/auth/forgot-password', { // 4000 порт нэмэв
+            const res = await fetch('https://purenest-app.onrender.com/api/auth/forgot-password', { 
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email })
@@ -62,7 +66,7 @@ export default function ForgotPassword() {
                         className="btn-primary p-2 rounded-lg mt-3 w-full bg-[#102B5A] text-white"
                         onClick={handleSendOTP}
                     >
-                        OTP код илгээх
+                         {loading ? "Илгээж байна..." : "OTP код илгээх"}
                     </button>
                 </>
             ) : (

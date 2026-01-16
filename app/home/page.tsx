@@ -30,7 +30,7 @@ export default function Home() {
   return (
     <main className="bg-white text-black relative font-sans">
       {/* Hero Section */}
-      <section className="relative w-full min-h-screen">
+      <section className="relative w-full min-h-screen justify-center items-center flex overflow-hidden">
         <img
           src="/home.png"
           alt="Cleaning Service"

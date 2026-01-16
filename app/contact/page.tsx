@@ -9,11 +9,6 @@ export default function ContactPage() {
     const [loading, setLoading] = useState(false);
     const [status, setStatus] = useState<null | { ok: boolean; text: string }>(null);
 
-    // Replace these placeholders with your real company info
-    const COMPANY_EMAIL = "info@purenest.mn";
-    const COMPANY_PHONE = "+976 12345678";
-    const COMPANY_ADDRESS = "Баянгол дүүрэг, Улаанбаатар, Монгол Баянгол дүүрэг, Улаанбаатар, Монгол";
-
     // Example map coordinates (Ulaanbaatar center). Replace with your lat/lng.
     const MAP_LAT = 47.9181;
     const MAP_LNG = 106.9170;
@@ -103,7 +98,7 @@ export default function ContactPage() {
                                     <div>
                                         <p className="text-sm font-light text-gray-300">Утас</p>
                                         {/* {COMPANY_PHONE}-ийг бодит утгаар солив */}
-                                        <p className="text-lg font-medium hover:text-amber-400 transition-colors">+976 7711 7711</p>
+                                        <p className="text-lg font-medium hover:text-amber-400 transition-colors">+976 12345678</p>
                                     </div>
                                 </div>
 
@@ -113,7 +108,7 @@ export default function ContactPage() {
                                     <div>
                                         <p className="text-sm font-light text-gray-300">Имэйлээр холбогдох</p>
                                         {/* {COMPANY_EMAIL}-ийг бодит утгаар солив */}
-                                        <p className="text-lg font-medium hover:text-amber-400 transition-colors">info@example.mn</p>
+                                        <p className="text-lg font-medium hover:text-amber-400 transition-colors">Sale@purenest.mn</p>
                                     </div>
                                 </div>
 

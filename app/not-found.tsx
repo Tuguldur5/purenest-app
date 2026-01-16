@@ -1,55 +1,89 @@
 "use client";
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { motion } from 'framer-motion';
+import { ArrowLeft, Home, Sparkle } from 'lucide-react';
 import BubbleBackground from './components/BubbleBackground';
 
 export default function NotFound() {
   const router = useRouter();
 
+  const goToHome = () => router.push('/');
+  const goBack = () => router.back();
+
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-6 overflow-hidden relative">
+    <div className="fixed inset-0 z-[9999] min-h-screen bg-white flex items-center justify-center px-6 overflow-hidden">
       
-      {/* Background Bubbles Component */}
+      {/* Таны өмнөх BubbleBackground-ийг энд хэвээр нь үлдээлээ */}
       <BubbleBackground />
 
-      <div className="max-w-md w-full text-center relative z-10">
+      <div className="max-w-2xl w-full text-center relative z-10">
         
-        {/* 1. 404 Header - Minimal & Clean */}
-        <div className="mb-6">
-          <h1 className="text-9xl font-extrabold text-[#102B5A] tracking-tighter leading-none opacity-90">
-            404
-          </h1>
-          <div className="h-1 w-12 bg-blue-500 mx-auto mt-6 rounded-full"></div>
+        {/* 1. Creative 404 Section */}
+        <div className="relative mb-6 inline-block">
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            <h1 className="text-[12rem] md:text-[16rem] font-black text-[#102B5A] leading-none tracking-tighter select-none">
+              404
+            </h1>
+          </motion.div>
+          
+          {/* Гялалздаг оч - Цэвэрлэгээний эффект */}
+          <motion.div 
+            animate={{ 
+              scale: [1, 1.2, 1],
+              opacity: [0.5, 1, 0.5] 
+            }}
+            transition={{ duration: 2, repeat: Infinity }}
+            className="absolute top-10 right-0 text-blue-400"
+          >
+            <Sparkle size={48} fill="currentColor" />
+          </motion.div>
         </div>
 
-        {/* 2. Content - Typography-г илүү эмх цэгцтэй болгосон */}
-        <div className="mb-10 px-4">
-          <h2 className="text-2xl font-bold text-slate-800 mb-3 tracking-tight">
-            Хуудас олдсонгүй
+        {/* 2. Текст хэсэг - Илүү цэгцтэй */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3, duration: 0.8 }}
+          className="space-y-4 mb-12"
+        >
+          <h2 className="text-3xl md:text-5xl font-bold text-slate-800 tracking-tight">
+            Төгс цэвэрлэгээний үр дүн.
           </h2>
-          <p className="text-slate-500 text-base font-medium leading-relaxed">
-            Уучлаарай, таны хайсан хуудас байхгүй байна. <br />
-            Бид энэ хэсгийг гялалзтал нь цэвэрлэж байна.
+          <div className="h-1.5 w-24 bg-blue-500 mx-auto rounded-full mb-6"></div>
+          <p className="text-slate-500 text-lg md:text-xl font-medium max-w-lg mx-auto leading-relaxed">
+            Уучлаарай, бид энэ хуудсыг хэтэрхий сайн цэвэрлэчихжээ. 
+            Таны хайсан мэдээлэл энд алга байна.
           </p>
-        </div>
+        </motion.div>
 
-        {/* 3. Buttons - Илүү цэвэрхэн, орчин үеийн (Rounded) */}
-        <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
-          <Link
-            href="/"
-            className="w-full sm:w-auto px-10 py-3.5 bg-[#102B5A] text-white text-sm font-semibold rounded-full hover:bg-blue-800 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 active:scale-95"
-          >
-            Нүүр хуудас
-          </Link>
+        {/* 3. Товчнууд - Дугуй бөгөөд "Clean" загвар */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+        >
           <button
-            onClick={() => router.back()}
-            className="w-full sm:w-auto px-10 py-3.5 bg-white text-[#102B5A] text-sm font-semibold rounded-full border border-slate-200 hover:border-blue-200 hover:bg-blue-50/50 transition-all duration-300 active:scale-95"
+            onClick={goToHome}
+            className="group flex items-center gap-3 px-10 py-4 bg-[#102B5A] text-white text-base font-bold rounded-full hover:bg-blue-800 transition-all duration-300 hover:shadow-[0_10px_30px_rgba(16,43,90,0.3)] active:scale-95"
           >
-            Буцах
+            <Home size={20} />
+            Нүүр хуудас руу
           </button>
-        </div>
-
+          
+          <button
+            onClick={goBack}
+            className="group flex items-center gap-3 px-10 py-4 bg-white text-[#102B5A] text-base font-bold rounded-full border-2 border-slate-100 hover:border-blue-200 hover:bg-blue-50/30 transition-all duration-300 active:scale-95"
+          >
+            <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
+            Буцаад хайх
+          </button>
+        </motion.div>
       </div>
     </div>
   );

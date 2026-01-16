@@ -12,7 +12,7 @@ export default function Footer({ size = 28, color = "white" }: SocialIconsProps)
 
                 <div>
                     <h3 className="text-xl font-semibold mb-3">Холбоо барих</h3>
-                    <p  className="hover:text-amber-400">Утас: +976 9900-0000</p>
+                    <p  className="hover:text-amber-400">Утас: +976 12345678</p>
                     <p  className="hover:text-amber-400">Email: Sales@purenest.mn</p>
                     <p  className="hover:text-amber-400">Хаяг: Улаанбаатар, Монгол</p>
                 </div>
@@ -21,8 +21,8 @@ export default function Footer({ size = 28, color = "white" }: SocialIconsProps)
                     <h3 className="text-xl font-semibold mb-3">Хурдан Холбоос</h3>
                     <ul className="space-y-2">
                         <li><Link className="hover:text-amber-400" href="/">Нүүр</Link></li>
-                        <li><Link className="hover:text-amber-400" href="/service">Үйлчилгээ</Link></li>
-                        <li><Link className="hover:text-amber-400" href="/booking">Захиалах</Link></li>
+                        <li><Link className="hover:text-amber-400" href="/booking">Захиалга</Link></li>
+                        <li><Link className="hover:text-amber-400" href="/about">Бидний тухай</Link></li>
                         <li><Link className="hover:text-amber-400" href="/faq">Түгээмэл асуултууд</Link></li>
                     </ul>
                 </div>
