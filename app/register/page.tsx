@@ -1,20 +1,58 @@
-'use client'
+"use client"
 import { useState } from 'react'
 import Link from 'next/link'
-import { Phone } from 'lucide-react'
+import { useRouter } from 'next/navigation' // window.location-ийн оронд ашиглах
+import { useSiteToast } from '../hooks/useSiteToast'
+import { Eye, EyeOff } from 'lucide-react' // Нүдний дүрс
 
 export default function Register() {
+    const router = useRouter()
+    const { showToast } = useSiteToast()
+
     const [form, setForm] = useState({
         name: '',
         email: '',
         phone: '',
         password: ''
     })
-    const [error, setError] = useState('')
-    const [loading, setLoading] = useState(false)
 
-    const handleRegister = async () => {
-        setError('')
+    const [loading, setLoading] = useState(false)
+    const [showPassword, setShowPassword] = useState(false) // Нууц үг харах төлөв
+    const [errors, setErrors] = useState<{ password?: string }>({});
+    // И-мэйл формат шалгах функц
+    const validateEmail = (email: string) => {
+        return String(email)
+            .toLowerCase()
+            .match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
+    }
+
+    const handleRegister = async (e: React.FormEvent) => {
+
+        e.preventDefault();
+
+        // Алдааг цэвэрлэх
+        setErrors({});
+
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+        if (!passwordRegex.test(form.password)) {
+            setErrors(prev => ({
+                ...prev,
+                password: "Нууц үг багадаа 8 тэмдэгт, 1 том үсэг, 1 тоо болон 1 тусгай тэмдэгт агуулсан байх ёстой."
+            }));
+            // Toast-оо давхар харуулж болно, эсвэл болиулсан ч болно
+            return;
+        }
+        if (!form.name || !form.email || !form.phone || !form.password) {
+            showToast({ title: "Алдаа", description: "Бүх талбарыг бөглөнө үү." })
+            return
+        }
+
+        // 2. И-мэйл формат шалгах
+        if (!validateEmail(form.email)) {
+            showToast({ title: "Алдаа", description: "И-мэйл хаяг буруу байна (@ болон домэйн оруулна уу)." })
+            return
+        }
         setLoading(true)
 
         try {
@@ -24,7 +62,7 @@ export default function Register() {
                 body: JSON.stringify({
                     full_name: form.name,
                     email: form.email,
-                    phone:form.phone,
+                    phone: form.phone,
                     password: form.password
                 })
             })
@@ -32,70 +70,93 @@ export default function Register() {
             const data = await res.json()
 
             if (!res.ok) {
-                setError(data.error || "Бүртгэх үед алдаа гарлаа")
+                // Backend-ээс ирж буй алдааны мессежийг оновчтой харуулах
+                const errorMsg = data.message || data.error || "Бүртгэх үед алдаа гарлаа"
+                showToast({ title: "Алдаа", description: errorMsg })
             } else {
-                alert("Бүртгэл амжилттай!")
-                window.location.href = "/login"
+                showToast({ title: "Амжилттай!", description: "Бүртгэл амжилттай боллоо. Нэвтрэх хэсэг рүү шилжиж байна." })
+                setTimeout(() => {
+                    router.push("/login") // Next.js-ийн router ашиглах нь илүү хурдан
+                }, 1500)
             }
-
         } catch (err) {
-            setError("Сервертэй холбогдож чадсангүй.")
+            showToast({ title: "Алдаа", description: "Сервертэй холбогдож чадсангүй." })
+        } finally {
+            setLoading(false)
         }
-
-        setLoading(false)
     }
 
     return (
-      
-        <section className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 max-w-md items-center text-black 
-        border border-black/5 shadow-md p-10 rounded-2xl">
-            
-            
-            <h2 className="text-2xl font-semibold mb-4 text-center text-[#102B5A]">Бүртгүүлэх</h2>
+        <section className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md items-center text-black 
+        border border-black/5 shadow-md p-10 rounded-2xl bg-white">
 
-            {error && <p className="text-red-600 text-sm mb-3">{error}</p>}
+            <h2 className="text-2xl font-semibold mb-6 text-center text-[#102B5A]">Бүртгүүлэх</h2>
+            <div className="space-y-4">
+                {/* Нэр */}
+                <input
+                    placeholder="Нэр"
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    className="w-full border border-gray-200 p-3 rounded-xl outline-none transition-all focus:border-[#102B5A] focus:ring-1 focus:ring-[#102B5A]/10"
+                />
 
-            <input 
-                placeholder="Нэр" 
-                value={form.name} 
-                onChange={(e) => setForm({ ...form, name: e.target.value })} 
-                className="w-full border p-2 rounded mb-3" 
-            />
+                {/* И-мэйл */}
+                <input
+                    placeholder="И-мэйл (жишээ: example@mail.com)"
+                    type="email"
+                    value={form.email}
+                    onChange={(e) => setForm({ ...form, email: e.target.value })}
+                    className="w-full border border-gray-200 p-3 rounded-xl outline-none transition-all focus:border-[#102B5A] focus:ring-1 focus:ring-[#102B5A]/10"
+                />
 
-            <input 
-                placeholder="И-мэйл" 
-                value={form.email} 
-                onChange={(e) => setForm({ ...form, email: e.target.value })} 
-                className="w-full border p-2 rounded mb-3" 
-            />
+                {/* Утасны дугаар */}
+                <input
+                    placeholder="Утасны дугаар"
+                    type="tel"
+                    value={form.phone}
+                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                    className="w-full border border-gray-200 p-3 rounded-xl outline-none transition-all focus:border-[#102B5A] focus:ring-1 focus:ring-[#102B5A]/10"
+                />
 
-            <input 
-                placeholder="Утасны дугаар" 
-                type="phone_number"
-                value={form.phone} 
-                onChange={(e) => setForm({ ...form, phone: e.target.value })} 
-                className="w-full border p-2 rounded mb-3" 
-            />
-             <input 
-                placeholder="Нууц үг" 
-                type="password"
-                value={form.password} 
-                onChange={(e) => setForm({ ...form, password: e.target.value })} 
-                className="w-full border p-2 rounded mb-3" 
-            />
+                <div className="relative">
+                    <input
+                        placeholder="Нууц үг"
+                        type={showPassword ? "text" : "password"}
+                        value={form.password}
+                        onChange={(e) => {
+                            setForm({ ...form, password: e.target.value });
+                            if (errors.password) setErrors({ ...errors, password: "" });
+                        }}
+                        className={`w-full border p-3 pr-12 rounded-xl outline-none transition-all ${errors.password ? 'border-red-500 bg-red-50/30' : 'border-gray-200 focus:border-[#102B5A] focus:ring-1 focus:ring-[#102B5A]/10'
+                            }`}
+                    />
+                    <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#102B5A] transition-colors"
+                    >
+                        {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </button>
+                </div>
+                {errors.password && (
+                    <p className="text-[11px] text-red-500 font-medium ml-1 leading-tight animate-in fade-in slide-in-from-top-1">
+                        {errors.password}
+                    </p>
+                )}
 
-            <button 
-                className="btn-primary w-full mt-3 mb-3 text-white border-gray-300 p-3 border border-black/5 shadow-md rounded-lg bg-[#102B5A]"
-                onClick={handleRegister}
-                disabled={loading}
-            >
-                {loading ? "Уншиж байна..." : "Бүртгүүлэх"}
-            </button>
+                <button
+                    className="w-full mt-2 text-white p-3 shadow-md rounded-[14px] bg-[#102B5A] hover:bg-[#1a3d7a] transition-colors disabled:bg-gray-400"
+                    onClick={handleRegister}
+                    disabled={loading}
+                >
+                    {loading ? "Уншиж байна..." : "Бүртгүүлэх"}
+                </button>
+            </div>
 
-            <p className="mt-3 text-center">
+            <p className="mt-5 text-center text-sm">
                 Бүртгэлтэй юу?
-                <Link href="/login" className="hover-mustard text-[#102B5A] font-bold hover:underline ml-1">
-                        Нэвтрэх
+                <Link href="/login" className="text-[#102B5A] font-bold hover:underline ml-1">
+                    Нэвтрэх
                 </Link>
             </p>
         </section>

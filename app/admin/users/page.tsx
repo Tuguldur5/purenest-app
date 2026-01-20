@@ -1,12 +1,13 @@
 'use client';
 import { useEffect, useState, useMemo } from "react";
 import { Users, ShoppingCart, DollarSign, Search } from "lucide-react";
+import { useSiteToast } from "@/app/hooks/useSiteToast";
 
 export default function UsersPage() {
     const [users, setUsers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState(""); // Хайлт хийхэд хэрэгтэй
-
+    const { showToast } = useSiteToast()
     useEffect(() => {
         async function loadUsers() {
             try {
@@ -16,13 +17,13 @@ export default function UsersPage() {
                 });
                 const data = await res.json();
                 if (!res.ok || data.error) {
-                    alert(data.error || "Server error");
+                    showToast({title: "Алдаа", description:"Серверийн алдаа!" });
                     return;
                 }
                 setUsers(data.users || []);
             } catch (err) {
                 console.error("Fetch users error:", err);
-                alert("Сервертэй холбогдож чадсангүй.");
+                showToast({title:"Алдаа", description:"Сервертэй холбогдож чадсангүй."})
             } finally {
                 setLoading(false);
             }

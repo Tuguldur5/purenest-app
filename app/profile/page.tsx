@@ -2,9 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Loading from '../loading';
-// ===========================================
-// 1. INTERFACES
-// ===========================================
+import { useSiteToast } from '../hooks/useSiteToast';
+
 interface UserDetail {
     full_name: string;
     email: string;
@@ -20,9 +19,6 @@ interface Order {
     date: string;
 }
 
-// ===========================================
-// 2. USER DETAILS COMPONENT
-// ===========================================
 function UserDetails({ details, onUpdate }: { details: UserDetail | null, onUpdate: (newData: UserDetail) => void }) {
     const [isEditing, setIsEditing] = useState(false);
     const [form, setForm] = useState<UserDetail>({
@@ -31,6 +27,7 @@ function UserDetails({ details, onUpdate }: { details: UserDetail | null, onUpda
         phone: ''
     });
     const [loading, setLoading] = useState(false);
+    const {showToast} = useSiteToast();
 
     // 1. Пропсоор өгөгдөл ирэх эсвэл өөрчлөгдөх үед form state-ийг шинэчлэх
     // Энэ хэсэг нь утасны дугаар болон бусад мэдээлэл харагдахгүй байх асуудлыг шийднэ.
@@ -69,13 +66,15 @@ function UserDetails({ details, onUpdate }: { details: UserDetail | null, onUpda
 
             // 2. Амжилттай болбол Parent компонент болон LocalStorage-ийг шинэчлэх
             onUpdate(data);
-            localStorage.setItem('user', JSON.stringify(data)); 
-            
+            localStorage.setItem('user', JSON.stringify(data));
+
             setIsEditing(false);
-            alert("Мэдээлэл амжилттай шинэчлэгдлээ.");
+            
+            showToast({title:"Амжилттай", description:"Мэдээлэл амжилттай шинэчлэгдлээ."});
         } catch (error: any) {
             console.error("Save error:", error);
-            alert(error.message);
+            showToast({ title:"Алдаа гарлаа", description:"Хадгалахад алдаа гарлаа"});
+            
         } finally {
             setLoading(false);
         }
@@ -95,7 +94,7 @@ function UserDetails({ details, onUpdate }: { details: UserDetail | null, onUpda
                         isEditing={isEditing}
                         onChange={(val) => setForm({ ...form, full_name: val })}
                         placeholder="Нэр оруулах"
-                        
+
                     />
                     <EditableField
                         label="И-мэйл хаяг"
@@ -131,8 +130,8 @@ function UserDetails({ details, onUpdate }: { details: UserDetail | null, onUpda
                             {loading ? "Хадгалж байна..." : "Хадгалах"}
                         </button>
                         <button
-                            onClick={() => { 
-                                setIsEditing(false); 
+                            onClick={() => {
+                                setIsEditing(false);
                                 setForm(details); // Болих үед хуучин утгыг нь буцааж оноох
                             }}
                             className="px-6 py-2 text-sm font-medium text-gray-500 bg-gray-100 rounded-[14px] hover:bg-gray-200 transition-colors"
@@ -175,7 +174,38 @@ function EditableField({ label, value, isEditing, onChange, placeholder }: Edita
         </div>
     );
 }
+const handleDeleteOrder = async (orderId: number, status: string) => {
+    const {showToast} = useSiteToast();
+        // Зөвхөн хүлээгдэж буй захиалгыг устгахыг зөвшөөрөх (Сонголтоор)
+        if (status !== "Хүлээгдэж байна") {
+            showToast({title:"Алдаа" , description:"Энэ захиалгыг цуцлах боломжгүй. Баталгаажсан эсвэл дууссан байна."});
+            return;
+        }
 
+        if (!window.confirm("Та энэ захиалгыг устгахдаа итгэлтэй байна уу?")) return;
+
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`https://purenest-app.onrender.com/api/booking/${orderId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (res.ok) {
+                showToast({title:"Амжилттай", description:"Захиалга амжилттай устгагдлаа."});
+                // Жагсаалтыг шинэчлэх (State-ээс хасах)
+                // setOrders(prev => prev.filter(o => o.id !== orderId));
+                window.location.reload(); // Эсвэл state-ээ шинэчлэх
+            } else {
+                
+                showToast({title:"Алдаа гарлаа", description:"Устгахад алдаа гарлаа."});
+            }
+        } catch (err) {
+            console.error("Delete error:", err);
+        }
+    };
 // ===========================================
 // 3. STATUS BADGE COMPONENT
 // ===========================================
@@ -203,9 +233,7 @@ const StatusBadge: React.FC<{ status: string; type?: 'service' | 'order' }> = ({
     );
 };
 
-// ===========================================
-// 4. ORDER HISTORY COMPONENT
-// ===========================================
+
 function OrderHistory({ orders }: { orders: Order[] }) {
     const [filterService, setFilterService] = useState('Бүгд');
     const [filterStatus, setFilterStatus] = useState('Бүгд');
@@ -311,12 +339,24 @@ function OrderHistory({ orders }: { orders: Order[] }) {
                                             <p className="text-base font-bold text-slate-900 group-hover:text-indigo-600 transition-colors leading-none">
                                                 {Number(order.total_price).toLocaleString()}₮
                                             </p>
-                                            <p className="text-[10px] text-slate-400 font-bold mt-1">
+                                            <p className="text-[12px] text-slate-600 font-bold mt-1">
                                                 {new Date(order.date).toLocaleDateString()}
                                             </p>
                                         </div>
                                     </div>
-
+                                    <div className="md:col-span-1 flex justify-end items-center">
+                                        {order.status === "Хүлээгдэж байна" && (
+                                            <button
+                                                onClick={() => handleDeleteOrder(order.id, order.status)}
+                                                className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                                title="Захиалга цуцлах"
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         ))
@@ -327,9 +367,7 @@ function OrderHistory({ orders }: { orders: Order[] }) {
     );
 }
 
-// ===========================================
-// 5. MAIN PROFILE COMPONENT
-// ===========================================
+
 export default function Profile() {
     const [userDetails, setUserDetails] = useState<UserDetail | null>(null);
     const [orderHistory, setOrderHistory] = useState<Order[]>([]);
@@ -371,7 +409,6 @@ export default function Profile() {
 
     return (
         <div className="min-h-screen flex flex-col bg-[#FDFEFE]">
-            {/* 1. HEADER SECTION (Full Width Header) */}
             <div className="bg-[#102B5A] items-center px-4 sm:px-6 lg:px-8 py-12">
                 <div className="max-w-7xl mx-auto w-full ">
                     <header className="text-center">
@@ -381,12 +418,10 @@ export default function Profile() {
                 </div>
             </div>
 
-            {/* 2. MAIN CONTENT AREA */}
             <div className="w-full  max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start -mt-10">
                     <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-8 h-fit">
                         <UserDetails details={userDetails} onUpdate={(data) => setUserDetails(data)} />
-
                         <button
                             onClick={handleLogout}
                             className="w-full py-3.5 px-6 border border-gray-200 text-white text-sm font-medium rounded-[14px] bg-[#102B5A] hover:bg-white hover:text-red-500 transition-all duration-300 flex items-center justify-center gap-2 group"
@@ -396,8 +431,6 @@ export default function Profile() {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                             </svg>
                         </button>
-
-
                     </div>
 
                     {/* Right Column (Order History) */}

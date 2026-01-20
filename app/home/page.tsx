@@ -4,28 +4,35 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Partner from './../components/partner';
 import { link } from 'fs';
+
 import BubbleBackground from '../components/BubbleBackground';
+import { Building2, Home as HomeIcon, Users, ArrowRight } from 'lucide-react';
+
+
 export default function Home() {
   const services = [
-    {
-      title: 'Оффис цэвэрлэгээ',
-      desc: 'Бидний найдвартай оффис цэвэрлэгээ таны ажлын орчинг цэвэр, эрүүл болгоно.',
-      image: '/office.jpg',
-      link: '/service/office',
-    },
-    {
-      title: 'СӨХ цэвэрлэгээ',
-      desc: 'Орон сууцны СӨХ-ийн нийтлэг талбайн цэвэрлэгээг мэргэжлийн түвшинд гүйцэтгэнэ.',
-      image: '/ONT.jpg',
-      link: '/service/suh',
-    },
-    {
-      title: 'Олон нийтийн талбай',
-      desc: 'Олон нийтийн талбайн цэвэрлэгээ, ажилбар, гадаргуу арчилгаа.',
-      image: '/ОНТ.jpg',
-      link: '/service/public-space',
-    },
-  ];
+  {
+    title: 'Оффис цэвэрлэгээ',
+    desc: 'Бидний найдвартай оффис цэвэрлэгээ таны ажлын орчинг цэвэр, эрүүл болгоно.',
+    icon: Building2, // Оффис икон
+    link: '/service/office',
+    color: 'hover:bg-blue-600'
+  },
+  {
+    title: 'СӨХ цэвэрлэгээ',
+    desc: 'Орон сууцны СӨХ-ийн нийтлэг талбайн цэвэрлэгээг мэргэжлийн түвшинд гүйцэтгэнэ.',
+    icon: HomeIcon, // Гэр икон
+    link: '/service/suh',
+    color: 'hover:bg-emerald-600'
+  },
+  {
+    title: 'Олон нийтийн талбай',
+    desc: 'Олон нийтийн талбайн цэвэрлэгээ, ажилбар, гадаргуу арчилгаа.',
+    icon: Users, // Хүмүүс икон
+    link: '/service/public-space',
+    color: 'hover:bg-indigo-600'
+  },
+];
 
   return (
     <main className="bg-white text-black relative font-sans">
@@ -51,63 +58,65 @@ export default function Home() {
           </Link>
         </div>
       </section>
-
-      {/* Services Section */}
+      
       {/* Services Section */}
       <section className="py-24 bg-gray-50">
-        <div className="container mx-auto px-6">
-          <motion.h2
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-3xl md:text-4xl font-bold text-center mb-16 text-gray-900"
-          >
-            Бидний үйлчилгээ
-          </motion.h2>
+      <div className="container mx-auto px-6">
+        <motion.h2
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-3xl md:text-4xl font-bold text-center mb-16 text-gray-900"
+        >
+          Бидний үйлчилгээ
+        </motion.h2>
 
-          <div className="grid md:grid-cols-3 gap-10">
-            {services.map((service, idx) => (
+        <div className="grid md:grid-cols-3 gap-8">
+          {services.map((service, idx) => {
+            const Icon = service.icon;
+            return (
               <motion.div
                 key={idx}
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                whileHover={{ y: -15 }}
-                transition={{ duration: 0.3 }}
-                // Өндрийг tablet дээр арай өндөр (500px) болгож өөрчилж болно
-                className="relative group h-[450px] md:h-[500px] overflow-hidden rounded-3xl shadow-2xl cursor-pointer"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: idx * 0.1 }}
+                className={`group relative p-8 bg-white rounded-[14px] shadow-sm border border-gray-100 transition-all duration-500 overflow-hidden cursor-pointer ${service.color} hover:shadow-xl hover:-translate-y-2`}
               >
-                {/* Background Image */}
-                <img
-                  src={service.image}
-                  alt={service.title}
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                />
+                {/* Hover Background Decor (optional) */}
+                <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full transition-all duration-500 group-hover:scale-150" />
 
-                {/* Overlay - Hover үед харанхуй хэсэг нь илүү дээшээ гарна */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent transition-all duration-500 group-hover:via-black/70"></div>
+                {/* Icon Container */}
+                <div className="relative z-10 w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mb-8 transition-colors duration-500 group-hover:bg-white/20">
+                  <Icon 
+                    size={32} 
+                    className="text-gray-700 transition-colors duration-500 group-hover:text-white" 
+                  />
+                </div>
 
                 {/* Content */}
-                <div className="absolute inset-0 p-6 md:p-8 flex flex-col justify-end text-white">
-                  {/* Гарчиг: Hover үед илүү дээшээ шилжинэ (-translate-y-12) */}
-                  <h3 className="text-2xl font-bold mb-3 transition-transform duration-500 group-hover:-translate-y-4">
+                <div className="relative z-10">
+                  <h3 className="text-xl font-bold mb-4 text-gray-900 transition-colors duration-500 group-hover:text-white">
                     {service.title}
                   </h3>
+                  <p className="text-gray-600 mb-8 leading-relaxed transition-colors duration-500 group-hover:text-white/90">
+                    {service.desc}
+                  </p>
 
-                  {/* Description хэсэг */}
-                  <div className="max-h-0 opacity-0 overflow-hidden transition-all duration-500 group-hover:max-h-60 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0">
-                    <p className="text-gray-200 text-sm md:text-base leading-snug mb-4">
-                      {service.desc}
-                    </p>
-                    <Link href={service.link} className="inline-block text-emerald-400 font-semibold hover:underline">
-                      Дэлгэрэнгүй ➔
-                    </Link>
-                  </div>
+                  <Link 
+                    href={service.link} 
+                    className="inline-flex items-center font-semibold text-gray-900 transition-colors duration-500 group-hover:text-white group-hover:gap-3"
+                  >
+                    Дэлгэрэнгүй 
+                    <ArrowRight size={18} className="ml-2 transition-transform duration-300" />
+                  </Link>
                 </div>
               </motion.div>
-            ))}
-          </div>
+            );
+          })}
         </div>
-      </section>
+      </div>
+    </section>
 
 
       {/* CTA Section */}
@@ -121,7 +130,7 @@ export default function Home() {
           </p>
           <Link
             href="/booking"
-            className="px-10 py-4 rounded-2xl bg-gradient-to-r from-emerald-400 to-emerald-500 hover:from-emerald-500 hover:to-emerald-600 text-white font-semibold shadow-lg transition-all duration-300 transform hover:-translate-y-1"
+            className="px-10 py-4 rounded-[14px] bg-gradient-to-r from-emerald-400 to-emerald-500 hover:from-emerald-500 hover:to-emerald-600 text-white font-semibold shadow-lg transition-all duration-300 transform hover:-translate-y-1"
           >
             Захиалах
           </Link>

@@ -1,75 +1,86 @@
-
-
 export default function AboutPage() {
     return (
-        <section className="container mx-auto w-full py-14 px-6 md:px-20 text-gray-800 ">
+        <section className="container mx-auto w-full py-10 md:py-20 px-6 md:px-10 text-gray-800">
             {/* Title Section */}
-            <div className="max-w-5xl mx-auto text-center mb-12">
-                <h2 className="text-4xl font-bold text-[#102B5A]">Бидний тухай</h2>
-                <p className="text-lg mt-4 text-gray-600">
+            <div className="max-w-4xl mx-auto text-center mb-12 md:mb-16">
+                <h2 className="text-3xl md:text-5xl font-bold text-[#102B5A]">Бидний тухай</h2>
+                <div className="w-20 h-1.5 bg-amber-400 mx-auto mt-4 rounded-full"></div> {/* Гоёл чимэглэлийн зураас */}
+                <p className="text-base md:text-xl mt-6 text-gray-600 leading-relaxed">
                     Purenest Cleaning Services — Цэвэр, Тав тухтай, Эрүүл орчныг танд.
                 </p>
             </div>
 
-            {/* About Information */}
-            <div className="grid md:grid-cols-2 gap-10 items-center max-w-5xl mx-auto">
-                <img
-                    src="/purenest.jpg"
-                    alt="Purenest Cleaning Service"
-                    className="w-full rounded-xl shadow-lg object-cover"
-                />
+            {/* About Information Section */}
+            <div className="grid lg:grid-cols-2 gap-10 items-center max-w-6xl mx-auto">
+                {/* Image Wrapper */}
+                <div className="relative group">
+                    <div className="absolute -inset-1 bg-gradient-to-r from-amber-400 to-[#102B5A] rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
+                    <img
+                        src="/purenest.jpg"
+                        alt="Purenest Cleaning Service"
+                        className="relative w-full h-[300px] md:h-[510px] rounded-2xl shadow-1xl object-cover"
+                    />
+                </div>
 
-                <div className="space-y-4 text-lg leading-relaxed -mt-60 ">
-                    <p>
-                        <strong className="text-[#102B5A] text-bold">Purenest</strong> нь 2025 онд
-                        үүсгэн байгуулагдсан бөгөөд гэр, албан байгууллага болон олон нийтийн
-                        талбайд зориулсан мэргэжлийн цэвэрлэгээний үйлчилгээ үзүүлдэг.
-                    </p>
+                {/* Text Content */}
+                <div className="space-y-6 text-base md:text-lg leading-relaxed ">
+                    <div className="border-l-4 border-amber-400 pl-4">
+                        <p className="text-gray-700">
+                            {/* leading-none нь текстийн дээд талын хоосон зайг авч хаяна */}
+                            <strong className="text-[#102B5A] font-bold text-2xl md:text-3xl block mb-3 leading-none">
+                                Purenest
+                            </strong>
+                            нь 2025 онд үүсгэн байгуулагдсан бөгөөд гэр, албан байгууллага болон
+                            олон нийтийн талбайд зориулсан мэргэжлийн цэвэрлэгээний үйлчилгээ үзүүлдэг.
+                        </p>
+                    </div>
 
-                    <p>
+                    <p className="text-gray-600">
                         Манай хамт олон туршлагатай, найдвартай, хариуцлагатай бөгөөд олон улсын
-                        стандартын дагуу байгальд ээлтэй бодлого баримтлан үйлчилдэг.
+                        стандартын дагуу байгальд ээлтэй бодлого баримтлан үйлчилдэг. Бид үйлчлүүлэгч бүрийн
+                        хэрэгцээнд нийцсэн чанартай гүйцэтгэлийг амлаж байна.
                     </p>
                 </div>
             </div>
 
-            {/* Values */}
-            <div className="mt-16 max-w-6xl mx-auto px-4">
-                <h3 className="text-3xl md:text-4xl font-semibold text-center text-[#102B5A] mb-12">
+            {/* Values Section */}
+            <div className="mt-20 md:mt-32 max-w-6xl mx-auto">
+                <h3 className="text-2xl md:text-4xl font-bold text-center text-[#102B5A] mb-12">
                     Манай үнэт зүйлс
                 </h3>
 
-                <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-4 text-center">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     {[
-                        { title: 'Найдвартай байдал', icon: '🛡️' },
-                        { title: 'Хэрэглэгч төвтэй', icon: '🤝' },
-                        { title: 'Хурд ба Шаргуу байдал', icon: '⚡' },
-                        { title: 'Экологийн хариуцлага', icon: '🌱' },
+                        { title: 'Найдвартай байдал', icon: '🛡️', desc: 'Бид таны итгэлийг эрхэмлэнэ' },
+                        { title: 'Хэрэглэгч төвтэй', icon: '🤝', desc: 'Таны сэтгэл ханамж бидний зорилго' },
+                        { title: 'Хурд ба Шаргуу байдал', icon: '⚡', desc: 'Чанарыг богино хугацаанд' },
+                        { title: 'Экологийн хариуцлага', icon: '🌱', desc: 'Байгальд ээлтэй цэвэрлэгээ' },
                     ].map((item, index) => (
                         <div
                             key={index}
-                            className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl"
+                            className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-white p-8 shadow-md transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl"
                         >
                             {/* Accent bar */}
-                            <div className="absolute left-0 top-0 h-full w-1 bg-[#102B5A] opacity-70 group-hover:opacity-100 transition" />
+                            <div className="absolute left-0 top-0 h-full w-1.5 bg-[#102B5A] opacity-20 group-hover:opacity-100 transition-all duration-300" />
 
-                            {/* Icon */}
-                            <div className="mb-4 text-4xl">
+                            <div className="mb-4 text-5xl transform group-hover:scale-110 transition-transform duration-300">
                                 {item.icon}
                             </div>
 
-                            {/* Title */}
-                            <h4 className="text-lg font-semibold text-gray-800 leading-snug">
+                            <h4 className="text-lg font-bold text-gray-900 mb-2">
                                 {item.title}
                             </h4>
 
-                            {/* Hover underline */}
-                            <div className="mt-3 h-0.5 w-0 bg-[#102B5A] transition-all duration-300 group-hover:w-10" />
+                            <p className="text-sm text-gray-500">
+                                {item.desc}
+                            </p>
+
+                            {/* Hover line effect */}
+                            <div className="mt-4 h-1 w-0 bg-amber-400 transition-all duration-500 group-hover:w-full" />
                         </div>
                     ))}
                 </div>
             </div>
-
         </section>
     );
 }

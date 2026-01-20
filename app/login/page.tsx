@@ -1,125 +1,150 @@
-'use client'
+"use client"
 
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { signIn } from 'next-auth/react'
-// 💡 Өөрийн лоудер компонентыг импортлох (Замыг нь зөв зааж өгөөрэй)
-import Loading from '../loading';
+import Loading from '../loading'
+import { useSiteToast } from '../hooks/useSiteToast'
+import { Eye, EyeOff } from 'lucide-react'
 
 export default function Login() {
-    const [email, setEmail] = useState('')
-    const [pass, setPass] = useState('')
-    const [error, setError] = useState('')
-    const [loading, setLoading] = useState(false) // 💡 Энэ state лоудерыг удирдана
+    const [email, setEmail] = useState<string>('')
+    const [pass, setPass] = useState<string>('')
+    const [loading, setLoading] = useState<boolean>(false)
+    const [showPassword, setShowPassword] = useState<boolean>(false)
+    
     const router = useRouter()
+    const { showToast } = useSiteToast()
 
-    const handleLogin = async () => {
-        setError('')
-        setLoading(true) // 💡 Лоудерыг эхлүүлэх
+    const handleLogin = async (e?: React.FormEvent) => {
+        if (e) e.preventDefault();
+        
+        if (!email || !pass) {
+            showToast({ title: "Алдаа", description: "И-мэйл болон нууц үгээ оруулна уу." });
+            return;
+        }
+
+        setLoading(true)
 
         try {
             const res = await fetch("https://purenest-app.onrender.com/auth/login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    email: email,
-                    password: pass,
-                })
+                body: JSON.stringify({ email, password: pass })
             })
 
             const data = await res.json()
 
             if (!res.ok) {
-                setError(data.error || "Нэвтрэхэд алдаа гарлаа.")
-                setLoading(false) // ❌ Алдаа гарвал лоудерыг зогсоох
+                // Серверээс ирсэн алдааг шалгах (404 бол бүртгэлгүй гэж үзнэ)
+                if (res.status === 404 || data.message?.includes("not found") || data.error?.includes("User")) {
+                    showToast({ 
+                        title: "Бүртгэлгүй хэрэглэгч", 
+                        description: "Энэ и-мэйл хаяг бүртгэлгүй байна. Та бүртгүүлнэ үү." 
+                    });
+                } else {
+                    showToast({ 
+                        title: "Алдаа", 
+                        description: data.error || data.message || "И-мэйл эсвэл нууц үг буруу байна." 
+                    });
+                }
+                setLoading(false)
                 return
             }
 
+            // Хадгалах хэсэг
             localStorage.setItem("token", data.token)
             if (data.user) {
                 localStorage.setItem("userRole", data.user.role || 'user');
                 localStorage.setItem("user", JSON.stringify(data.user))
             }
 
-            const userRole = data.user?.role;
-            const redirectPath = (userRole === 'admin') ? '/admin' : '/home';
+            showToast({ title: "Амжилттай", description: "Нэвтэрлээ. Тавтай морил!" })
 
-            // Амжилттай болсон үед лоудер хаагдалгүйгээр шилжилт хийгдэх нь гоё харагддаг
-            if (userRole === 'admin') {
-                window.location.href = redirectPath;
-            } else {
-                router.push(redirectPath);
-            }
+            const redirectPath = data.user?.role === 'admin' ? '/admin' : '/home';
+            router.push(redirectPath);
 
         } catch (err) {
-            console.error("Login Error:", err);
-            setError("Сервертэй холбогдож чадсангүй.")
-            setLoading(false) // ❌ Алдаа гарвал лоудерыг зогсоох
+            showToast({ title: "Алдаа", description: "Сервертэй холбогдож чадсангүй." })
+            setLoading(false)
         }
     }
 
     return (
         <>
-            {/* 💡 Loading state үнэн байх үед лоудер харагдана */}
             {loading && <Loading />}
 
-            <section className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 max-w-md items-center text-black 
-            border border-black/5 shadow-md p-10 rounded-2xl transition-opacity ${loading ? 'opacity-20' : 'opacity-100'}`}>
+            <section className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md items-center text-black 
+            border border-black/5 shadow-md p-10 rounded-2xl transition-opacity bg-white ${loading ? 'opacity-20 pointer-events-none' : 'opacity-100'}`}>
 
-                <h2 className="text-2xl font-semibold mb-4 text-center text-[#102B5A]">Нэвтрэх</h2>
+                <h2 className="text-2xl font-semibold mb-6 text-center text-[#102B5A]">Нэвтрэх</h2>
 
-                {error && <p className="text-red-600 text-sm mb-2 text-center">{error}</p>}
+                <form onSubmit={handleLogin} className="space-y-4">
+                    <div>
+                        <input
+                            type="email"
+                            placeholder="И-мэйл"
+                            value={email}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+                            className="w-full border border-gray-200 p-3 rounded-xl outline-none transition-all focus:border-[#102B5A] focus:ring-1 focus:ring-[#102B5A]/10"
+                            disabled={loading}
+                        />
+                    </div>
 
-                <form onSubmit={(e) => { e.preventDefault(); handleLogin(); }}>
-                    <input
-                        placeholder="И-мэйл"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="w-full border p-2 rounded mb-3"
-                        disabled={loading} // 💡 Уншиж байх үед оролтыг хаах
-                    />
+                    <div className="relative">
+                        <input
+                            placeholder="Нууц үг"
+                            type={showPassword ? "text" : "password"}
+                            value={pass}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPass(e.target.value)}
+                            className="w-full border border-gray-200 p-3 rounded-xl outline-none transition-all focus:border-[#102B5A] focus:ring-1 focus:ring-[#102B5A]/10"
+                            disabled={loading}
+                        />
+                        <button 
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                        >
+                            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                        </button>
+                    </div>
 
-                    <input
-                        placeholder="Нууц үг"
-                        type="password"
-                        value={pass}
-                        onChange={(e) => setPass(e.target.value)}
-                        className="w-full border p-2 rounded mb-3"
-                        disabled={loading}
-                    />
-                    <div className="flex items-center justify-between"><br />
-                    <Link href="/forgot-password" className="text-sm text-red-500 hover:text-red-700">
-                        Нууц үгээ мартсан?
-                    </Link>
-                </div>
+                    <div className="flex justify-end">
+                        <Link href="/forgot-password" className="text-sm text-red-500 hover:underline">
+                            Нууц үгээ мартсан?
+                        </Link>
+                    </div>
 
                     <button
                         type="submit"
-                        className="mt-3 p-2 border border-black/5 rounded-lg text-white w-full bg-[#102B5A] disabled:opacity-50 hover:shadow-lg transition-all font-medium"
+                        className="p-3 rounded-[14px] text-white w-full bg-[#102B5A] disabled:bg-gray-400 hover:shadow-lg transition-all"
                         disabled={loading}
                     >
                         {loading ? "Уншиж байна..." : "Нэвтрэх"}
                     </button>
 
-                    <div className="relative flex items-center mb-4 mt-4">
+                   {/* <div className="relative flex items-center py-2">
                         <div className="flex-grow border-t border-gray-200"></div>
                         <span className="flex-shrink mx-4 text-gray-400 text-xs uppercase">Эсвэл</span>
                         <div className="flex-grow border-t border-gray-200"></div>
                     </div>
-
-                    {/* Google товч */}
+                        */ }
+                    {/* Google Login Button
+                    
                     <button
-                        onClick={() => signIn('google', { callbackUrl: '/' })}
-                        className="w-full flex items-center justify-center gap-3 border border-gray-300 p-2.5 rounded-lg mb-6 hover:shadow-md hover:bg-gray-50 transition-all font-medium"
+                        type="button"
+                        onClick={() => signIn('google', { callbackUrl: '/home' })}
+                        className="w-full flex items-center justify-center gap-3 border border-gray-300 p-2.5 rounded-lg hover:bg-gray-50 transition-all font-medium"
                     >
                         <img src="https://www.svgrepo.com/show/355037/google.svg" className="w-5 h-5" alt="Google" />
                         Google-ээр нэвтрэх
                     </button>
+                */}
                 </form>
 
-                <p className="mt-4 text-center">
-                    Бүртгэлгүй юу? <Link href="/register" className="text-[#102B5A] font-bold hover:underline ">Бүртгүүлэх</Link>
+                <p className="mt-6 text-center text-sm">
+                    Бүртгэлгүй юу? <Link href="/register" className="text-[#102B5A] font-bold hover:underline ml-1">Бүртгүүлэх</Link>
                 </p>
             </section>
         </>

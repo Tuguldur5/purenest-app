@@ -98,7 +98,22 @@ export default function ContactPage() {
                                     <div>
                                         <p className="text-sm font-light text-gray-300">Утас</p>
                                         {/* {COMPANY_PHONE}-ийг бодит утгаар солив */}
-                                        <p className="text-lg font-medium hover:text-amber-400 transition-colors">+976 12345678</p>
+                                        <p className=" font-text-gray-300">
+
+                                            <a
+                                                href="tel:+97699069162"
+                                                className="ml-1 hover:text-amber-400 transition"
+                                            >
+                                                +976 9906 9162
+                                            </a>
+                                            <span className="mx-2 text-gray-500">|</span>
+                                            <a
+                                                href="tel:+97690504700"
+                                                className="hover:text-amber-400 transition"
+                                            >
+                                                +976 9050 4700
+                                            </a>
+                                        </p>
                                     </div>
                                 </div>
 
@@ -108,7 +123,13 @@ export default function ContactPage() {
                                     <div>
                                         <p className="text-sm font-light text-gray-300">Имэйлээр холбогдох</p>
                                         {/* {COMPANY_EMAIL}-ийг бодит утгаар солив */}
-                                        <p className="text-lg font-medium hover:text-amber-400 transition-colors">Sale@purenest.mn</p>
+                                        <p
+                                            onClick={() => navigator.clipboard.writeText("sale@purenest.mn")}
+                                            className="text-lg font-medium cursor-pointer hover:text-amber-400 transition-colors"
+                                        >
+                                            sale@purenest.mn
+                                        </p>
+
                                     </div>
                                 </div>
 
@@ -116,10 +137,23 @@ export default function ContactPage() {
                                 <div className="flex items-start">
                                     <svg className="w-6 h-6 mr-3 text-amber-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                                     <div>
-                                        <p className="text-sm font-light text-gray-300">Байршил</p>
-                                        {/* {COMPANY_ADDRESS}-ийг бодит утгаар солив */}
-                                        <p className="text-lg font-medium">Хан-Уул дүүрэг, 3-р хороо, Чингисийн өргөн чөлөө, Анун төв</p>
+                                        <p className="text-sm font-light text-gray-300">
+                                            Байршил
+                                        </p>
+
+                                        <p
+                                            onClick={() =>
+                                                navigator.clipboard.writeText(
+                                                    "Хан-Уул дүүрэг, 3-р хороо, Чингисийн өргөн чөлөө, Анун төв"
+                                                )
+                                            }
+                                            className="text-lg font-medium cursor-pointer hover:text-amber-400 transition-colors"
+                                            title="Click to copy"
+                                        >
+                                            Хан-Уул дүүрэг, 3-р хороо, Чингисийн өргөн чөлөө, Анун төв
+                                        </p>
                                     </div>
+
                                 </div>
                             </div>
                         </div>

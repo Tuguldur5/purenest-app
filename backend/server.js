@@ -249,8 +249,8 @@ app.post('/api/booking', authMiddleware, async (req, res) => {
 
         const transporter = nodemailer.createTransport({
             host: "smtp.gmail.com",
-            port: 587,
-            secure: false,
+            port: 465,
+            secure: true,
             auth: {
                 user: SENDER_USER,
                 pass: SENDER_PASS,
@@ -403,7 +403,7 @@ app.post('/api/contact', async (req, res) => {
     const SENDER_HOST = process.env.SMTP_HOST || 'smtp.gmail.com'; // Default утга өгч байна
     const SENDER_USER = process.env.MAIL_USER;
     const SENDER_PASS = process.env.MAIL_PASS;
-    const SENDER_PORT = Number(process.env.SMTP_PORT || 587);
+    const SENDER_PORT = Number(process.env.SMTP_PORT);
 
     // Хэрэв нэвтрэх мэдээлэл байхгүй бол 500 алдаа буцаана
     if (!SENDER_USER || !SENDER_PASS) {

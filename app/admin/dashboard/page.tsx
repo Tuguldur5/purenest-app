@@ -7,6 +7,7 @@ import {
     LineChart, Line, PieChart, Pie, Cell
 } from 'recharts';
 import Loading from '../../loading';
+import { useSiteToast } from '../../hooks/useSiteToast'
 
 const API_BASE_URL = "https://purenest-app.onrender.com/api/admin";
 
@@ -29,6 +30,7 @@ interface Order {
 interface User {
     full_name: string,
 }
+
 // Үйлчилгээний нэр биш, захиалгын явцын статусуудыг энд бичнэ
 const STATUS_OPTIONS = ['Хүлээгдэж байна', 'Баталгаажсан', 'Дууссан', 'Цуцлагдсан'];
 const STATUS_STYLES: Record<string, string> = {
@@ -44,7 +46,7 @@ export default function AdminDashboardPage() {
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<'dashboard' | 'orders' | 'analytics'>('dashboard');
-
+    const { showToast } = useSiteToast();
     const fetchAdminData = async () => {
         const token = localStorage.getItem('token');
         if (!token) { router.push('/login'); return; }
@@ -90,11 +92,11 @@ export default function AdminDashboardPage() {
             if (res.ok) {
                 setOrders(prev => prev.map(o => o.id === id ? { ...o, status: newStatus } : o));
             } else {
-                alert(`Алдаа: ${data.error || "Шинэчилж чадсангүй"}`);
+                showToast({ title: "Алдаа", description: "Шинэчилж чадсангүй." })
             }
         } catch (error) {
             console.error("Хүсэлт илгээхэд алдаа гарлаа:", error);
-            alert("Сервертэй холбогдож чадсангүй.");
+            showToast({ title: "Алдаа", description: "Сервертэй холбогдож чадсангүй." })
         }
     };
     const statsData = useMemo(() => {
@@ -219,6 +221,7 @@ export default function AdminDashboardPage() {
                                     <th className="p-4">Утас</th>
                                     <th className="p-4">Үйлчилгээ</th>
                                     <th className="p-4">Хаяг</th>
+                                    <th className="p-4">Он сар</th>
                                     <th className="p-4">Төлбөр</th>
                                     <th className="p-4">Төлөв</th>
                                 </tr>
@@ -231,13 +234,14 @@ export default function AdminDashboardPage() {
                                         <td className="p-4 text-xm">{o.phone_number}</td>
                                         <td className="p-4">
                                             <p className="font-bold text-sm">{o.service}</p>
-                                            <p className="text-[12px] text-gray-600">{new Date(o.date).toLocaleString('mn-MN', {
+
+                                        </td>
+                                        <td className="p-4 text-sm text-black truncate max-w-[200px]">{o.district},{o.khoroo},{o.address}</td>
+                                        <td className="p-4 text-sm text-black truncate max-w-[200px]">{new Date(o.date).toLocaleString('mn-MN', {
                                                 year: 'numeric',
                                                 month: '2-digit',
                                                 day: '2-digit'
-                                            })}</p>
-                                        </td>
-                                        <td className="p-4 text-sm text-black truncate max-w-[200px]">{o.district},{o.khoroo},{o.address}</td>
+                                            })} </td>
                                         <td className="p-4 font-bold text-blue-600">{Number(o.total_price).toLocaleString()} ₮</td>
                                         <td className="p-4">
                                             <select

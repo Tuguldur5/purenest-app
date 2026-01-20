@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { text } from 'stream/consumers';
-
+import { useSiteToast } from '../../hooks/useSiteToast'
 const API_URL = "https://purenest-app.onrender.com/api/admin/pricing";
 
 export default function PricingAdmin() {
@@ -14,13 +14,14 @@ export default function PricingAdmin() {
     });
 
     const [loading, setLoading] = useState(false);
+     const { showToast } = useSiteToast()
 
     const handleSave = async () => {
         setLoading(true);
         try {
             const token = localStorage.getItem('token');
             if (!token) {
-                alert("Админ эрхээр нэвтэрч байж үнэ засварлана!");
+                showToast({ title: "Алдаа", description: "Админ эрхээр нэвтэрч байж үнэ засварлана!" })
                 setLoading(false);
                 return;
             }
@@ -40,15 +41,16 @@ export default function PricingAdmin() {
             });
 
             if (res.ok) {
-                alert("Үнэ амжилттай шинэчлэгдлээ!");
+                showToast({ title: "Амжилттай!", description: "Үнэ амжилттай шинэчлэгдлээ." })
+                
             } else {
                 const err = await res.json();
-                alert(err.error || "Алдаа гарлаа");
+                showToast({ title: "Алдаа", description: "Алдаа гарлаа!" })
             }
 
         } catch (err) {
             console.error(err);
-            alert("Сервертэй холбогдож чадсангүй");
+            showToast({ title: "Алдаа", description: "Сервертэй холбогдож чадсангүй!" })
         } finally {
             setLoading(false);
         }
@@ -57,7 +59,7 @@ export default function PricingAdmin() {
     useEffect(() => {
         const token = localStorage.getItem('token');
         if (!token) {
-            alert("Нэвтрэх шаардлагатай!");
+            showToast({title: "Алдаа", description:"Нэвтрэх шаардлагатай!" });
             setLoading(false);
             return;
         }

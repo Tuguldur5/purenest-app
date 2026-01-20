@@ -4,6 +4,7 @@ import "./globals.css";
 import HeaderWrapper from "./components/HeaderWrapper";
 import FooterWrapper from "./components/footerWrapper";
 import AuthProvider from "./components/AuthProvider"; // Доор үүнийг үүсгэнэ
+import { ToastProvider } from "./hooks/useSiteToast";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -42,7 +43,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <AuthProvider>
           <div className="min-h-screen bg-white flex flex-col">
             <HeaderWrapper />
-            <main className="min-h-screen">{children}</main>
+            <ToastProvider>
+            <main className="min-h-screen">{children}
+            </main>
+            </ToastProvider>
             <FooterWrapper />
           </div>
         </AuthProvider>

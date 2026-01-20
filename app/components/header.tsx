@@ -4,11 +4,14 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation'; // useRouter-ийг импортлох
 import { FaUserCircle } from 'react-icons/fa';
 import { usePathname } from 'next/navigation';
+import { ChevronDown } from 'lucide-react';
 import { Home, MoreHorizontal } from "lucide-react";
 export default function Header() {
     // 💡 Header функцийг дотор нь тодорхойлсныг устгаж, шууд Header функцийг ашиглаж байна.
     const [scrolled, setScrolled] = useState(false)
     const pathname = usePathname() // Одоо байгаа page-г авах
+    const [isOpen, setIsOpen] = useState(false); // Mobile menu toggle
+    const [isServiceOpen, setIsServiceOpen] = useState(false); // Dropdown toggle
 
     useEffect(() => {
         // Зөвхөн Home page-д scroll event нэмэх
@@ -162,22 +165,32 @@ export default function Header() {
 
             {/* Mobile Menu Links */}
             {open && (
-                <div className="md:hidden border-t bg-white/5 backdrop-blur-md border-black/5 rounded-lg shadow-md">
-                    <div className="container mx-auto px-4 py-4 flex flex-col gap-3 ">
-                        <Link className="text-black hover:text-amber-400" href="/home">Нүүр</Link>
-                        <Link className="text-black hover:text-amber-400" href="/service">Үйлчилгээ</Link>
-                        <Link className="text-black hover:text-amber-400" href="/booking">Захиалга</Link>
-                        <Link className="text-black hover:text-amber-400" href="/about">Бидний тухай</Link>
-                        <Link className="text-black hover:text-amber-400" href="/faq">Түгээмэл асуултууд</Link>
-                        <Link className="text-black hover:text-amber-400" href={isLoggedIn ? "/profile" : "/login"}>
-                            {isLoggedIn ? "Профайл" : "Нэвтрэх"}
-                        </Link>
-                        {isLoggedIn && (
-                            <button  onClick={handleLogout} className="text-left text-black hover:text-amber-400">
-                                Гарах
-                            </button>
+                <div className="md:hidden bg-white border-t border-gray-50 px-4 pt-2 pb-6 space-y-1">
+                    <Link href="/home" className="block py-2 text-black hover:text-amber-400">Нүүр</Link>
+
+                    {/* Mobile Dropdown */}
+                    <div>
+                        <button
+                            onClick={() => setIsServiceOpen(!isServiceOpen)}
+                            className="flex items-center justify-between w-full py-2 text-black hover:text-amber-400"
+                        >
+                            Үйлчилгээ <ChevronDown className={`w-4 h-4 transform ${isServiceOpen ? 'rotate-180' : ''}`} />
+                        </button>
+
+                        {isServiceOpen && (
+                            <div className="pl-4 bg-gray-50 rounded-lg mt-1 border-l-2 border-amber-400">
+                                <Link href="/service/office" className="block py-2 px-2 text-sm text-gray-600">Оффис цэвэрлэгээ</Link>
+                                <Link href="/service/suh" className="block py-2 px-2 text-sm text-gray-600">СӨХ цэвэрлэгээ</Link>
+                                <Link href="/service/public-space" className="block py-2 px-2 text-sm text-gray-600">Олон нийтийн талбай цэвэрлэгээ</Link>
+                            </div>
                         )}
                     </div>
+
+                    <Link href="/booking" className="block py-2 text-black hover:text-amber-400">Захиалга</Link>
+                    <Link href="/about" className="block py-2 text-black hover:text-amber-400">Бидний тухай</Link>
+                    <Link className="text-black hover:text-amber-400" href={isLoggedIn ? "/profile" : "/login"}>
+                        {isLoggedIn ? "Профайл" : "Нэвтрэх"}
+                    </Link>
                 </div>
             )}
         </header>

@@ -1,5 +1,9 @@
 'use client'
 import { useState, useMemo, useEffect } from 'react' // useMemo-г нэмэв
+import { useRouter } from 'next/navigation'; // Чиглүүлэгч нэмэх
+import { useSiteToast } from '../hooks/useSiteToast';
+import { describe } from 'node:test';
+import { DessertIcon } from 'lucide-react';
 
 // Давтамж
 const frequencyOptions = [
@@ -33,6 +37,10 @@ const API_URL = "https://purenest-app.onrender.com/api/booking";
 
 export default function Booking() {
     const today = new Date().toISOString().split('T')[0];
+    const [loading, setLoading] = useState<boolean>(false)
+    const router = useRouter();
+    const [isLoggedIn, setIsLoggedIn] = useState<boolean>(true); // Анхны утга
+    const { showToast } = useSiteToast();
     const [form, setForm] = useState({
         name: '',
         phone_number: '',
@@ -129,13 +137,13 @@ export default function Booking() {
         // 1. Токен шалгах
         const token = localStorage.getItem('token');
         if (!token) {
-            alert("Захиалга хийхийн тулд эхлээд нэвтрэх шаардлагатай!");
+            showToast({title:"Алдаа", description:"Захиалга хийхийн тулд эхлээд нэвтрэх шаардлагатай!"})
             return;
         }
 
         // 2. Шаардлагатай талбаруудыг шалгах
         if (!form.phone_number || !form.city || !form.district || !form.address || !form.date) {
-            alert("Утас, Огноо, Хаягийн мэдээллийг бүрэн бөглөнө үү.");
+            showToast({title:"Анхаар!", description:"Утас, Огноо, Хаягийн мэдээллийг бүрэн бөглөнө үү."})
             return;
         }
 
@@ -173,8 +181,7 @@ export default function Booking() {
             if (res.ok) {
                 const data = await res.json();
                 console.log("Backend response:", data);
-                alert(`Захиалга амжилттай илгээгдлээ! Дугаар: ${data.order?.id ?? 'N/A'}`); // DB-ийн id-г ашиглав
-            } else {
+                showToast({title:"Амжилттай", description:"Захиалга амжилттай илгээгдлээ!"})
                 let errorData: { error?: string } = {};
                 try {
                     errorData = await res.json();
@@ -182,14 +189,14 @@ export default function Booking() {
                     console.warn("JSON parse failed, likely empty or non-JSON response:", parseErr);
                 }
                 const errorMessage = errorData.error || `Алдаа гарлаа: ${res.status} ${res.statusText}`;
-                alert(`Захиалга хийхэд алдаа гарлаа: ${errorMessage}`);
+                showToast({title:"Алдаа",description:"Захиалга хийхэд алдаа гарлаа:", errorMessage})
             }
         } catch (err) {
             console.error("Fetch failed:", err);
-            alert("Сервертэй холбогдож чадсангүй. Та дараа дахин оролдоно уу.");
+            
+            showToast({title:"Алдаа", description:"Сервертэй холбогдож чадсангүй. Та дараа дахин оролдоно уу"})
         }
     };
-
 
     // Сонгосон дүүрэгт хамаарах хороог шүүж авах
     const availableKhoroos = useMemo(() => {
@@ -198,7 +205,10 @@ export default function Booking() {
 
     useEffect(() => {
         const token = localStorage.getItem('token');
-        if (!token) return;
+        if (!token) {
+            setIsLoggedIn(false); 
+            return;
+        }
 
         // Хэрэглэгчийн мэдээллийг татах
         fetch("https://purenest-app.onrender.com/api/booking/user-info", {
@@ -219,6 +229,29 @@ export default function Booking() {
                 console.error("User info fetch failed:", err);
             });
     }, []);
+
+    if (!isLoggedIn) {
+        return (
+            <section className="flex flex-col items-center justify-center min-h-[60vh] px-4">
+                <div className="bg-white p-10 rounded-2xl shadow-2xl border border-gray-100 text-center max-w-md">
+                    <div className="bg-amber-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                    </div>
+                    <h2 className="text-2xl font-bold text-gray-800 mb-4">Нэвтрэх шаардлагатай</h2>
+                    <p className="text-gray-600 mb-8">Захиалга өгөхийн тулд та өөрийн бүртгэлээрээ нэвтэрсэн байх шаардлагатай.</p>
+                    <button 
+                        onClick={() => router.push('/login')} 
+                        className="w-full bg-[#102B5A] text-white py-4 rounded-xl font-bold text-lg hover:bg-[#1a3f7a] transition-all shadow-lg"
+                    >
+                        Нэвтрэх хуудас руу очих
+                    </button>
+                    <p className="mt-4 text-sm text-gray-400">Бүртгэлгүй бол <span className="text-blue-600 cursor-pointer" onClick={() => router.push('/register')}>бүртгүүлэх</span></p>
+                </div>
+            </section>
+        );
+    }
 
     return (
         <section className="flex flex-col items-center mt-10 mb-20 px-4 text-black bg-gray-50/50">
@@ -409,7 +442,7 @@ export default function Booking() {
                             type="submit"
                             className="w-full bg-[#102B5A] text-white py-4 rounded-xl font-bold text-lg shadow-lg hover:bg-[#1a3f7a] transition-all duration-300 mt-4"
                         >
-                            Захиалах
+                          {loading ? "Уншиж байна..." : "Захиалах"} 
                         </button>
                     </form>
                 </div>
@@ -447,5 +480,5 @@ export default function Booking() {
                 </div>
             </div>
         </section>
-    )
+)
 }
