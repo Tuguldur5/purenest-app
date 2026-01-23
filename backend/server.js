@@ -14,23 +14,21 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cors({
     origin: [
-        "https://purenest.mn", 
+        "https://purenest.mn",
         "https://www.purenest.mn",
         "https://purenest-app.vercel.app", // Өөрийн Vercel хаягийг энд нэмээрэй
         "http://localhost:3000" // Локал дээр туршихад хэрэгтэй
-    ], 
+    ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
 const JWT_SECRET = process.env.JWT_SECRET || 'YOUR_HIGHLY_SECURE_SECRET_KEY_123';
 
-
-// Бакэнд (server.js эсвэл харгалзах файл)
 async function UserDetails(user_id) {
     try {
         const userQuery = await pool.query(
-            `SELECT full_name, email, phone FROM users WHERE id = $1`, // 'email' нэмэв
+            `SELECT full_name, email, phone FROM users WHERE id = $1`,
             [user_id]
         );
         return userQuery.rows[0];
@@ -42,7 +40,7 @@ async function UserDetails(user_id) {
 
 const authMiddleware = (req, res, next) => {
     const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    if (!authHeader || !authHeader.startsWith('Bearer')) {
         return res.status(401).json({ error: 'Нэвтрэлт шаардлагатай. Token олдсонгүй.' });
     }
 
@@ -166,32 +164,48 @@ app.put('/api/users/update', authMiddleware, async (req, res) => {
         const userId = req.user.id;
         const { full_name, phone, email } = req.body;
 
-        // 1. И-мэйл аль хэдийн өөр хэрэглэгч дээр бүртгэлтэй байгаа эсэхийг шалгах
-        const emailCheck = await pool.query(
-            'SELECT id FROM users WHERE email = $1 AND id != $2',
-            [email, userId]
-        );
-
-        if (emailCheck.rows.length > 0) {
-            return res.status(400).json({ error: "Энэ и-мэйл хаяг аль хэдийн бүртгэгдсэн байна." });
+        // 1. Оруулах өгөгдөл бүрэн байгаа эсэхийг шалгах (Validation)
+        if (!full_name || !phone || !email) {
+            return res.status(400).json({ error: "Бүх талбарыг бөглөнө үү." });
         }
 
-        // 2. Мэдээллийг шинэчлэх
+        // 2. И-мэйл эсвэл Утасны дугаар өөр хэрэглэгч дээр байгаа эсэхийг НЭГ хүсэлтээр шалгах
+        const duplicateCheck = await pool.query(
+            'SELECT email, phone FROM users WHERE (email = $1 OR phone = $2) AND id != $3',
+            [email, phone, userId]
+        );
+
+        if (duplicateCheck.rows.length > 0) {
+            const foundUser = duplicateCheck.rows[0];
+            if (foundUser.email === email) {
+                return res.status(400).json({ error: "Энэ и-мэйл хаяг аль хэдийн бүртгэгдсэн байна." });
+            }
+            if (foundUser.phone === phone) {
+                return res.status(400).json({ error: "Энэ утасны дугаар аль хэдийн бүртгэгдсэн байна." });
+            }
+        }
+
         const result = await pool.query(
             `UPDATE users 
-             SET full_name = $1, phone = $2, email = $3 
-             WHERE id = $4 
-             RETURNING id, full_name, email, phone, address`,
+                SET full_name = $1, phone = $2, email = $3 
+                WHERE id = $4 
+                RETURNING id, full_name, email, phone`, 
             [full_name, phone, email, userId]
         );
 
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: "Хэрэглэгч олдсонгүй." });
+        }
+
+        // Амжилттай бол шинэчлэгдсэн датаг буцаах
         res.json(result.rows[0]);
+
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: "Серверийн алдаа гарлаа." });
+        // Сервер дээр алдааг дэлгэрэнгүй харах
+        console.error("UPDATE USER ERROR:", err.message);
+        res.status(500).json({ error: "Серверийн алдаа гарлаа: " + err.message });
     }
 });
-
 app.post('/api/booking', authMiddleware, async (req, res) => {
     try {
         const user_id = req.user.id;

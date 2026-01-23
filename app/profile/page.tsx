@@ -27,16 +27,14 @@ function UserDetails({ details, onUpdate }: { details: UserDetail | null, onUpda
         phone: ''
     });
     const [loading, setLoading] = useState(false);
-    const {showToast} = useSiteToast();
+    const { showToast } = useSiteToast();
 
-    // 1. Пропсоор өгөгдөл ирэх эсвэл өөрчлөгдөх үед form state-ийг шинэчлэх
-    // Энэ хэсэг нь утасны дугаар болон бусад мэдээлэл харагдахгүй байх асуудлыг шийднэ.
     useEffect(() => {
         if (details) {
             setForm({
                 full_name: details.full_name || '',
                 email: details.email || '',
-                phone: details.phone || ''
+                phone: details.phone ? String(details.phone) : ''
             });
         }
     }, [details]);
@@ -47,7 +45,13 @@ function UserDetails({ details, onUpdate }: { details: UserDetail | null, onUpda
         setLoading(true);
         try {
             const token = localStorage.getItem('token');
-            if (!token) throw new Error("Нэвтрэх эрхгүй байна.");
+
+            // Backend-ийн хүлээж авах боломжтой хувилбарууд
+            const payload = {
+                ...form,
+                // Хэрэв сервер заавал тоо нэхээд байвал:
+                // phone: Number(form.phone.replace(/\D/g, '')) 
+            };
 
             const res = await fetch(`https://purenest-app.onrender.com/api/users/update`, {
                 method: 'PUT',
@@ -55,31 +59,27 @@ function UserDetails({ details, onUpdate }: { details: UserDetail | null, onUpda
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify(form)
+                body: JSON.stringify(payload)
             });
 
             const data = await res.json();
 
-            if (!res.ok) {
-                throw new Error(data.error || "Шинэчлэхэд алдаа гарлаа");
+            if (res.ok) {
+                onUpdate(form);
+                localStorage.setItem('user', JSON.stringify(form));
+                setIsEditing(false);
+                showToast({ title: "Амжилттай", description: "Мэдээлэл шинэчлэгдлээ." });
+            } else {
+                // Энд консол дээр датаг бүрэн харах
+                console.error("Серверээс ирсэн алдааны дэлгэрэнгүй:", data);
+                throw new Error(data.message || data.error || "Сервер мэдээллийг хүлээж авсангүй.");
             }
-
-            // 2. Амжилттай болбол Parent компонент болон LocalStorage-ийг шинэчлэх
-            onUpdate(data);
-            localStorage.setItem('user', JSON.stringify(data));
-
-            setIsEditing(false);
-            
-            showToast({title:"Амжилттай", description:"Мэдээлэл амжилттай шинэчлэгдлээ."});
         } catch (error: any) {
-            console.error("Save error:", error);
-            showToast({ title:"Алдаа гарлаа", description:"Хадгалахад алдаа гарлаа"});
-            
+            showToast({ title: "Алдаа гарлаа", description: error.message });
         } finally {
             setLoading(false);
         }
     };
-
     return (
         <div className="bg-white rounded-[14px] shadow-sm border border-gray-100 -mt-10 overflow-hidden transition-all duration-300 hover:shadow-md">
             <div className="p-6">
@@ -169,43 +169,43 @@ function EditableField({ label, value, isEditing, onChange, placeholder }: Edita
                     className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-[14px] focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all text-gray-800"
                 />
             ) : (
-                <p className="text-gray-700 font-medium px-1">{value || 'Тохируулаагүй'}</p>
+                <p className="text-gray-700 font-medium px-1">{value}</p>
             )}
         </div>
     );
 }
 const handleDeleteOrder = async (orderId: number, status: string) => {
-    const {showToast} = useSiteToast();
-        // Зөвхөн хүлээгдэж буй захиалгыг устгахыг зөвшөөрөх (Сонголтоор)
-        if (status !== "Хүлээгдэж байна") {
-            showToast({title:"Алдаа" , description:"Энэ захиалгыг цуцлах боломжгүй. Баталгаажсан эсвэл дууссан байна."});
-            return;
-        }
+    const { showToast } = useSiteToast();
+    // Зөвхөн хүлээгдэж буй захиалгыг устгахыг зөвшөөрөх (Сонголтоор)
+    if (status !== "Хүлээгдэж байна") {
+        showToast({ title: "Алдаа", description: "Энэ захиалгыг цуцлах боломжгүй. Баталгаажсан эсвэл дууссан байна." });
+        return;
+    }
 
-        if (!window.confirm("Та энэ захиалгыг устгахдаа итгэлтэй байна уу?")) return;
+    if (!window.confirm("Та энэ захиалгыг устгахдаа итгэлтэй байна уу?")) return;
 
-        try {
-            const token = localStorage.getItem('token');
-            const res = await fetch(`https://purenest-app.onrender.com/api/booking/${orderId}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (res.ok) {
-                showToast({title:"Амжилттай", description:"Захиалга амжилттай устгагдлаа."});
-                // Жагсаалтыг шинэчлэх (State-ээс хасах)
-                // setOrders(prev => prev.filter(o => o.id !== orderId));
-                window.location.reload(); // Эсвэл state-ээ шинэчлэх
-            } else {
-                
-                showToast({title:"Алдаа гарлаа", description:"Устгахад алдаа гарлаа."});
+    try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`https://purenest-app.onrender.com/api/booking/${orderId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
             }
-        } catch (err) {
-            console.error("Delete error:", err);
+        });
+
+        if (res.ok) {
+            showToast({ title: "Амжилттай", description: "Захиалга амжилттай устгагдлаа." });
+            // Жагсаалтыг шинэчлэх (State-ээс хасах)
+            // setOrders(prev => prev.filter(o => o.id !== orderId));
+            window.location.reload(); // Эсвэл state-ээ шинэчлэх
+        } else {
+
+            showToast({ title: "Алдаа гарлаа", description: "Устгахад алдаа гарлаа." });
         }
-    };
+    } catch (err) {
+        console.error("Delete error:", err);
+    }
+};
 // ===========================================
 // 3. STATUS BADGE COMPONENT
 // ===========================================
@@ -298,65 +298,79 @@ function OrderHistory({ orders }: { orders: Order[] }) {
                 </div>
 
                 {/* --- ХҮСНЭГТИЙН БАГАНЫ НЭРҮҮД (Зөвхөн Desktop дээр харагдана) --- */}
-                <div className="hidden md:grid grid-cols-12 px-8 py-4 bg-slate-50/50 border-b border-gray-50 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                    <div className="md:col-span-2">ID</div>
-                    <div className="md:col-span-4">Үйлчилгээний төрөл</div>
-                    <div className="md:col-span-3">Төлөв</div>
-                    <div className="md:col-span-3 text-right">Төлбөр / Огноо</div>
+                {/* Жагсаалтын толгой (Header) */}
+                {/* Жагсаалтын толгой (Header) */}
+                <div className="hidden md:grid grid-cols-12 px-8 py-4 bg-slate-50/50 border-b border-gray-100 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                    {/* ID & Огноо - 2 багана */}
+                    <div className="md:col-span-2 text-left">Захиалга № / Огноо</div>
+                    {/* Үйлчилгээ - 3 багана */}
+                    <div className="md:col-span-3 text-left">Үйлчилгээний төрөл</div>
+                    {/* Төлөв - 3 багана */}
+                    <div className="md:col-span-3 text-left">Төлөв</div>
+                    {/* Нийт төлбөр - 3 багана (Баруун тийш шахсан) */}
+                    <div className="md:col-span-3 text-right pr-12">Нийт төлбөр</div>
+                    {/* Үйлдэл - 1 багана */}
+                    <div className="md:col-span-1 text-right">Үйлдэл</div>
                 </div>
 
-                {/* Жагсаалтын хэсэг */}
-                <div className="divide-y divide-gray-50 max-h-[600px] overflow-y-auto custom-scrollbar">
+                {/* Жагсаалтын их бие (Body) */}
+                <div className="divide-y divide-gray-100 max-h-[600px] overflow-y-auto custom-scrollbar bg-white">
                     {filteredOrders.length === 0 ? (
-                        <div className="py-24 text-center text-slate-400 text-sm font-medium">Тохирох захиалга олдсонгүй.</div>
+                        <div className="py-24 text-center">
+                            <p className="text-slate-400 text-sm font-medium">Тохирох захиалга олдсонгүй.</p>
+                        </div>
                     ) : (
                         filteredOrders.map((order) => (
-                            <div key={order.id} className="px-8 py-5 hover:bg-slate-50/50 transition-all group">
-                                <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-6 items-center">
+                            <div key={order.id} className="px-8 py-5 hover:bg-slate-50/80 transition-all group">
+                                {/* Энд grid-cols-12 нь толгойтойгоо яг ижил байна */}
+                                <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
 
-                                    {/* ID багана */}
-                                    <div className="md:col-span-2 flex items-center justify-between md:block">
-                                        <p className="md:hidden text-[10px] font-bold text-slate-300 uppercase">ID</p>
-                                        <span className="text-sm font-bold text-slate-900">#{order.id}</span>
+                                    {/* 1. ID & Огноо (col-span-2) */}
+                                    <div className="md:col-span-2 flex flex-row md:flex-col justify-between items-center md:items-start text-left">
+                                        <span className="text-sm font-bold text-slate-900 group-hover:text-[#102B5A] transition-colors">
+                                            #{order.id}
+                                        </span>
+                                        <span className="text-[11px] text-slate-500 font-medium">
+                                            {new Date(order.date).toLocaleDateString()}
+                                        </span>
                                     </div>
 
-                                    {/* Төрөл багана */}
-                                    <div className="md:col-span-4 flex items-center justify-between md:block">
-                                        <p className="md:hidden text-[10px] font-bold text-slate-300 uppercase">Төрөл</p>
+                                    {/* 2. Төрөл (col-span-3) */}
+                                    <div className="md:col-span-3 flex justify-between items-center md:block text-left">
+                                        <p className="md:hidden text-[10px] font-bold text-slate-400 uppercase tracking-wider">Төрөл</p>
                                         <StatusBadge status={order.service} type="service" />
                                     </div>
 
-                                    {/* Төлөв багана */}
-                                    <div className="md:col-span-3 flex items-center justify-between md:block">
-                                        <p className="md:hidden text-[10px] font-bold text-slate-300 uppercase">Төлөв</p>
+                                    {/* 3. Төлөв (col-span-3) */}
+                                    <div className="md:col-span-3 flex justify-between items-center md:block text-left">
+                                        <p className="md:hidden text-[10px] font-bold text-slate-400 uppercase tracking-wider">Төлөв</p>
                                         <StatusBadge status={order.status} type="order" />
                                     </div>
 
-                                    {/* Үнэ & Огноо багана */}
-                                    <div className="md:col-span-3 flex items-center justify-between md:block text-right">
-                                        <p className="md:hidden text-[10px] font-bold text-slate-300 uppercase">Нийт</p>
-                                        <div>
-                                            <p className="text-base font-bold text-slate-900 group-hover:text-indigo-600 transition-colors leading-none">
-                                                {Number(order.total_price).toLocaleString()}₮
-                                            </p>
-                                            <p className="text-[12px] text-slate-600 font-bold mt-1">
-                                                {new Date(order.date).toLocaleDateString()}
-                                            </p>
-                                        </div>
+                                    {/* 4. Нийт Үнэ (col-span-3) - Толгойн 'Нийт төлбөр'-тэй яг ижил text-right */}
+                                    <div className="md:col-span-3 flex justify-between items-center md:text-right pr-12">
+                                        <p className="md:hidden text-[10px] font-bold text-slate-400 uppercase tracking-wider">Нийт</p>
+                                        <p className="text-sm font-extrabold text-slate-900 w-full">
+                                            {Number(order.total_price).toLocaleString()}₮
+                                        </p>
                                     </div>
+
+                                    {/* 5. Үйлдэл (col-span-1) */}
                                     <div className="md:col-span-1 flex justify-end items-center">
-                                        {order.status === "Хүлээгдэж байна" && (
+                                        {order.status === "Хүлээгдэж байна" ? (
                                             <button
                                                 onClick={() => handleDeleteOrder(order.id, order.status)}
-                                                className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                                                title="Захиалга цуцлах"
+                                                className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all duration-200"
                                             >
                                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                 </svg>
                                             </button>
+                                        ) : (
+                                            <div className="w-9" />
                                         )}
                                     </div>
+
                                 </div>
                             </div>
                         ))

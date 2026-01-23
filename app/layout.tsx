@@ -18,18 +18,29 @@ const geistMono = Geist_Mono({
 
 // SEO тохиргоо энд байна
 export const metadata: Metadata = {
-  icons: "/nest.jpg", // public-оос авахдаа / гэж эхэлнэ
+  icons: "/nest.jpg", // Энэ нь хөтчийн tab дээрх жижиг зураг (favicon)
   title: {
-    default: "Purenest - Цэвэрлэгээ үйлчилгээ",
+    default: "Purenest | Мэргэжлийн цэвэрлэгээний үйлчилгээ",
     template: "%s | Purenest"
   },
-  description: "Purenest: Мэргэжлийн цэвэрлэгээ, Оффис, СӨХ, Олон нийтийн талбайн цэвэрлэгээ үйлчилгээ",
-  keywords: ["цэвэрлэгээ", "cleaning service mongolia", "purenest", "Office цэвэрлэгээ", "office cleaning", "СӨХ цэвэрлэгээ", "Олон нийтийн талбай цэвэрлэгээ"],
+  description: "Оффис, СӨХ, айл гэр болон олон нийтийн талбайн мэргэжлийн цэвэрлэгээ. Purenest - Таны тав тухтай орчин.",
+  keywords: [
+    "цэвэрлэгээ", "цэвэрлэгээний үйлчилгээ", "айлын цэвэрлэгээ", 
+    "оффис цэвэрлэгээ", "сөх цэвэрлэгээ", "purenest", "cleaning service mongolia"
+  ],
   openGraph: {
-    title: "Purenest Cleaning Service",
-    description: "Мэргэжлийн цэвэрлэгээний нэгдсэн үйлчилгээ",
-    url: 'https://purenest.mn', // Таны домэйн
+    title: "Purenest - Цэвэрлэгээний үйлчилгээ",
+    description: "Мэргэжлийн цэвэрлэгээний нэгдсэн үйлчилгээ. Найдвартай хамт олон.",
+    url: 'https://purenest.mn',
     siteName: 'Purenest',
+    images: [
+      {
+        url: '/purenest.jpg', // Хайлт болон сошиалд харагдах зураг
+        width: 500,
+        height: 300,
+        alt: 'Purenest Cleaning Service',
+      },
+    ],
     locale: 'mn_MN',
     type: 'website',
   },

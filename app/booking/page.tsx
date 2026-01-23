@@ -232,7 +232,7 @@ export default function Booking() {
 
     if (!isLoggedIn) {
         return (
-            <section className="flex flex-col items-center justify-center min-h-[60vh] px-4">
+            <section className="flex flex-col items-center justify-center min-h-[60vh] px-4 my-10 ">
                 <div className="bg-white p-10 rounded-2xl shadow-2xl border border-gray-100 text-center max-w-md">
                     <div className="bg-amber-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -247,7 +247,7 @@ export default function Booking() {
                     >
                         Нэвтрэх хуудас руу очих
                     </button>
-                    <p className="mt-4 text-sm text-gray-400">Бүртгэлгүй бол <span className="text-blue-600 cursor-pointer" onClick={() => router.push('/register')}>бүртгүүлэх</span></p>
+                    <p className="mt-4 text-sm text-gray-500">Бүртгэлгүй бол <span className="text-blue-600 cursor-pointer hover:underline" onClick={() => router.push('/register')}>Бүртгүүлэх</span></p>
                 </div>
             </section>
         );
@@ -442,7 +442,7 @@ export default function Booking() {
                             type="submit"
                             className="w-full bg-[#102B5A] text-white py-4 rounded-xl font-bold text-lg shadow-lg hover:bg-[#1a3f7a] transition-all duration-300 mt-4"
                         >
-                          {loading ? "Уншиж байна..." : "Захиалах"} 
+                          {loading ? "Мэдээллийг илгээж байна..." : "Захиалах"} 
                         </button>
                     </form>
                 </div>

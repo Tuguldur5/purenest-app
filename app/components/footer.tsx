@@ -10,9 +10,9 @@ export default function Footer({ size = 28, color = "white" }: SocialIconsProps)
         <footer className="w-full bg-[#102B5A] text-white py-10 px-6 mt-10">
             <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-10">
 
-                <div>
+                <div className="-ml-6">
                     <h3 className="text-xl font-semibold mb-3">Холбоо барих</h3>
-                    <p className="font-text-gray-300">
+                    <p className="font-text-gray-300 ml-8">
                         <strong>Утас:</strong>
                         <a
                             href="tel:+97699069162"
@@ -29,8 +29,8 @@ export default function Footer({ size = 28, color = "white" }: SocialIconsProps)
                         </a>
                     </p>
 
-                    <p className="mt-2">
-                        <span className="font-semibold">Email:</span>{" "}
+                    <p className="mt-2 ml-8">
+                        <span className="font-semibold">И-мэйл:</span>{" "}
                         <span
                             onClick={() => navigator.clipboard.writeText("Sales@purenest.mn")}
                             className="cursor-pointer hover:text-amber-400 transition-colors"
@@ -39,7 +39,7 @@ export default function Footer({ size = 28, color = "white" }: SocialIconsProps)
                         </span>
                     </p>
 
-                    <p className="mt-2">
+                    <p className="mt-2 ml-8">
                         <span className="font-semibold">Хаяг:</span>{" "}
                         <span
                             onClick={() =>

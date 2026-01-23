@@ -142,16 +142,34 @@ export default function Header() {
                         {isLoggedIn ? (
                             // ✅ Нэвтэрсэн үед: Profile Icon болон Гарах товч
                             <div className="flex items-center space-x-4">
-                                <Link href="/profile" className="text-[#102B5A] hover:text-amber-400 transition-colors duration-300">
+                                <Link href="/profile" className="hover:text-amber-400 text-gray-500 transition-colors duration-300">
                                     <FaUserCircle size={35} />
                                 </Link>
 
                             </div>
                         ) : (
-                            // ❌ Нэвтрээгүй үед: Нэвтрэх товч
-                            <Link href="/login" className="hover-mustard border text-white bg-[#102B5A] border-black/5 p-2 ml-5 pl-4 pr-4
-                                shadow-md rounded-md  rounded-lg transition-colors duration-300 hover:text-amber-400">
-                                Нэвтрэх
+                            <Link
+                                href="/login"
+                                className="px-6 py-2.5 bg-[#102B5A]/90 backdrop-blur-sm
+                                            text-white font-semibold text-sm tracking-wide
+                                                border border-white/20
+                                                rounded-[14px]
+                                                shadow-[0_4px_20px_rgba(0,0,0,0.3)]
+                                               
+                                                transition-all duration-300 ease-out
+                                                hover:scale-105 
+                                                hover:bg-[#102B5A] 
+                                                hover:text-amber-400 
+                                                hover:border-amber-400/50
+                                                hover:shadow-amber-400/20
+                                                active:scale-95
+                                                flex items-center justify-center"
+                            >
+                                <span className="relative">
+                                    Нэвтрэх
+                                    {/* Доорх жижиг зураас hover хийхэд гарч ирнэ */}
+                                    <span className="absolute -bottom-1 left-0 w-0 h-[1px] bg-amber-400 transition-all duration-300 group-hover:w-full"></span>
+                                </span>
                             </Link>
                         )}
                     </div>

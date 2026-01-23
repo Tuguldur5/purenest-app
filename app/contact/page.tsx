@@ -74,14 +74,16 @@ export default function ContactPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 px-4 py-16">
-            <div className="max-w-6xl mx-auto text-black rounded-[18px] shadow-2xl p-6 md:p-10 bg-white border border-gray-100">
-                <h2 className="text-4xl font-bold text-[#102B5A] mb-4 text-center">
-                    Холбоо барих
-                </h2>
-                <p className="text-gray-600 mb-12 text-center max-w-2xl mx-auto">
+        <div className="min-h-screen px-4 py-16">
+            <div className="max-w-6xl mx-auto text-black ">
+                <div className="max-w-4xl mx-auto text-center mb-12 md:mb-16">
+                <h2 className="text-3xl md:text-5xl font-bold text-[#102B5A]">Холбоо барих</h2>
+                <div className="w-20 h-1.5 bg-amber-400 mx-auto mt-4 rounded-full"></div> 
+                <p className="text-base md:text-lg mt-6 text-gray-600 leading-relaxed">
                     Асуулт, санал хүсэлт, эсвэл үйлчилгээний талаарх мэдээлэл авахыг хүсвэл доорх маягтыг бөглөнө үү.
                 </p>
+            </div>
+                
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
 

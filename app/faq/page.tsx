@@ -8,7 +8,7 @@ export default function FAQPage() {
     const [openIndex, setOpenIndex] = useState<number | null>(null);
 
     const faqData = [
-        { q: "Та бүхэн ямар үйлчилгээ үзүүлдэг вэ?", a: "Оффис, СӨХ, Олон нийтийн талбайн ерөнхий болон гүн цэвэрлэгээний үйлчилгээ үзүүлдэг." },
+        { q: "Танай компани ямар үйлчилгээ үзүүлдэг вэ?", a: "Оффис, СӨХ, Олон нийтийн талбайн ерөнхий болон гүн цэвэрлэгээний үйлчилгээ үзүүлдэг." },
         { q: "Цэвэрлэгээний үнэ хэрхэн тооцогдох вэ?", a: "Талбайн хэмжээ, бохирдол болон үйлчилгээний төрөлд үндэслэн үнэ тогтооно." },
         { q: "Баталгаат үйлчилгээтэй юу?", a: "Тийм, үйлчилгээндээ 100% сэтгэл ханамжийн баталгаа өгдөг." },
         { q: "Бэлэн мөнгөөр төлж болох уу?", a: "Тийм, бэлэн мөнгө болон дижитал төлбөрийн бүх төрлийг хүлээн авна." },
@@ -23,15 +23,17 @@ export default function FAQPage() {
 
     return (
         <section className="max-w-5xl mx-auto px-6 py-14 text-black">
-            <h2 className="text-4xl font-bold text-center mb-10 text-[#102B5A]">Түгээмэл асуултууд</h2>
-
+           
+             <div className="max-w-4xl mx-auto text-center mb-12 md:mb-16">
+                <h2 className="text-3xl md:text-5xl font-bold text-[#102B5A]">Түгээмэл асуултууд</h2>
+                <div className="w-20 h-1.5 bg-amber-400 mx-auto mt-4 rounded-full"></div> 
+            </div>
             <div className="space-y-4 max-w-5xl mx-auto">
                 {displayedFaqs.map((item, index) => (
-                    <div 
-                        key={index} 
-                        className={`border border-black/5 rounded-2xl p-6 transition-all duration-300 ${
-                            openIndex === index ? 'bg-white shadow-md' : 'bg-gray-50 hover:bg-white hover:shadow-sm'
-                        }`}
+                    <div
+                        key={index}
+                        className={`border border-black/5 rounded-2xl p-6 transition-all duration-300 ${openIndex === index ? 'bg-white shadow-md' : 'bg-gray-50 hover:bg-white hover:shadow-sm'
+                            }`}
                     >
                         <button
                             onClick={() => toggleFAQ(index)}
@@ -44,10 +46,9 @@ export default function FAQPage() {
                                 </svg>
                             </span>
                         </button>
-                        
-                        <div className={`grid transition-all duration-300 ease-in-out ${
-                            openIndex === index ? 'grid-rows-[1fr] opacity-100 mt-4' : 'grid-rows-[0fr] opacity-0'
-                        }`}>
+
+                        <div className={`grid transition-all duration-300 ease-in-out ${openIndex === index ? 'grid-rows-[1fr] opacity-100 mt-4' : 'grid-rows-[0fr] opacity-0'
+                            }`}>
                             <div className="overflow-hidden">
                                 <p className="text-slate-600 leading-relaxed border-t border-slate-100 pt-4 text-sm md:text-base">
                                     {item.a}
@@ -65,10 +66,10 @@ export default function FAQPage() {
                     className="group inline-flex items-center gap-2 px-8 py-3 bg-white border border-slate-200 text-slate-700 font-bold rounded-full hover:bg-[#102B5A] hover:text-white hover:border-[#102B5A] transition-all duration-300 shadow-sm"
                 >
                     {showAll ? "Цөөн харах" : "Бүх асуултыг харах"}
-                    <svg 
-                        className={`w-4 h-4 transition-transform duration-300 ${showAll ? 'rotate-180' : 'group-hover:translate-y-1'}`} 
-                        fill="none" 
-                        stroke="currentColor" 
+                    <svg
+                        className={`w-4 h-4 transition-transform duration-300 ${showAll ? 'rotate-180' : 'group-hover:translate-y-1'}`}
+                        fill="none"
+                        stroke="currentColor"
                         viewBox="0 0 24 24"
                     >
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
@@ -77,7 +78,7 @@ export default function FAQPage() {
             </div>
             <div className="bg-white rounded-2xl border border-gray-100 p-8 shadow-lg text-center mt-10">
                 {/* Толгой хэсэг */}
-                
+
                 <h2 className="text-3xl font-bold text-gray-900 mb-2 tracking-tight">Тусламж хэрэгтэй юу?</h2>
                 <p className="text-sm text-gray-400 font-normal mb-6 leading-relaxed">
                     Танд асуух зүйл гарвал манай дэмжлэгийн баг туслахад бэлэн байна.
@@ -89,24 +90,33 @@ export default function FAQPage() {
                         <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
-                        <span>Sales@purenest.mn</span>
+                        <span> <p
+                            onClick={() => navigator.clipboard.writeText("sale@purenest.mn")}
+                            className="text-sm font-medium cursor-pointer hover:text-amber-400 transition-colors"
+                        >
+                            sale@purenest.mn
+                        </p></span>
                     </div>
                     <div className="flex items-center justify-center gap-2 text-sm text-gray-600 font-normal border border-black/5 shadow-md rounded-xl py-2 px-4">
                         <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                         </svg>
-                        <span>+976 12345678</span>
+                        <span> <p className=" font-text-gray-300">
+                            <a href="tel:+97699069162" className="ml-1 hover:text-amber-400 transition">
+                                +976 9906 9162
+                            </a>
+                        </p></span>
                     </div>
                     <button
-                    onClick={() => router.push('/contact')}
-                    className="w-full py-3 px-4 bg-gray-900 text-white text-sm font-normal rounded-xl hover:bg-indigo-600 transition-all duration-300 shadow-sm shadow-gray-200"
-                >
-                    Холбоо барих хуудас руу
-                </button>
+                        onClick={() => router.push('/contact')}
+                        className="w-full py-3 px-4 bg-gray-900 text-white text-sm font-normal rounded-xl hover:bg-indigo-600 transition-all duration-300 shadow-sm shadow-gray-200"
+                    >
+                        Холбоо барих хуудас руу
+                    </button>
                 </div>
 
                 {/* Үйлдэл хийх товчлуур */}
-                
+
             </div>
         </section>
     );

@@ -4,8 +4,8 @@ export default function AboutPage() {
             {/* Title Section */}
             <div className="max-w-4xl mx-auto text-center mb-12 md:mb-16">
                 <h2 className="text-3xl md:text-5xl font-bold text-[#102B5A]">Бидний тухай</h2>
-                <div className="w-20 h-1.5 bg-amber-400 mx-auto mt-4 rounded-full"></div> {/* Гоёл чимэглэлийн зураас */}
-                <p className="text-base md:text-xl mt-6 text-gray-600 leading-relaxed">
+                <div className="w-20 h-1.5 bg-amber-400 mx-auto mt-4 rounded-full"></div> 
+                <p className="text-base md:text-lg mt-6 text-gray-600 leading-relaxed">
                     Purenest Cleaning Services — Цэвэр, Тав тухтай, Эрүүл орчныг танд.
                 </p>
             </div>
@@ -14,11 +14,11 @@ export default function AboutPage() {
             <div className="grid lg:grid-cols-2 gap-10 items-center max-w-6xl mx-auto">
                 {/* Image Wrapper */}
                 <div className="relative group">
-                    <div className="absolute -inset-1 bg-gradient-to-r from-amber-400 to-[#102B5A] rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
+                    <div className="absolute -inset-1 bg-gradient-to-r from-amber-400 to-[#102B5A] rounded-2xl blur  group-hover:opacity-50 transition duration-1000"></div>
                     <img
                         src="/purenest.jpg"
                         alt="Purenest Cleaning Service"
-                        className="relative w-full h-[300px] md:h-[510px] rounded-2xl shadow-1xl object-cover"
+                        className="relative w-full rounded-2xl shadow-1xl object-cover"
                     />
                 </div>
 
@@ -26,11 +26,10 @@ export default function AboutPage() {
                 <div className="space-y-6 text-base md:text-lg leading-relaxed ">
                     <div className="border-l-4 border-amber-400 pl-4">
                         <p className="text-gray-700">
-                            {/* leading-none нь текстийн дээд талын хоосон зайг авч хаяна */}
-                            <strong className="text-[#102B5A] font-bold text-2xl md:text-3xl block mb-3 leading-none">
-                                Purenest
-                            </strong>
-                            нь 2025 онд үүсгэн байгуулагдсан бөгөөд гэр, албан байгууллага болон
+        
+                            
+
+                            2025 онд үүсгэн байгуулагдсан бөгөөд гэр, албан байгууллага болон
                             олон нийтийн талбайд зориулсан мэргэжлийн цэвэрлэгээний үйлчилгээ үзүүлдэг.
                         </p>
                     </div>

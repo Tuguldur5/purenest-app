@@ -14,6 +14,6 @@ export const Toast: React.FC<ToastProps> = ({ title, description,errorMessage })
       <div className="text-white/80 text-sm">
         {description} {errorMessage && <span className="block font-mono mt-1 text-xs bg-black/20 p-1 rounded">{errorMessage}</span>}
       </div>
-      </div>
+    </div>
   )
 }
