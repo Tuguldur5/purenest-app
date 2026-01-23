@@ -35,7 +35,7 @@ function UserDetails({ details, onUpdate }: { details: UserDetail | null, onUpda
                 full_name: details.full_name || '',
                 email: details.email || '',
                 // details.phone байхгүй бол хоосон string оноох
-                phone: details.phone ? String(details.phone) : '' 
+                phone: details.phone ? String(details.phone) : ''
             });
         }
     }, [details]);
@@ -57,7 +57,7 @@ function UserDetails({ details, onUpdate }: { details: UserDetail | null, onUpda
             if (res.ok) {
                 const updatedData = await res.json();
                 // Серверээс ирсэн шинэ өгөгдлөөр state-ээ шинэчлэх
-                const newData = updatedData.user || form; 
+                const newData = updatedData.user || form;
                 onUpdate(newData);
                 localStorage.setItem('user', JSON.stringify(newData));
                 setIsEditing(false);
@@ -121,7 +121,7 @@ function UserDetails({ details, onUpdate }: { details: UserDetail | null, onUpda
                         <button
                             onClick={() => {
                                 setIsEditing(false);
-                                
+
                             }}
                             className="px-6 py-2 text-sm font-medium text-gray-500 bg-gray-100 rounded-[14px] hover:bg-gray-200 transition-colors"
                         >
@@ -379,44 +379,44 @@ export default function Profile() {
 
     // Profile компонент доторх useEffect-ийг ингэж шинэчилнэ үү:
 
-useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) { router.push('/login'); return; }
-
-    const fetchProfileData = async () => {
-        try {
-            // 1. Хэрэглэгчийн мэдээллийг серверээс авах (ШИНЭ)
-            const userRes = await fetch(`https://purenest-app.onrender.com/api/users/profile`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            
-            if (userRes.ok) {
-                const userData = await userRes.json();
-                setUserDetails(userData);
-                // Мөн localStorage-аа шинэчилж болно
-                localStorage.setItem('user', JSON.stringify(userData));
-            } else if (userRes.status === 401) {
-                localStorage.clear();
-                router.push('/login');
-                return;
-            }
-
-            // 2. Захиалгын түүхийг авах
-            const ordersResponse = await fetch(`https://purenest-app.onrender.com/api/orders/history`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-
-            if (ordersResponse.ok) setOrderHistory(await ordersResponse.json());
-            
-        } catch (err) {
-            console.error("Data fetch error:", err);
-        } finally {
-            setLoading(false);
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            router.push('/login');
+            return;
         }
-    };
-    
-    fetchProfileData();
-}, [router]);
+
+        const fetchAllData = async () => {
+            try {
+                // 1. Хэрэглэгчийн мэдээллийг БАЗААС дуудах (ШИНЭ ХЭСЭГ)
+                const userRes = await fetch(`https://purenest-app.onrender.com/api/users/profile`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (userRes.ok) {
+                    const userData = await userRes.json();
+                    setUserDetails(userData); // Баазаас ирсэн датаг онооно
+                    localStorage.setItem('user', JSON.stringify(userData)); // LocalStorage-аа шинэчилнэ
+                } else if (userRes.status === 401) {
+                    handleLogout(); // Токен буруу бол гаргана
+                }
+
+                // 2. Захиалгын түүхийг дуудах
+                const ordersRes = await fetch(`https://purenest-app.onrender.com/api/orders/history`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (ordersRes.ok) {
+                    setOrderHistory(await ordersRes.json());
+                }
+            } catch (err) {
+                console.error("Дата татахад алдаа гарлаа:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchAllData();
+    }, [router]);
 
     const handleLogout = () => {
         localStorage.clear();

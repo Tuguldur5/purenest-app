@@ -159,17 +159,21 @@ app.get('/api/booking/user-info', authMiddleware, async (req, res) => {
         res.status(500).json({ error: "User info fetch failed" });
     }
 });
-app.get('/api/users/profile', authenticateToken, async (req, res) => {
-    const { data, error } = await supabase
-        .from('users')
-        .select('full_name, email, phone') // 'phone' энд заавал байх ёстой
-        .eq('id', req.user.id)
-        .single();
-    
-    if (error) return res.status(400).json(error);
-    res.json(data);
-});
+// server.js дээр ингэж засна:
+app.get('/api/users/profile', authMiddleware, async (req, res) => {
+    try {
+        // req.user дотор таны JWT-ээс ирсэн id байгаа
+        const user = await UserDetails(req.user.id);
 
+        if (!user) {
+            return res.status(404).json({ error: "Хэрэглэгч олдсонгүй" });
+        }
+
+        res.json(user);
+    } catch (error) {
+        res.status(500).json({ error: "Серверийн алдаа" });
+    }
+});
 app.put('/api/users/update', authMiddleware, async (req, res) => {
     try {
         const userId = req.user.id;
@@ -200,7 +204,7 @@ app.put('/api/users/update', authMiddleware, async (req, res) => {
             `UPDATE users 
                 SET full_name = $1, phone = $2, email = $3 
                 WHERE id = $4 
-                RETURNING id, full_name, email, phone`, 
+                RETURNING id, full_name, email, phone`,
             [full_name, phone, email, userId]
         );
 
@@ -223,7 +227,7 @@ app.post('/api/booking', authMiddleware, async (req, res) => {
 
         // 1. Хэрэглэгчийн нэрийг сангаас татах
         const userResult = await pool.query('SELECT full_name FROM users WHERE id = $1', [user_id]);
-        
+
         if (userResult.rows.length === 0) {
             return res.status(404).json({ error: "Хэрэглэгч олдсонгүй" });
         }
@@ -231,10 +235,10 @@ app.post('/api/booking', authMiddleware, async (req, res) => {
         const userName = userResult.rows[0].full_name;
 
         // 2. Request body-оос мэдээллүүдээ задлах (Default утга оноох замаар undefined-аас сэргийлнэ)
-        const { 
-            service = 'Тодорхойгүй үйлчилгээ', 
-            date, 
-            address = '', 
+        const {
+            service = 'Тодорхойгүй үйлчилгээ',
+            date,
+            address = '',
             total_price = 0,
             apartments = 0,
             floors = 0,
@@ -303,9 +307,9 @@ app.post('/api/booking', authMiddleware, async (req, res) => {
 
     } catch (err) {
         console.error("Critical Booking Error:", err);
-        res.status(500).json({ 
-            error: 'Серверт алдаа гарлаа.', 
-            details: err.message 
+        res.status(500).json({
+            error: 'Серверт алдаа гарлаа.',
+            details: err.message
         });
     }
 });
@@ -422,7 +426,7 @@ app.post('/api/contact', async (req, res) => {
 
     try {
         await resend.emails.send({
-            from: 'Purenest Contact <onboarding@resend.dev>', 
+            from: 'Purenest Contact <onboarding@resend.dev>',
             to: process.env.COMPANY_MAIL || 'sales@purenest.mn',
             subject: `Холбоо барих маягт: ${name}`,
             html: `<p>Нэр: ${name}</p><p>Имэйл: ${email}</p><p>Мессеж: ${message}</p>`,
