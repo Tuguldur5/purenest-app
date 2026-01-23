@@ -159,6 +159,16 @@ app.get('/api/booking/user-info', authMiddleware, async (req, res) => {
         res.status(500).json({ error: "User info fetch failed" });
     }
 });
+app.get('/api/users/profile', authenticateToken, async (req, res) => {
+    const { data, error } = await supabase
+        .from('users')
+        .select('full_name, email, phone') // 'phone' энд заавал байх ёстой
+        .eq('id', req.user.id)
+        .single();
+    
+    if (error) return res.status(400).json(error);
+    res.json(data);
+});
 
 app.put('/api/users/update', authMiddleware, async (req, res) => {
     try {

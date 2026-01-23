@@ -1,39 +1,49 @@
 "use client"
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { Toast } from "../components/ui/toast"; // Toast компонентоо ийм замаар импортлоорой
 
 export default function ContactPage() {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
-    const [status, setStatus] = useState<null | { ok: boolean; text: string }>(null);
+    
+    // Toast-д зориулсан шинэ state
+    const [toast, setToast] = useState<{ title: string; description: string; variant: "success" | "error" | "default" } | null>(null);
 
-    // Example map coordinates (Ulaanbaatar center). Replace with your lat/lng.
-    const MAP_LAT = 47.9181;
-    const MAP_LNG = 106.9170;
+    // Toast-ыг 3 секундын дараа автоматаар хаах эффект
+    useEffect(() => {
+        if (toast) {
+            const timer = setTimeout(() => setToast(null), 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [toast]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setStatus(null);
 
-        // 1. Утга байгаа эсэхийг шалгах
         if (!name.trim() || !email.trim() || !message.trim()) {
-            setStatus({ ok: false, text: "Бүх талбарыг бөглөнө үү." });
+            setToast({
+                title: "Алдаа",
+                description: "Бүх талбарыг бөглөнө үү.",
+                variant: "error"
+            });
             return;
         }
 
-        // 2. 📧 Имэйл форматыг шалгах (Нэмэлт сайжруулалт)
-        // Энэ Regex нь энгийн имэйл форматыг шалгадаг.
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
-            setStatus({ ok: false, text: "Имэйл хаягийн формат буруу байна." });
+            setToast({
+                title: "Алдаа",
+                description: "Имэйл хаягийн формат буруу байна.",
+                variant: "error"
+            });
             return;
         }
 
         setLoading(true);
         try {
-            // POST to your backend API
             const res = await fetch("https://purenest-app.onrender.com/api/contact", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -41,201 +51,164 @@ export default function ContactPage() {
             });
 
             if (res.ok) {
-                // 3. ✅ Амжилттай хариу
-                setStatus({ ok: true, text: "Таны захиаг хүлээн авлаа. Баярлалаа!" });
+                setToast({
+                    title: "Амжилттай",
+                    description: "Таны захиаг хүлээн авлаа. Баярлалаа!",
+                    variant: "success"
+                });
                 setName("");
                 setEmail("");
                 setMessage("");
             } else {
-                // 4. ❌ Бек-эндээс алдаа ирсэн
-                const contentType = res.headers.get("content-type");
-                let errorText = "Серверийн алдаа. Дахин оролдоно уу.";
-
-                if (contentType && contentType.includes("application/json")) {
-                    // Хэрэв JSON хариу ирсэн бол, алдааг нь гаргаж авна
-                    const err = await res.json().catch(() => ({}));
-                    errorText = err.error || errorText;
-                } else {
-                    // Хэрэв JSON бус алдаа (жишээ нь, 404, 500 HTML) ирсэн бол
-                    console.error(`Бек-эндээс JSON бус алдаа ирлээ. Статус: ${res.status}`);
-                    errorText = `Хүсэлт амжилтгүй боллоо (Статус: ${res.status}).`;
-                }
-
-                // 💡 Хэрэглэгчид алдааг харуулна
-                setStatus({ ok: false, text: errorText });
+                setToast({
+                    title: "Амжилтгүй боллоо",
+                    description: "Серверийн алдаа гарлаа. Дахин оролдоно уу.",
+                    variant: "error"
+                });
             }
         } catch (err) {
-            // 5. 🛑 Сүлжээний (Fetch) алдаа
-            console.error("Fetch/Сүлжээний алдаа:", err); // Алдааг консолд хэвлэж байна
-            setStatus({ ok: false, text: "Сүлжээний алдаа. Интернэтээ шалгана уу." });
+            setToast({
+                title: "Сүлжээний алдаа",
+                description: "Интернэт холболтоо шалгана уу.",
+                variant: "error"
+            });
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="min-h-screen px-4 py-16">
-            <div className="max-w-6xl mx-auto text-black ">
+        <div className="relative min-h-screen px-4 py-16 bg-gray-50/50 text-black">
+            {/* Toast-ыг дэлгэцийн хамгийн дээд хэсэгт байрлуулна */}
+            {toast && (
+                <Toast 
+                    title={toast.title} 
+                    description={toast.description} 
+                    variant={toast.variant} 
+                />
+            )}
+
+            <div className="max-w-6xl mx-auto">
                 <div className="max-w-4xl mx-auto text-center mb-12 md:mb-16">
-                <h2 className="text-3xl md:text-5xl font-bold text-[#102B5A]">Холбоо барих</h2>
-                <div className="w-20 h-1.5 bg-amber-400 mx-auto mt-4 rounded-full"></div> 
-                <p className="text-base md:text-lg mt-6 text-gray-600 leading-relaxed">
-                    Асуулт, санал хүсэлт, эсвэл үйлчилгээний талаарх мэдээлэл авахыг хүсвэл доорх маягтыг бөглөнө үү.
-                </p>
-            </div>
-                
+                    <h2 className="text-3xl md:text-5xl font-bold text-[#102B5A]">Холбоо барих</h2>
+                    <div className="w-20 h-1.5 bg-amber-400 mx-auto mt-4 rounded-full"></div> 
+                    <p className="text-base md:text-lg mt-6 text-gray-600 leading-relaxed">
+                        Асуулт, санал хүсэлт, эсвэл үйлчилгээний талаарх мэдээлэл авахыг хүсвэл доорх маягтыг бөглөнө үү.
+                    </p>
+                </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-
-                    {/* 1. RIGHT: Quick Contact Info (Зүүн талын хэсэг - БОДИТ УТГУУД) */}
-                    <div className="order-2 md:order-1 max-h-130 flex flex-col justify-between p-6 bg-[#102B5A] rounded-xl shadow-lg shadow-inner text-white">
-                        <div className="space-y-8">
-                            <h3 className="text-3xl font-bold border-b border-amber-400 pb-3">Мэдээлэл</h3>
-
-                            {/* Contact Items */}
-                            <div className="space-y-6">
-                                {/* Утас */}
-                                <div className="flex items-start">
-                                    <svg className="w-6 h-6 mr-3 text-amber-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+                    {/* Мэдээллийн хэсэг (Зүүн тал) */}
+                    <div className="order-2 md:order-1 flex flex-col justify-between p-8 bg-[#102B5A] rounded-3xl shadow-2xl text-white relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-amber-400/10 rounded-full -mr-16 -mt-16 blur-3xl"></div>
+                        <div className="space-y-8 relative z-10">
+                            <h3 className="text-3xl font-bold border-b border-amber-400/30 pb-4">Мэдээлэл</h3>
+                            <div className="space-y-7">
+                                <div className="flex items-start group">
+                                    <div className="p-3 bg-amber-400/10 rounded-xl mr-4 group-hover:bg-amber-400/20 transition-colors">
+                                        <svg className="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+                                    </div>
                                     <div>
-                                        <p className="text-sm font-light text-gray-300">Утас</p>
-                                        {/* {COMPANY_PHONE}-ийг бодит утгаар солив */}
-                                        <p className=" font-text-gray-300">
-
-                                            <a
-                                                href="tel:+97699069162"
-                                                className="ml-1 hover:text-amber-400 transition"
-                                            >
-                                                +976 9906 9162
-                                            </a>
-                                            <span className="mx-2 text-gray-500">|</span>
-                                            <a
-                                                href="tel:+97690504700"
-                                                className="hover:text-amber-400 transition"
-                                            >
-                                                +976 9050 4700
-                                            </a>
-                                        </p>
+                                        <p className="text-xs font-bold uppercase tracking-wider text-amber-400/60 mb-1">Утас</p>
+                                        <div className="flex flex-wrap gap-2 text-lg font-medium">
+                                            <a href="tel:+97699069162" className="hover:text-amber-400 transition">+976 9906 9162</a>
+                                            <span className="text-white/20">|</span>
+                                            <a href="tel:+97690504700" className="hover:text-amber-400 transition">+976 9050 4700</a>
+                                        </div>
                                     </div>
                                 </div>
 
-                                {/* Имэйл */}
-                                <div className="flex items-start">
-                                    <svg className="w-6 h-6 mr-3 text-amber-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.892 5.263A2 2 0 0012 14c.72 0 1.404-.263 1.992-.737L21 8m-2 4v7a2 2 0 01-2 2H5a2 2 0 01-2-2v-7"></path></svg>
+                                <div className="flex items-start group">
+                                    <div className="p-3 bg-amber-400/10 rounded-xl mr-4 group-hover:bg-amber-400/20 transition-colors">
+                                        <svg className="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.892 5.263A2 2 0 0012 14c.72 0 1.404-.263 1.992-.737L21 8m-2 4v7a2 2 0 01-2 2H5a2 2 0 01-2-2v-7"></path></svg>
+                                    </div>
                                     <div>
-                                        <p className="text-sm font-light text-gray-300">Имэйлээр холбогдох</p>
-                                        {/* {COMPANY_EMAIL}-ийг бодит утгаар солив */}
-                                        <p
-                                            onClick={() => navigator.clipboard.writeText("sale@purenest.mn")}
-                                            className="text-lg font-medium cursor-pointer hover:text-amber-400 transition-colors"
-                                        >
-                                            sale@purenest.mn
-                                        </p>
-
+                                        <p className="text-xs font-bold uppercase tracking-wider text-amber-400/60 mb-1">Имэйл</p>
+                                        <p onClick={() => {navigator.clipboard.writeText("sale@purenest.mn"); alert("Хууллаа!");}} className="text-lg font-medium cursor-pointer hover:text-amber-400 transition-colors">sale@purenest.mn</p>
                                     </div>
                                 </div>
 
-                                {/* Байршил */}
-                                <div className="flex items-start">
-                                    <svg className="w-6 h-6 mr-3 text-amber-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                                    <div>
-                                        <p className="text-sm font-light text-gray-300">
-                                            Байршил
-                                        </p>
-
-                                        <p
-                                            onClick={() =>
-                                                navigator.clipboard.writeText(
-                                                    "Хан-Уул дүүрэг, 3-р хороо, Чингисийн өргөн чөлөө, Анун төв"
-                                                )
-                                            }
-                                            className="text-lg font-medium cursor-pointer hover:text-amber-400 transition-colors"
-                                            title="Click to copy"
-                                        >
-                                            Хан-Уул дүүрэг, 3-р хороо, Чингисийн өргөн чөлөө, Анун төв
-                                        </p>
+                                <div className="flex items-start group">
+                                    <div className="p-3 bg-amber-400/10 rounded-xl mr-4 group-hover:bg-amber-400/20 transition-colors">
+                                        <svg className="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                                     </div>
-
+                                    <div>
+                                        <p className="text-xs font-bold uppercase tracking-wider text-amber-400/60 mb-1">Байршил</p>
+                                        <p className="text-lg font-medium leading-snug">Хан-Уул дүүрэг, 3-р хороо,<br/>Чингисийн өргөн чөлөө, Анун төв</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Ажлын цаг */}
-                        <div className="mt-8 pt-4 border-t border-gray-600">
-                            <p className="text-sm font-medium text-amber-400">Ажлын цаг:</p>
-                            <p className="text-sm text-gray-300">Өдөр бүр 09:00 - 18:00</p>
+                        <div className="mt-12 pt-6 border-t border-white/10 relative z-10">
+                            <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                                <p className="text-sm font-medium text-gray-300">Ажлын цаг: 09:00 - 18:00 (Өдөр бүр)</p>
+                            </div>
                         </div>
                     </div>
 
-                    {/* 2. LEFT: Contact Form (Баруун талын хэсэг - LOGIC-ИЙГ ХЭВЭЭР ҮЛДЭЭВ) */}
-                    <div className="order-1 md:order-2 bg-white p-6 md:p-8 rounded-xl shadow-lg border border-gray-100">
-                        <h3 className="text-3xl font-bold text-gray-800 mb-6">Захиа илгээх</h3>
-
-                        {/* Form - (Backend/State Logic хэвээр) */}
-
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            <div>
-                                <label className="block text-sm mb-1">Нэр</label>
+                    {/* Форм (Баруун тал) */}
+                    <div className="order-1 md:order-2 bg-white p-8 md:p-10 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-gray-100">
+                        <h3 className="text-3xl font-bold text-gray-800 mb-8">Захиа илгээх</h3>
+                        <form onSubmit={handleSubmit} className="space-y-6">
+                            <div className="space-y-2">
+                                <label className="text-sm font-semibold text-gray-600 ml-1">Нэр</label>
                                 <input
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
-                                    className="w-full border border-black/20 hover:shadow-lg rounded p-2"
+                                    className="w-full bg-gray-50 border border-gray-200 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/5 outline-none rounded-2xl p-4 transition-all"
                                     placeholder="Таны нэр"
                                 />
                             </div>
 
-                            <div>
-                                <label className="block text-sm mb-1">Имэйл</label>
+                            <div className="space-y-2">
+                                <label className="text-sm font-semibold text-gray-600 ml-1">Имэйл</label>
                                 <input
                                     type="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="w-full border border-black/20 hover:shadow-lg rounded p-2"
+                                    className="w-full bg-gray-50 border border-gray-200 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/5 outline-none rounded-2xl p-4 transition-all"
                                     placeholder="name@example.com"
                                 />
                             </div>
 
-                            <div>
-                                <label className="block text-sm mb-1">Сэтгэгдэл / Асуулт</label>
+                            <div className="space-y-2">
+                                <label className="text-sm font-semibold text-gray-600 ml-1">Сэтгэгдэл / Асуулт</label>
                                 <textarea
                                     value={message}
                                     onChange={(e) => setMessage(e.target.value)}
-                                    className="w-full border border-black/20 hover:shadow-lg rounded p-2 min-h-40"
-                                    placeholder="Сэтгэгдэлээ бичнэ үү..."
+                                    className="w-full bg-gray-50 border border-gray-200 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/5 outline-none rounded-2xl p-4 min-h-[160px] transition-all resize-none"
+                                    placeholder="Энд бичнэ үү..."
                                 />
                             </div>
 
-                            <div>
-                                <button
-                                    type="submit"
-                                    disabled={loading}
-                                    className="w-full bg-[#102B5A] text-white p-3 rounded ] disabled:opacity-60 hover:text-amber-400 transition-colors"
-                                >
-                                    {loading ? "Илгээж байна..." : "Илгээх"}
-                                </button>
-                            </div>
-
-                            {status && (
-                                <p className={`text-sm pt-2 ${status.ok ? 'text-green-600' : 'text-red-600'}`}>{status.text}</p>
-                            )}
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="w-full bg-[#102B5A] text-white py-4 rounded-2xl font-bold text-lg shadow-lg hover:shadow-blue-900/20 hover:bg-[#1a3f7a] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-3"
+                            >
+                                {loading ? (
+                                    <>
+                                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                        Илгээж байна...
+                                    </>
+                                ) : "Захиа илгээх"}
+                            </button>
                         </form>
                     </div>
                 </div>
 
-                {/* 3. BOTTOM: Google Map (Газрын зураг - БОДИТ УТГУУД) */}
-                <div className="mt-10 p-6 bg-white rounded-3xl shadow-xl border border-gray-100">
-                    <h3 className="text-2xl font-bold text-center text-gray-800 mb-6">Манай байршил</h3>
-                    <div className="w-full overflow-hidden rounded-2xl shadow-md" style={{ height: '400px' }}>
+                {/* Газрын зураг */}
+                <div className="mt-16 p-2 bg-white rounded-[2rem] shadow-xl border border-gray-100 overflow-hidden">
+                    <div className="w-full h-[450px] rounded-[1.8rem] overflow-hidden grayscale-[0.3] hover:grayscale-0 transition-all duration-700">
                         <iframe
                             title="anun-center-location"
                             width="100%"
                             height="100%"
                             style={{ border: 0 }}
                             loading="lazy"
-                            referrerPolicy="no-referrer-when-downgrade"
-                            // Зассан src код:
-                            src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d2675.762194954005!2d106.88428437637841!3d47.897519886286766!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zNDfCsDUzJzUxLjEiTiAxMDbCsDUzJzEyLjciRQ!5e0!3m2!1smn!2smn!4v1715600000000!5m2!1smn!2smn"
-                        />
+                            src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d2675.762194954005!2d106.88428437637841!3d47.897519886286766!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zNDfCsDUzJzUxLjEiTiAxMDbCsDUzJzEyLjciRQ!5e0!3m2!1smn!2smn!4v1715600000000!5m2!1smn!2smn"/>
                     </div>
                 </div>
             </div>

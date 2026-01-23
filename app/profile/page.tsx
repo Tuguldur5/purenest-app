@@ -34,45 +34,34 @@ function UserDetails({ details, onUpdate }: { details: UserDetail | null, onUpda
             setForm({
                 full_name: details.full_name || '',
                 email: details.email || '',
-                phone: details.phone ? String(details.phone) : ''
+                // details.phone байхгүй бол хоосон string оноох
+                phone: details.phone ? String(details.phone) : '' 
             });
         }
     }, [details]);
 
-    if (!details) return <div className="animate-pulse bg-gray-200 h-64 rounded-2xl"></div>;
-
+    // Save хийх үед Backend-ийн бүтцийг шалгах
     const handleSave = async () => {
         setLoading(true);
         try {
             const token = localStorage.getItem('token');
-
-            // Backend-ийн хүлээж авах боломжтой хувилбарууд
-            const payload = {
-                ...form,
-                // Хэрэв сервер заавал тоо нэхээд байвал:
-                // phone: Number(form.phone.replace(/\D/g, '')) 
-            };
-
             const res = await fetch(`https://purenest-app.onrender.com/api/users/update`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify(payload)
+                body: JSON.stringify(form) // form дотор phone, full_name, email байгаа
             });
 
-            const data = await res.json();
-
             if (res.ok) {
-                onUpdate(form);
-                localStorage.setItem('user', JSON.stringify(form));
+                const updatedData = await res.json();
+                // Серверээс ирсэн шинэ өгөгдлөөр state-ээ шинэчлэх
+                const newData = updatedData.user || form; 
+                onUpdate(newData);
+                localStorage.setItem('user', JSON.stringify(newData));
                 setIsEditing(false);
                 showToast({ title: "Амжилттай", description: "Мэдээлэл шинэчлэгдлээ." });
-            } else {
-                // Энд консол дээр датаг бүрэн харах
-                console.error("Серверээс ирсэн алдааны дэлгэрэнгүй:", data);
-                throw new Error(data.message || data.error || "Сервер мэдээллийг хүлээж авсангүй.");
             }
         } catch (error: any) {
             showToast({ title: "Алдаа гарлаа", description: error.message });
@@ -132,7 +121,7 @@ function UserDetails({ details, onUpdate }: { details: UserDetail | null, onUpda
                         <button
                             onClick={() => {
                                 setIsEditing(false);
-                                setForm(details); // Болих үед хуучин утгыг нь буцааж оноох
+                                
                             }}
                             className="px-6 py-2 text-sm font-medium text-gray-500 bg-gray-100 rounded-[14px] hover:bg-gray-200 transition-colors"
                         >
@@ -388,29 +377,46 @@ export default function Profile() {
     const [loading, setLoading] = useState(true);
     const router = useRouter();
 
-    useEffect(() => {
-        const token = localStorage.getItem('token');
-        if (!token) { router.push('/login'); return; }
+    // Profile компонент доторх useEffect-ийг ингэж шинэчилнэ үү:
 
-        const fetchProfileData = async () => {
-            try {
-                const storedUser = localStorage.getItem('user');
-                if (storedUser) setUserDetails(JSON.parse(storedUser));
+useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) { router.push('/login'); return; }
 
-                const ordersResponse = await fetch(`https://purenest-app.onrender.com/api/orders/history`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-
-                if (ordersResponse.ok) setOrderHistory(await ordersResponse.json());
-                else if (ordersResponse.status === 401) { localStorage.clear(); router.push('/login'); }
-            } catch (err) {
-                console.error(err);
-            } finally {
-                setLoading(false);
+    const fetchProfileData = async () => {
+        try {
+            // 1. Хэрэглэгчийн мэдээллийг серверээс авах (ШИНЭ)
+            const userRes = await fetch(`https://purenest-app.onrender.com/api/users/profile`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            
+            if (userRes.ok) {
+                const userData = await userRes.json();
+                setUserDetails(userData);
+                // Мөн localStorage-аа шинэчилж болно
+                localStorage.setItem('user', JSON.stringify(userData));
+            } else if (userRes.status === 401) {
+                localStorage.clear();
+                router.push('/login');
+                return;
             }
-        };
-        fetchProfileData();
-    }, [router]);
+
+            // 2. Захиалгын түүхийг авах
+            const ordersResponse = await fetch(`https://purenest-app.onrender.com/api/orders/history`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            if (ordersResponse.ok) setOrderHistory(await ordersResponse.json());
+            
+        } catch (err) {
+            console.error("Data fetch error:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+    
+    fetchProfileData();
+}, [router]);
 
     const handleLogout = () => {
         localStorage.clear();

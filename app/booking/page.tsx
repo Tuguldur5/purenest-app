@@ -41,6 +41,7 @@ export default function Booking() {
     const router = useRouter();
     const [isLoggedIn, setIsLoggedIn] = useState<boolean>(true); // Анхны утга
     const { showToast } = useSiteToast();
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [form, setForm] = useState({
         name: '',
         phone_number: '',
@@ -132,71 +133,90 @@ export default function Booking() {
 
     // Хүсэлт илгээх функц
     const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    e.preventDefault();
+    setLoading(true);
 
-        // 1. Токен шалгах
-        const token = localStorage.getItem('token');
-        if (!token) {
-            showToast({title:"Алдаа", description:"Захиалга хийхийн тулд эхлээд нэвтрэх шаардлагатай!"})
-            return;
-        }
+    // 1. Токен шалгах
+    const token = localStorage.getItem('token');
+    if (!token) {
+        showToast({ 
+            title: "Алдаа", 
+            description: "Захиалга хийхийн тулд эхлээд нэвтрэх шаардлагатай!" 
+        });
+        setLoading(false);
+        return;
+    }
 
-        // 2. Шаардлагатай талбаруудыг шалгах
-        if (!form.phone_number || !form.city || !form.district || !form.address || !form.date) {
-            showToast({title:"Анхаар!", description:"Утас, Огноо, Хаягийн мэдээллийг бүрэн бөглөнө үү."})
-            return;
-        }
+    // 2. Шаардлагатай талбаруудыг шалгах
+    if (!form.phone_number || !form.city || !form.district || !form.address || !form.date) {
+        showToast({ 
+            title: "Анхаар!", 
+            description: "Утас, Огноо, Хаягийн мэдээллийг бүрэн бөглөнө үү." 
+        });
+        setLoading(false);
+        return;
+    }
 
-        // 3. Payload бэлтгэх (DB-ийн баганын нэрээр)
-        const payload = {
-            service: form.service,
-            date: form.date,
-            // 💡 DB-д байгаа СӨХ-ийн INT талбарууд:
-            apartments: form.apartments || 0,
-            floors: form.floors || 0,
-            lifts: form.lifts || 0,
-            rooms: form.rooms || 0, // Айлын тоо     
-            public_area_size: form.service !== "СӨХ цэвэрлэгээ" ? Number(form.publicAreaSize) : 0,
-            frequency: form.frequency || "Нэг удаа",
-            city: form.city,
-            district: form.district,
-            khoroo: form.khoroo,
-            address: form.address,
-            total_price: totalPrice, // 
-            phone_number: form.phone_number,
-            full_name: form.name,
-
-        };
-
-        try {
-            const res = await fetch(API_URL, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`,
-                },
-                body: JSON.stringify(payload),
-            });
-
-            if (res.ok) {
-                const data = await res.json();
-                console.log("Backend response:", data);
-                showToast({title:"Амжилттай", description:"Захиалга амжилттай илгээгдлээ!"})
-                let errorData: { error?: string } = {};
-                try {
-                    errorData = await res.json();
-                } catch (parseErr) {
-                    console.warn("JSON parse failed, likely empty or non-JSON response:", parseErr);
-                }
-                const errorMessage = errorData.error || `Алдаа гарлаа: ${res.status} ${res.statusText}`;
-                showToast({title:"Алдаа",description:"Захиалга хийхэд алдаа гарлаа:", errorMessage})
-            }
-        } catch (err) {
-            console.error("Fetch failed:", err);
-            
-            showToast({title:"Алдаа", description:"Сервертэй холбогдож чадсангүй. Та дараа дахин оролдоно уу"})
-        }
+    // 3. Payload бэлтгэх (Тоон утгуудыг Number() болгож баталгаажуулав)
+    const payload = {
+        service: form.service,
+        date: form.date,
+        apartments: Number(form.apartments) || 0,
+        floors: Number(form.floors) || 0,
+        lifts: Number(form.lifts) || 0,
+        rooms: Number(form.rooms) || 0,
+        public_area_size: form.service !== "СӨХ цэвэрлэгээ" ? Number(form.publicAreaSize) : 0,
+        frequency: form.frequency || "Нэг удаа",
+        city: form.city,
+        district: form.district,
+        khoroo: form.khoroo,
+        address: form.address,
+        total_price: Number(totalPrice) || 0,
+        phone_number: form.phone_number,
+        full_name: form.name,
     };
+
+    try {
+        const res = await fetch(API_URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`,
+            },
+            body: JSON.stringify(payload),
+        });
+
+        // Backend-ээс ирсэн хариуг НЭГ УДАА л уншина
+        const responseData = await res.json();
+    
+
+        if (res.ok) {
+            // АМЖИЛТТАЙ БОЛСОН ҮЕД
+            console.log("Захиалга амжилттай:", responseData);
+            setShowSuccessModal(true);
+            
+            // Захиалга амжилттай болсны дараа формыг цэвэрлэх эсвэл шилжих логик энд орно
+            // setForm(initialState); 
+        } else {
+            // СЕРВЕР АЛДАА ЗААСАН ҮЕД (Жишээ нь 400, 500)
+            const errorMsg = responseData.error || `Алдаа: ${res.status}`;
+            showToast({ 
+                title: "Алдаа", 
+                description: errorMsg 
+            });
+        }
+
+    } catch (err) {
+        // СҮЛЖЭЭНИЙ АЛДАА (Сервер ажиллахгүй байх гэх мэт)
+        console.error("Fetch failed:", err);
+        showToast({ 
+            title: "Алдаа", 
+            description: "Сервертэй холбогдож чадсангүй. Та түр хүлээгээд дахин оролдоно уу." 
+        });
+    } finally {
+        setLoading(false);
+    }
+};
 
     // Сонгосон дүүрэгт хамаарах хороог шүүж авах
     const availableKhoroos = useMemo(() => {
@@ -206,7 +226,7 @@ export default function Booking() {
     useEffect(() => {
         const token = localStorage.getItem('token');
         if (!token) {
-            setIsLoggedIn(false); 
+            setIsLoggedIn(false);
             return;
         }
 
@@ -241,8 +261,8 @@ export default function Booking() {
                     </div>
                     <h2 className="text-2xl font-bold text-gray-800 mb-4">Нэвтрэх шаардлагатай</h2>
                     <p className="text-gray-600 mb-8">Захиалга өгөхийн тулд та өөрийн бүртгэлээрээ нэвтэрсэн байх шаардлагатай.</p>
-                    <button 
-                        onClick={() => router.push('/login')} 
+                    <button
+                        onClick={() => router.push('/login')}
                         className="w-full bg-[#102B5A] text-white py-4 rounded-xl font-bold text-lg hover:bg-[#1a3f7a] transition-all shadow-lg"
                     >
                         Нэвтрэх хуудас руу очих
@@ -442,7 +462,17 @@ export default function Booking() {
                             type="submit"
                             className="w-full bg-[#102B5A] text-white py-4 rounded-xl font-bold text-lg shadow-lg hover:bg-[#1a3f7a] transition-all duration-300 mt-4"
                         >
-                          {loading ? "Мэдээллийг илгээж байна..." : "Захиалах"} 
+                            {loading ? (
+                                <span className="flex items-center justify-center gap-2">
+                                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Түр хүлээнэ үү...
+                                </span>
+                            ) : (
+                                "Захиалах"
+                            )}
                         </button>
                     </form>
                 </div>
@@ -479,6 +509,45 @@ export default function Booking() {
                     </div>
                 </div>
             </div>
+
+            {showSuccessModal && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 overflow-x-hidden overflow-y-auto outline-none focus:outline-none">
+                {/* Арын бүрхүүл (Backdrop) */}
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"></div>
+
+                {/* Попап контент */}
+                <div className="relative w-full max-w-md p-8 bg-white rounded-3xl shadow-2xl transform transition-all scale-100 flex flex-col items-center text-center">
+                    {/* Ногоон check дүрс */}
+                    <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mb-6">
+                        <svg className="w-10 h-10 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+
+                    <h2 className="text-2xl font-black text-gray-800 mb-2">
+                        Захиалга амжилттай!
+                    </h2>
+                    <p className="text-gray-500 mb-8 leading-relaxed">
+                        Баярлалаа. Таны захиалгыг бид хүлээн авлаа. Манай ажилтан удахгүй холбогдож баталгаажуулах болно.
+                    </p>
+
+                    <div className="w-full space-y-3">
+                        <button
+                            onClick={() => window.location.href = '/profile'} // Эсвэл router.push('/profile')
+                            className="w-full bg-[#102B5A] text-white py-4 rounded-2xl font-bold hover:bg-[#1a3f7a] transition-all shadow-lg"
+                        >
+                            Миний захиалгууд харах
+                        </button>
+                        <button
+                            onClick={() => setShowSuccessModal(false)}
+                            className="w-full bg-gray-100 text-gray-600 py-4 rounded-2xl font-bold hover:bg-gray-200 transition-all"
+                        >
+                            Хаах
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )}
         </section>
-)
+    )
 }
