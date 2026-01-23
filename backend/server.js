@@ -317,22 +317,21 @@ app.post('/api/booking', authMiddleware, async (req, res) => {
 
 app.delete('/api/booking/:id', authMiddleware, async (req, res) => {
     try {
-        const orderId = req.params.id;
-        const userId = req.user.id;
+        const orderId = parseInt(req.params.id); // ID-г тоо болгож хөрвүүлэх
+        const userId = req.user.id; 
 
-        // Зөвхөн өөрийнх нь захиалгыг устгахыг зөвшөөрөх
-        const result = await pool.query(
-            'DELETE FROM bookings WHERE id = $1 AND user_id = $2 RETURNING *',
-            [orderId, userId]
-        );
+        // Query-г туршиж үзэх: Баганын нэрсээ DB-тэйгээ тулгаарай
+        const query = 'DELETE FROM orders WHERE id = $1 AND user_id = $2 RETURNING *';
+        const result = await pool.query(query, [orderId, userId]);
 
         if (result.rows.length === 0) {
-            return res.status(404).json({ error: "Захиалга олдсонгүй эсвэл устгах эрхгүй байна." });
+            return res.status(404).json({ error: "Захиалга олдсонгүй эсвэл таных биш байна." });
         }
 
-        res.json({ message: "Амжилттай устгагдлаа" });
+        res.json({ message: "Амжилттай устлаа" });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error("SERVER LOG:", err); // Энэ Render Logs дээр алдааг харуулна
+        res.status(500).json({ error: "Серверийн алдаа: " + err.message });
     }
 });
 // Захиалгын түүх
