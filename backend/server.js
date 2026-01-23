@@ -221,6 +221,7 @@ app.put('/api/users/update', authMiddleware, async (req, res) => {
         res.status(500).json({ error: "Серверийн алдаа гарлаа: " + err.message });
     }
 });
+
 app.post('/api/booking', authMiddleware, async (req, res) => {
     try {
         const user_id = req.user.id;
@@ -311,6 +312,27 @@ app.post('/api/booking', authMiddleware, async (req, res) => {
             error: 'Серверт алдаа гарлаа.',
             details: err.message
         });
+    }
+});
+
+app.delete('/api/booking/:id', authMiddleware, async (req, res) => {
+    try {
+        const orderId = req.params.id;
+        const userId = req.user.id;
+
+        // Зөвхөн өөрийнх нь захиалгыг устгахыг зөвшөөрөх
+        const result = await pool.query(
+            'DELETE FROM bookings WHERE id = $1 AND user_id = $2 RETURNING *',
+            [orderId, userId]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: "Захиалга олдсонгүй эсвэл устгах эрхгүй байна." });
+        }
+
+        res.json({ message: "Амжилттай устгагдлаа" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
     }
 });
 // Захиалгын түүх

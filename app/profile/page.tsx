@@ -163,41 +163,6 @@ function EditableField({ label, value, isEditing, onChange, placeholder }: Edita
         </div>
     );
 }
-const handleDeleteOrder = async (orderId: number, status: string) => {
-    const { showToast } = useSiteToast();
-    // Зөвхөн хүлээгдэж буй захиалгыг устгахыг зөвшөөрөх (Сонголтоор)
-    if (status !== "Хүлээгдэж байна") {
-        showToast({ title: "Алдаа", description: "Энэ захиалгыг цуцлах боломжгүй. Баталгаажсан эсвэл дууссан байна." });
-        return;
-    }
-
-    if (!window.confirm("Та энэ захиалгыг устгахдаа итгэлтэй байна уу?")) return;
-
-    try {
-        const token = localStorage.getItem('token');
-        const res = await fetch(`https://purenest-app.onrender.com/api/booking/${orderId}`, {
-            method: 'DELETE',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
-
-        if (res.ok) {
-            showToast({ title: "Амжилттай", description: "Захиалга амжилттай устгагдлаа." });
-            // Жагсаалтыг шинэчлэх (State-ээс хасах)
-            // setOrders(prev => prev.filter(o => o.id !== orderId));
-            window.location.reload(); // Эсвэл state-ээ шинэчлэх
-        } else {
-
-            showToast({ title: "Алдаа гарлаа", description: "Устгахад алдаа гарлаа." });
-        }
-    } catch (err) {
-        console.error("Delete error:", err);
-    }
-};
-// ===========================================
-// 3. STATUS BADGE COMPONENT
-// ===========================================
 const StatusBadge: React.FC<{ status: string; type?: 'service' | 'order' }> = ({ status, type = 'order' }) => {
     const config: any = {
         service: {
@@ -222,21 +187,85 @@ const StatusBadge: React.FC<{ status: string; type?: 'service' | 'order' }> = ({
     );
 };
 
-
-function OrderHistory({ orders }: { orders: Order[] }) {
+function OrderHistory({ orders: initialOrders }: { orders: Order[] }) {
+    const [orders, setOrders] = useState(initialOrders); // State нэмсэн
     const [filterService, setFilterService] = useState('Бүгд');
     const [filterStatus, setFilterStatus] = useState('Бүгд');
-
     const totalSpent = orders.reduce((sum, order) => sum + Number(order.total_price), 0);
+    const { showToast } = useSiteToast();
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false)
+    const handleDelete = async (orderId: number, status: string) => {
+        if (status !== "Хүлээгдэж байна") {
+            showToast({ title: "Алдаа", description: "Зөвхөн хүлээгдэж буй захиалгыг цуцалж болно." });
+            return;
+        }
+
+        if (!window.confirm("Та энэ захиалгыг устгахдаа итгэлтэй байна уу?")) return;
+
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`https://purenest-app.onrender.com/api/booking/${orderId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (res.ok) {
+                showToast({ title: "Амжилттай", description: "Захиалга устлаа." });
+                setOrders(prev => prev.filter(o => o.id !== orderId)); // Жагсаалтаас шууд хасах
+            } else {
+                showToast({ title: "Алдаа", description: "Сервер дээр алдаа гарлаа." });
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
 
     const filteredOrders = orders.filter(order => {
         const matchesService = filterService === 'Бүгд' || order.service === filterService;
         const matchesStatus = filterStatus === 'Бүгд' || order.status === filterStatus;
         return matchesService && matchesStatus;
     });
+    const openDeletePopup = (id: number) => {
+        setSelectedOrderId(id);
+        setIsModalOpen(true);
+    };
+
+    // Popup дээр "Устгах" дарахад ажиллах функц
+    const confirmDelete = async () => {
+        if (!selectedOrderId) return;
+        setIsDeleting(true);
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`https://purenest-app.onrender.com/api/booking/${selectedOrderId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (res.ok) {
+                setOrders(prev => prev.filter(o => o.id !== selectedOrderId));
+                showToast({ title: "Амжилттай", description: "Захиалга устгагдлаа." });
+                setIsModalOpen(false);
+            } else {
+                showToast({ title: "Алдаа", description: "Устгахад алдаа гарлаа." });
+            }
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setIsDeleting(false);
+            setSelectedOrderId(null);
+        }
+    };
 
     return (
         <div className="space-y-6">
+            <DeleteModal 
+                isOpen={isModalOpen} 
+                onClose={() => setIsModalOpen(false)} 
+                onConfirm={confirmDelete}
+                loading={isDeleting}
+            />
             {/* 1. СТАТИК КАРТУУД */}
             <div className="grid grid-cols-2 gap-4">
                 <div className="bg-white p-6 rounded-[14px] border border-gray-100 shadow-sm">
@@ -286,84 +315,60 @@ function OrderHistory({ orders }: { orders: Order[] }) {
                     </div>
                 </div>
 
-                {/* --- ХҮСНЭГТИЙН БАГАНЫ НЭРҮҮД (Зөвхөн Desktop дээр харагдана) --- */}
-                {/* Жагсаалтын толгой (Header) */}
-                {/* Жагсаалтын толгой (Header) */}
+                {/* --- HEADER --- */}
                 <div className="hidden md:grid grid-cols-12 px-8 py-4 bg-slate-50/50 border-b border-gray-100 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                    {/* ID & Огноо - 2 багана */}
-                    <div className="md:col-span-2 text-left">Захиалга № / Огноо</div>
-                    {/* Үйлчилгээ - 3 багана */}
-                    <div className="md:col-span-3 text-left">Үйлчилгээний төрөл</div>
-                    {/* Төлөв - 3 багана */}
-                    <div className="md:col-span-3 text-left">Төлөв</div>
-                    {/* Нийт төлбөр - 3 багана (Баруун тийш шахсан) */}
-                    <div className="md:col-span-3 text-right pr-12">Нийт төлбөр</div>
-                    {/* Үйлдэл - 1 багана */}
-                    <div className="md:col-span-1 text-right">Үйлдэл</div>
+                    <div className="col-span-2">ID / Огноо</div>
+                    <div className="col-span-3 text-center">Үйлчилгээ</div>
+                    <div className="col-span-3 text-center">Төлөв</div>
+                    <div className="col-span-3 text-center">Төлбөр</div>
+                    <div className="col-span-1 text-right"></div>
                 </div>
 
-                {/* Жагсаалтын их бие (Body) */}
-                <div className="divide-y divide-gray-100 max-h-[600px] overflow-y-auto custom-scrollbar bg-white">
-                    {filteredOrders.length === 0 ? (
-                        <div className="py-24 text-center">
-                            <p className="text-slate-400 text-sm font-medium">Тохирох захиалга олдсонгүй.</p>
-                        </div>
-                    ) : (
-                        filteredOrders.map((order) => (
-                            <div key={order.id} className="px-8 py-5 hover:bg-slate-50/80 transition-all group">
-                                {/* Энд grid-cols-12 нь толгойтойгоо яг ижил байна */}
-                                <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+                {/* --- BODY --- */}
+                <div className="divide-y divide-gray-100 max-h-[600px] overflow-y-auto">
+                    {filteredOrders.map((order) => (
+                        <div key={order.id} className="px-8 py-5 hover:bg-slate-50 transition-all">
+                            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center text-center md:text-left">
 
-                                    {/* 1. ID & Огноо (col-span-2) */}
-                                    <div className="md:col-span-2 flex flex-row md:flex-col justify-between items-center md:items-start text-left">
-                                        <span className="text-sm font-bold text-slate-900 group-hover:text-[#102B5A] transition-colors">
-                                            #{order.id}
-                                        </span>
-                                        <span className="text-[11px] text-slate-500 font-medium">
-                                            {new Date(order.date).toLocaleDateString()}
-                                        </span>
-                                    </div>
+                                {/* 1. ID / Огноо */}
+                                <div className="md:col-span-2 flex flex-col items-center md:items-start">
+                                    <span className="text-sm font-bold text-slate-900">#{order.id}</span>
+                                    <span className="text-[11px] text-slate-500">{new Date(order.date).toLocaleDateString()}</span>
+                                </div>
 
-                                    {/* 2. Төрөл (col-span-3) */}
-                                    <div className="md:col-span-3 flex justify-between items-center md:block text-left">
-                                        <p className="md:hidden text-[10px] font-bold text-slate-400 uppercase tracking-wider">Төрөл</p>
-                                        <StatusBadge status={order.service} type="service" />
-                                    </div>
+                                {/* 2. Үйлчилгээ (Center) */}
+                                <div className="md:col-span-3 flex justify-center">
+                                    <StatusBadge status={order.service} type="service" />
+                                </div>
 
-                                    {/* 3. Төлөв (col-span-3) */}
-                                    <div className="md:col-span-3 flex justify-between items-center md:block text-left">
-                                        <p className="md:hidden text-[10px] font-bold text-slate-400 uppercase tracking-wider">Төлөв</p>
-                                        <StatusBadge status={order.status} type="order" />
-                                    </div>
+                                {/* 3. Төлөв (Center) */}
+                                <div className="md:col-span-3 flex justify-center">
+                                    <StatusBadge status={order.status} type="order" />
+                                </div>
 
-                                    {/* 4. Нийт Үнэ (col-span-3) - Толгойн 'Нийт төлбөр'-тэй яг ижил text-right */}
-                                    <div className="md:col-span-3 flex justify-between items-center md:text-right pr-12">
-                                        <p className="md:hidden text-[10px] font-bold text-slate-400 uppercase tracking-wider">Нийт</p>
-                                        <p className="text-sm font-extrabold text-slate-900 w-full">
-                                            {Number(order.total_price).toLocaleString()}₮
-                                        </p>
-                                    </div>
+                                {/* 4. Төлбөр (Center) */}
+                                <div className="md:col-span-3 flex justify-center">
+                                    <p className="text-sm font-extrabold text-slate-900">
+                                        {Number(order.total_price).toLocaleString()}₮
+                                    </p>
+                                </div>
 
-                                    {/* 5. Үйлдэл (col-span-1) */}
-                                    <div className="md:col-span-1 flex justify-end items-center">
-                                        {order.status === "Хүлээгдэж байна" ? (
-                                            <button
-                                                onClick={() => handleDeleteOrder(order.id, order.status)}
-                                                className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all duration-200"
-                                            >
-                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                </svg>
-                                            </button>
-                                        ) : (
-                                            <div className="w-9" />
-                                        )}
-                                    </div>
-
+                                {/* 5. Устгах товч (Right) */}
+                                <div className="md:col-span-1 flex justify-end">
+                                    {order.status === "Хүлээгдэж байна" && (
+                                        <button
+                                            onClick={() => openDeletePopup(order.id)} // window.confirm-ын оронд Modal нээнэ
+                                            className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    )}
                                 </div>
                             </div>
-                        ))
-                    )}
+                        </div>
+                    ))}
                 </div>
             </div>
         </div>
@@ -460,6 +465,51 @@ export default function Profile() {
                 </div>
 
 
+            </div>
+        </div>
+    );
+}
+function DeleteModal({ isOpen, onClose, onConfirm, loading }: {
+    isOpen: boolean,
+    onClose: () => void,
+    onConfirm: () => void,
+    loading: boolean
+}) {
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onClose}></div>
+
+            {/* Modal Content */}
+            <div className="relative bg-white rounded-[20px] shadow-2xl w-full max-w-sm p-8 text-center animate-in fade-in zoom-in duration-200">
+                <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                </div>
+
+                <h3 className="text-xl font-bold text-slate-900 mb-2">Захиалга цуцлах</h3>
+                <p className="text-slate-500 text-sm mb-8 leading-relaxed">
+                    Та энэ захиалгыг устгахдаа итгэлтэй байна уу? Энэ үйлдлийг буцаах боломжгүй.
+                </p>
+
+                <div className="flex gap-3">
+                    <button
+                        onClick={onClose}
+                        className="flex-1 py-3 px-4 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold rounded-[14px] transition-colors"
+                    >
+                        Болих
+                    </button>
+                    <button
+                        onClick={onConfirm}
+                        disabled={loading}
+                        className="flex-1 py-3 px-4 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-[14px] shadow-lg shadow-red-200 transition-all disabled:opacity-50"
+                    >
+                        {loading ? "Устгаж байна..." : "Устгах"}
+                    </button>
+                </div>
             </div>
         </div>
     );
