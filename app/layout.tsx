@@ -15,10 +15,15 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
-
-// SEO тохиргоо энд байна
+const baseUrl = process.env.NODE_ENV === 'development' 
+  ? 'http://localhost:3000' 
+  : 'https://purenest.mn';
+  
 export const metadata: Metadata = {
-  icons: "/nest.jpg", // Энэ нь хөтчийн tab дээрх жижиг зураг (favicon)
+  // 1. АНХААРУУЛГЫГ АРИЛГАХ ЧУХАЛ ХЭСЭГ:
+  metadataBase: new URL(baseUrl),
+
+  icons: "/nest.jpg", 
   title: {
     default: "Purenest | Мэргэжлийн цэвэрлэгээний үйлчилгээ",
     template: "%s | Purenest"
@@ -33,19 +38,18 @@ export const metadata: Metadata = {
     description: "Мэргэжлийн цэвэрлэгээний нэгдсэн үйлчилгээ. Найдвартай хамт олон.",
     url: 'https://purenest.mn',
     siteName: 'Purenest',
+    // 2. СОШИАЛД ЗУРАГ ХАРАГДАХ ХЭСЭГ:
     images: [
       {
-        url: '/purenest.jpg', // Хайлт болон сошиалд харагдах зураг
-        width: 500,
-        height: 300,
-        alt: 'Purenest Cleaning Service',
-      },
+        url: '/nest.jpg', // Энэ зургийн замыг public/ дотор байгаа зөв зургаар солиорой
+        width: 1200,
+        height: 630,
+      }
     ],
     locale: 'mn_MN',
     type: 'website',
   },
 };
-
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="mn">

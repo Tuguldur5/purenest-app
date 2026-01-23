@@ -1,12 +1,13 @@
 // server.js
 const bodyParser = require('body-parser');
-const nodemailer = require('nodemailer');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const pool = require('./db.js'); // PostgreSQL холболт
 const express = require('express');
 const bcrypt = require('bcrypt');
+import { Resend } from 'resend';
+const resend = new Resend(process.env.RESEND_API_KEY);
 const app = express();
 
 app.use(bodyParser.json());
@@ -206,30 +207,57 @@ app.put('/api/users/update', authMiddleware, async (req, res) => {
         res.status(500).json({ error: "Серверийн алдаа гарлаа: " + err.message });
     }
 });
+
 app.post('/api/booking', authMiddleware, async (req, res) => {
     try {
         const user_id = req.user.id;
-
-        // 1. DB-ээс хэрэглэгчийн full_name-г automataar шүүж авах
-        const userResult = await pool.query(
-            'SELECT full_name FROM users WHERE id = $1',
-            [user_id]
-        );
-
+        const userResult = await pool.query('SELECT full_name FROM users WHERE id = $1', [user_id]);
+        
         if (userResult.rows.length === 0) {
             return res.status(404).json({ error: "Хэрэглэгч олдсонгүй" });
         }
 
         const userName = userResult.rows[0].full_name;
-        // 2. Frontend-ээс ирж буй мэдээллүүд
-        const {
-            service, date, address, total_price,
-            apartments, floors, lifts, rooms,
-            frequency, city, district, khoroo, public_area_size, phone_number
-        } = req.body;
+        const { service, date, address, total_price /* ... бусад талбарууд */ } = req.body;
 
-        // 3. DB INSERT QUERY
         const orderResult = await pool.query(
+            `INSERT INTO orders (...) VALUES (...) RETURNING *`,
+            [/* ... утгууд */]
+        );
+
+        // Resend ашиглан захиалгын мэдээлэл илгээх
+        const emailHtml = generateBookingHtml(req.body, { full_name: userName });
+
+        await resend.emails.send({
+            from: 'Booking <onboarding@resend.dev>',
+            to: process.env.COMPANY_MAIL || "tuguldur8000@gmail.com",
+            subject: `ШИНЭ ЗАХИАЛГА: ${service} - ${userName}`,
+            html: emailHtml,
+        });
+
+        res.json({
+            success: true,
+            message: 'Захиалга амжилттай хийгдлээ.',
+            order: orderResult.rows[0],
+        });
+
+    } catch (err) {
+        console.error("Resend Error (Booking):", err);
+        res.status(500).json({ error: 'Серверт алдаа гарлаа.' });
+    }
+});app.post('/api/booking', authMiddleware, async (req, res) => {
+    try {
+        const user_id = req.user.id;
+        const userResult = await pool.query('SELECT full_name FROM users WHERE id = $1', [user_id]);
+        
+        if (userResult.rows.length === 0) {
+            return res.status(404).json({ error: "Хэрэглэгч олдсонгүй" });
+        }
+
+        const userName = userResult.rows[0].full_name;
+        const { service, date, address, total_price /* ... бусад талбарууд */ } = req.body;
+
+         const orderResult = await pool.query(
             `INSERT INTO orders
              (user_id, service, date, address, total_price, status, 
               apartments, floors, lifts, rooms, 
@@ -257,34 +285,15 @@ app.post('/api/booking', authMiddleware, async (req, res) => {
             ]
         );
 
-        // 4. NODEMAILER ХЭСЭГ
-        const SENDER_USER = process.env.MAIL_USER;
-        const SENDER_PASS = process.env.MAIL_PASS;
+        // Resend ашиглан захиалгын мэдээлэл илгээх
+        const emailHtml = generateBookingHtml(req.body, { full_name: userName });
 
-        const transporter = nodemailer.createTransport({
-            host: "smtp.gmail.com",
-            port: 465,
-            secure: true,
-            auth: {
-                user: SENDER_USER,
-                pass: SENDER_PASS,
-            },
-        });
-
-        // Имэйлийн HTML агуулгыг үүсгэхэд DB-ээс авсан userName-ийг ашиглана
-        const emailHtml = generateBookingHtml(
-            req.body,
-            { full_name: userName } // Автоматаар авсан нэр
-        );
-
-        const mailOptions = {
-            from: `"Захиалгын систем" <${SENDER_USER}>`,
+        await resend.emails.send({
+            from: 'Booking <onboarding@resend.dev>',
             to: process.env.COMPANY_MAIL || "tuguldur8000@gmail.com",
             subject: `ШИНЭ ЗАХИАЛГА: ${service} - ${userName}`,
             html: emailHtml,
-        };
-
-        await transporter.sendMail(mailOptions);
+        });
 
         res.json({
             success: true,
@@ -293,11 +302,10 @@ app.post('/api/booking', authMiddleware, async (req, res) => {
         });
 
     } catch (err) {
-        console.error("Захиалга алдаа:", err);
+        console.error("Resend Error (Booking):", err);
         res.status(500).json({ error: 'Серверт алдаа гарлаа.' });
     }
 });
-
 // Захиалгын түүх
 app.get('/api/orders/history', authMiddleware, async (req, res) => {
     try {
@@ -407,46 +415,21 @@ app.get('/api/pricing-settings', async (req, res) => {
 // server.js доторх /api/contact хэсэг
 
 app.post('/api/contact', async (req, res) => {
-    // ...
     const { name, email, message } = req.body;
     if (!name || !email || !message) {
         return res.status(400).json({ error: "Бүх талбарыг бөглөнө үү." });
     }
 
-    // 💡 SMTP HOST болон MAIL USER-ийг баталгаажуулж байна
-    const SENDER_HOST = process.env.SMTP_HOST || 'smtp.gmail.com'; // Default утга өгч байна
-    const SENDER_USER = process.env.MAIL_USER;
-    const SENDER_PASS = process.env.MAIL_PASS;
-    const SENDER_PORT = Number(process.env.SMTP_PORT);
-
-    // Хэрэв нэвтрэх мэдээлэл байхгүй бол 500 алдаа буцаана
-    if (!SENDER_USER || !SENDER_PASS) {
-        console.error("EMAIL_USER эсвэл EMAIL_PASS хувьсагчид дутуу байна.");
-        return res.status(500).json({ error: 'Серверийн тохиргооны алдаа (Имэйл).' });
-    }
-
-    const transporter = nodemailer.createTransport({
-        host: SENDER_HOST,
-        port: SENDER_PORT,
-        secure: SENDER_PORT === 465, // Хэрэв 465 бол true, 587 бол false
-        auth: {
-            user: SENDER_USER,
-            pass: SENDER_PASS,
-        },
-    });
-
-    const mailOptions = {
-        from: email,
-        to: process.env.COMPANY_MAIL || SENDER_USER,
-        subject: `Холбоо барих маягт: ${name}`,
-        html: `<p>Нэр: ${name}</p><p>Имэйл: ${email}</p><p>Мессеж: ${message}</p>`,
-    };
-
     try {
-        await transporter.sendMail(mailOptions);
+        await resend.emails.send({
+            from: 'Purenest <onboarding@resend.dev>', // Домэйн баталгаажтал үүнийг ашиглана
+            to: process.env.COMPANY_MAIL || 'sales@purenest.mn',
+            subject: `Холбоо барих маягт: ${name}`,
+            html: `<p>Нэр: ${name}</p><p>Имэйл: ${email}</p><p>Мессеж: ${message}</p>`,
+        });
         return res.status(200).json({ ok: true });
     } catch (err) {
-        console.error("Имэйл илгээх үед гарсан бодит алдаа:", err); // 💡 Энэ алдааг бид дахин харахгүй байхыг хүсэж байна.
+        console.error("Resend Error (Contact):", err);
         return res.status(500).json({ error: 'Серверийн алдаа. Дахин оролдоно уу.' });
     }
 });
@@ -455,10 +438,8 @@ app.post('/api/contact', async (req, res) => {
 app.post('/api/auth/forgot-password', async (req, res) => {
     const { email } = req.body;
     try {
-        console.log("Хүсэлт ирлээ:", email); // Консол дээр харах
-
         const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-        const user = result.rows[0]; // Postgres-д ингэж авна
+        const user = result.rows[0];
 
         if (!user) {
             return res.status(404).json({ message: 'Хэрэглэгч олдсонгүй' });
@@ -466,32 +447,24 @@ app.post('/api/auth/forgot-password', async (req, res) => {
 
         const otp = Math.floor(100000 + Math.random() * 900000);
 
-        // Postgres-д INTERVAL-ийг '5 minutes' гэж бичнэ
         await pool.query(
             "UPDATE users SET otp_code = $1, otp_expires = NOW() + INTERVAL '5 minutes' WHERE email = $2",
             [otp, email]
         );
 
-        // Nodemailer... (EMAIL_USER, EMAIL_PASS байгаа эсэхийг шалгаарай)
-        let transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: process.env.MAIL_USER,
-                pass: process.env.MAIL_PASS
-            }
-        });
-
-        await transporter.sendMail({
-            from: `"Support" <${process.env.MAIL_USER}>`,
+        // Resend ашиглан OTP илгээх
+        await resend.emails.send({
+            from: 'Security <onboarding@resend.dev>',
             to: email,
             subject: 'Нууц үг сэргээх код',
-            text: `Таны баталгаажуулах код: ${otp}`
+            text: `Таны баталгаажуулах код: ${otp}`, // Текст хэлбэрээр
+            html: `<strong>Таны баталгаажуулах код: ${otp}</strong>`, // HTML хэлбэрээр
         });
 
         res.json({ success: true, message: 'OTP илгээгдлээ' });
     } catch (err) {
-        console.error("Алдааны дэлгэрэнгүй:", err); // Энэ консол дээрх бичгийг хараарай
-        res.status(500).json({ message: 'Серверийн алдаа: ' + err.message });
+        console.error("Resend Error (Forgot Password):", err);
+        res.status(500).json({ message: 'Серверийн алдаа' });
     }
 });
 
