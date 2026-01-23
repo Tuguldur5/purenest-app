@@ -207,10 +207,11 @@ app.put('/api/users/update', authMiddleware, async (req, res) => {
         res.status(500).json({ error: "Серверийн алдаа гарлаа: " + err.message });
     }
 });
-
 app.post('/api/booking', authMiddleware, async (req, res) => {
     try {
         const user_id = req.user.id;
+
+        // 1. Хэрэглэгчийн нэрийг сангаас татах
         const userResult = await pool.query('SELECT full_name FROM users WHERE id = $1', [user_id]);
         
         if (userResult.rows.length === 0) {
@@ -218,83 +219,72 @@ app.post('/api/booking', authMiddleware, async (req, res) => {
         }
 
         const userName = userResult.rows[0].full_name;
-        const { service, date, address, total_price /* ... бусад талбарууд */ } = req.body;
 
+        // 2. Request body-оос мэдээллүүдээ задлах (Default утга оноох замаар undefined-аас сэргийлнэ)
+        const { 
+            service = 'Тодорхойгүй үйлчилгээ', 
+            date, 
+            address = '', 
+            total_price = 0,
+            apartments = 0,
+            floors = 0,
+            lifts = 0,
+            rooms = 0,
+            frequency = 'Нэг удаа',
+            city = '',
+            district = '',
+            khoroo = '',
+            public_area_size = 0,
+            phone_number = ''
+        } = req.body;
+
+        // 3. Database-д захиалгыг хадгалах
         const orderResult = await pool.query(
-            `INSERT INTO orders (...) VALUES (...) RETURNING *`,
-            [/* ... утгууд */]
-        );
-
-        // Resend ашиглан захиалгын мэдээлэл илгээх
-        const emailHtml = generateBookingHtml(req.body, { full_name: userName });
-
-        await resend.emails.send({
-            from: 'Booking <onboarding@resend.dev>',
-            to: process.env.COMPANY_MAIL || "tuguldur8000@gmail.com",
-            subject: `ШИНЭ ЗАХИАЛГА: ${service} - ${userName}`,
-            html: emailHtml,
-        });
-
-        res.json({
-            success: true,
-            message: 'Захиалга амжилттай хийгдлээ.',
-            order: orderResult.rows[0],
-        });
-
-    } catch (err) {
-        console.error("Resend Error (Booking):", err);
-        res.status(500).json({ error: 'Серверт алдаа гарлаа.' });
-    }
-});app.post('/api/booking', authMiddleware, async (req, res) => {
-    try {
-        const user_id = req.user.id;
-        const userResult = await pool.query('SELECT full_name FROM users WHERE id = $1', [user_id]);
-        
-        if (userResult.rows.length === 0) {
-            return res.status(404).json({ error: "Хэрэглэгч олдсонгүй" });
-        }
-
-        const userName = userResult.rows[0].full_name;
-        const { service, date, address, total_price /* ... бусад талбарууд */ } = req.body;
-
-         const orderResult = await pool.query(
             `INSERT INTO orders
              (user_id, service, date, address, total_price, status, 
               apartments, floors, lifts, rooms, 
               frequency, city, district, khoroo, public_area_size, phone_number)
-             VALUES ($1,$2,$3,$4,$5,'Хүлээгдэж байна',
-                     $6,$7,$8,$9, 
-                     $10,$11,$12,$13,$14,$15) 
+             VALUES ($1, $2, $3, $4, $5, 'Хүлээгдэж байна',
+                     $6, $7, $8, $9, 
+                     $10, $11, $12, $13, $14, $15) 
              RETURNING *`,
             [
-                user_id, // $1
-                service || 'Тодорхойгүй үйлчилгээ', // $2
-                date, // $3
-                address || '', // $4
-                total_price || 0, // $5 
-                apartments || 0, // $6
-                floors || 0, // $7
-                lifts || 0, // $8
-                rooms || 0, // $9  
-                frequency || 'Нэг удаа', // $10
-                city || '', // $11
-                district || '', // $12
-                khoroo || '', // $13
-                public_area_size || 0, // $14
-                phone_number || '' // $15
+                user_id,           // $1
+                service,           // $2
+                date,              // $3
+                address,           // $4
+                total_price,       // $5 
+                apartments,        // $6
+                floors,            // $7
+                lifts,             // $8
+                rooms,             // $9  
+                frequency,         // $10
+                city,              // $11
+                district,          // $12
+                khoroo,            // $13
+                public_area_size,  // $14
+                phone_number       // $15
             ]
         );
 
-        // Resend ашиглан захиалгын мэдээлэл илгээх
-        const emailHtml = generateBookingHtml(req.body, { full_name: userName });
+        try {
+            // generateBookingHtml дотор substring(0, 10) байгаа тул date байгаа эсэхийг шалгана
+            const safeBody = { ...req.body, date: date || new Date().toISOString() };
+            const emailHtml = generateBookingHtml(safeBody, { full_name: userName });
 
-        await resend.emails.send({
-            from: 'Booking <onboarding@resend.dev>',
-            to: process.env.COMPANY_MAIL || "tuguldur8000@gmail.com",
-            subject: `ШИНЭ ЗАХИАЛГА: ${service} - ${userName}`,
-            html: emailHtml,
-        });
+            await resend.emails.send({
+                from: 'Booking <onboarding@resend.dev>',
+                to: process.env.COMPANY_MAIL || "tuguldur8000@gmail.com",
+                subject: `🔔 ШИНЭ ЗАХИАЛГА: ${service} - ${userName}`,
+                html: emailHtml,
+            });
+            console.log("Email sent successfully");
+        } catch (mailError) {
+            console.error("Resend Email Error:", mailError);
+            // Имэйл илгээхэд алдаа гарсан ч захиалга DB-д орсон тул хэрэглэгчид алдаа заахгүй байж болно
+        }
 
+        // 5. Амжилттай хариу өгөх
         res.json({
             success: true,
             message: 'Захиалга амжилттай хийгдлээ.',
@@ -302,8 +292,11 @@ app.post('/api/booking', authMiddleware, async (req, res) => {
         });
 
     } catch (err) {
-        console.error("Resend Error (Booking):", err);
-        res.status(500).json({ error: 'Серверт алдаа гарлаа.' });
+        console.error("Critical Booking Error:", err);
+        res.status(500).json({ 
+            error: 'Серверт алдаа гарлаа.', 
+            details: err.message 
+        });
     }
 });
 // Захиалгын түүх
@@ -411,9 +404,6 @@ app.get('/api/pricing-settings', async (req, res) => {
     }
 });
 
-
-// server.js доторх /api/contact хэсэг
-
 app.post('/api/contact', async (req, res) => {
     const { name, email, message } = req.body;
     if (!name || !email || !message) {
@@ -422,7 +412,7 @@ app.post('/api/contact', async (req, res) => {
 
     try {
         await resend.emails.send({
-            from: 'Purenest <onboarding@resend.dev>', // Домэйн баталгаажтал үүнийг ашиглана
+            from: 'Purenest Contact <onboarding@resend.dev>', 
             to: process.env.COMPANY_MAIL || 'sales@purenest.mn',
             subject: `Холбоо барих маягт: ${name}`,
             html: `<p>Нэр: ${name}</p><p>Имэйл: ${email}</p><p>Мессеж: ${message}</p>`,
