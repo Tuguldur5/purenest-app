@@ -84,7 +84,7 @@ export default function ServiceCard() {
                 <div className="mt-8 text-center">
                     <a
                         href="/booking"
-                        className="inline-block px-6 py-3 pr-15 pl-15 rounded-lg border border-white/5 hover:shadow-md bg-[#102B5A] text-white hover:text-amber-400 transition-colors duration-200"
+                        className="inline-block px-6 py-3 pr-15 pl-15 hover:shadow-md hover:bg- rounded-lg border border-white/5 hover:shadow-md bg-[#102B5A] text-white hover:text-amber-400 transition-colors duration-200"
                     >
                         Захиалах
                     </a>

@@ -23,7 +23,15 @@ export const metadata: Metadata = {
   // 1. АНХААРУУЛГЫГ АРИЛГАХ ЧУХАЛ ХЭСЭГ:
   metadataBase: new URL(baseUrl),
 
-  icons: "/nest.jpg", 
+  icons: {
+    icon: [
+      { url: '/nest1.jpg' }, // Ерөнхий icon
+      { url: '/nest1.jpg', sizes: '32x32', type: 'image/jpeg' }, // Хэмжээ зааж өгөх
+    ],
+    shortcut: '/nest1.jpg',
+    apple: '/nest1.jpg',   
+  },
+
   title: {
     default: "Purenest | Мэргэжлийн цэвэрлэгээний үйлчилгээ",
     template: "%s | Purenest"

@@ -36,63 +36,62 @@ export default function Home() {
 
   return (
     <main className="bg-white text-black relative font-sans">
-      <section className="relative w-full h-screen overflow-hidden flex items-center">
+      <section className="relative w-full h-screen min-h-[750px] flex items-center justify-center overflow-hidden">
+
+        <div className="absolute inset-0 z-0">
+          {/* Үндсэн Gradient дэвсгэр */}
+          <div className="absolute inset-0 bg-gradient-to-br from-[#102b5a] via-[#112d4e] to-[#064e3b] opacity-90" />
+
+          {/* Гэрлийн тусгал эффектүүд (Blobs) */}
+          <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-blue-500/20 blur-[120px]" />
+          <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] rounded-full bg-emerald-500/10 blur-[130px]" />
+
+          {/* Нарийн торон эффект (Grid pattern) */}
+          <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay" />
+        </div>
+
         <BubbleBackground />
-        {/* 1. Арын зураг - Дүрсийг хэвээр үлдээв */}
-        <img
-          src="/home.png"
-          alt="Cleaning Service"
-          className="absolute inset-0 w-full h-full object-cover brightness-75 z-0"
-        />
 
-        {/* 2. Баруун талын блок - Дүрсийг яг таны кодоор үлдээв */}
-        <div
-          className="relative z-10 h-full w-full md:w-[50%] ml-auto flex flex-col justify-center px-8 md:px-40 text-left
-               [clip-path:none] md:[clip-path:polygon(0_0,_100%_0,_100%_100%,_0_100%,_15%_75%)]"
-          style={{ backgroundColor: '#102b5a' }}
-        >
-          <div className="max-w-2xl md:ml-10">
-            {/* Текст хэсэг: Илүү цэгцтэй, хэмжээ нь таарсан */}
-            <h1 className="text-3xl md:text-4xl font-black text-white leading-tight mb-2">
-              Тавтай морилно уу<br/>
-               <span className="text-amber-300 ml-20">PURENEST</span>
-            </h1>
-            <p className="text-white/60 text-xs md:text-xs tracking-[0.2em] uppercase mb-10 ">
-              Бидний найдвартай цэвэрлэгээ үйлчилгээ таны орчныг цэвэрхэн, эрүүл болгоно.
-            </p>
+        {/* Hero Content - Center Aligned Glassmorphism */}
+        <div className="relative z-20 container mx-auto px-6 text-center">
 
-            <div className="flex flex-col gap-5 mb-12 ml-10">
-              <div className="group border-l-2 border-amber-300/20 pl-6 hover:border-amber-300 transition-colors">
-                <h2 className="text-white text-xl md:text-2xl font-bold  tracking-wider">Оффис</h2>
-                
-              </div>
+          <h1 className="text-3xl md:text-6xl font-black text-white leading-tight mb-2">
+            Тавтай морилно уу<br />
+            <span className="text-amber-300">PURENEST</span>
+          </h1>
 
-              <div className="group border-l-2 border-amber-300/20 pl-6 hover:border-amber-300 transition-colors">
-                <h2 className="text-white text-xl md:text-2xl font-bold uppercase tracking-wider">СӨХ</h2>
-                
-              </div>
+          <p className="text-gray-200 text-lg md:text-xl max-w-2xl mx-auto mb-12 font-light leading-relaxed">
+            Бид таны цаг завыг хэмнэж, амьдрах орчинг тань гэрэлтүүлнэ.
+            Мэргэжлийн түвшинд гүйцэтгэх цогц шийдэл.
+          </p>
 
-              <div className="group border-l-2 border-amber-300/20 pl-6 hover:border-amber-300 transition-colors">
-                <h2 className="text-white text-xl md:text-2xl font-bold  tracking-wider">Олон нийтийн талбай</h2>
-                
-              </div>
-            </div>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+            <Link
+              href="/booking"
+              className="group relative px-12 py-5 bg-emerald-500 hover:bg-emerald-400 text-white hover:text-[#102b5a] font-black rounded-2xl transition-all duration-300 shadow-[0_20px_50px_rgba(16,_185,_129,_0.3)] flex items-center gap-3 overflow-hidden"
+            >
+              <span className="relative z-10">Одоо Захиалах</span>
+              <ArrowRight size={20} className="relative z-10 group-hover:translate-x-2 transition-transform" />
+              <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity" />
+            </Link>
 
-            {/* Товчлуур */}
-            <div className="flex ml-20">
-              <Link
-                href="/booking"
-                className="inline-block text-center px-10 py-4 rounded-[14px] bg-emerald-400 hover:bg-emerald-500 text-white text-lg font-bold transition-all duration-300 shadow-xl shadow-emerald-400/20 active:scale-95"
-              >
-                Захиалга өгөх
-              </Link>
-            </div>
           </div>
+
+        </div>
+        {/* Hero section-ий хамгийн доор байрлуулна */}
+        <div className="absolute -bottom-[1px] left-0 w-full overflow-hidden leading-[0] z-10">
+          <svg
+            viewBox="0 0 1200 120"
+            preserveAspectRatio="none"
+            className="relative block w-full h-[60px] fill-white"
+          >
+            <path d="M600,112.77C268.63,112.77,0,65.52,0,7.23V120H1200V7.23C1200,65.52,931.37,112.77,600,112.77Z"></path>
+          </svg>
         </div>
       </section>
       <BubbleBackground />
       {/* Services Section */}
-      <section className="py-24 bg-gray-50">
+      <section className="py-24 bg-white">
         <div className="container mx-auto px-6">
           <motion.h2
             initial={{ opacity: 0, y: 30 }}
@@ -113,12 +112,12 @@ export default function Home() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: idx * 0.1 }}
-                  className={`group relative p-8 bg-white rounded-[14px] shadow-sm border border-gray-100 transition-all duration-500 overflow-hidden cursor-pointer ${service.color} hover:shadow-xl hover:-translate-y-2`}
+                  className={`group relative p-8 bg-white rounded-[14px] shadow-md border border-gray-100 transition-all duration-500 overflow-hidden cursor-pointer ${service.color} hover:shadow-xl hover:-translate-y-2`}
                 >
-                  {/* Hover Background Decor (optional) */}
+
                   <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full transition-all duration-500 group-hover:scale-150" />
 
-                  {/* Icon Container */}
+
                   <div className="relative z-10 w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mb-8 transition-colors duration-500 group-hover:bg-white/20">
                     <Icon
                       size={32}
@@ -126,7 +125,6 @@ export default function Home() {
                     />
                   </div>
 
-                  {/* Content */}
                   <div className="relative z-10">
                     <h3 className="text-xl font-bold mb-4 text-gray-900 transition-colors duration-500 group-hover:text-white">
                       {service.title}
@@ -167,7 +165,9 @@ export default function Home() {
             Захиалах
           </Link>
         </div>
+       
       </section>
+     <BubbleBackground />
     </main >
   );
 }

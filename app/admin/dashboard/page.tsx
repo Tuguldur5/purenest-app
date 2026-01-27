@@ -287,7 +287,7 @@ export default function AdminDashboardPage() {
                                         tickLine={false}
                                         axisLine={false}
                                         stroke="#94a3b8"
-                                        tickFormatter={(value) => `${(value / 1000000).toLocaleString()} сая`} // 10,000 -> 10k
+                                        tickFormatter={(value) => `${(value / 1000000).toLocaleString()} сая`} 
                                     />
 
                                     <Tooltip
