@@ -70,7 +70,7 @@ export default function Header() {
 
                 <nav className="hidden md:flex items-center space-x-4 ">
                     {/* Нүүр */}
-                    <nav className="flex items-center gap-4">
+                    <nav className="flex items-center gap-3">
                         {/* 1. Нүүр */}
                         <Link
                             href="/home"
@@ -78,8 +78,8 @@ export default function Header() {
                         >
                             {/* Underline-ийг icon болон текст доор бүтэн харуулахын тулд wrapper span ашиглана */}
                             <span className="relative flex items-center gap-2">
-                                <Home size={20} />
-                                <span className="text-[17px]">Нүүр</span>
+                                <Home size={17} />
+                                <span className="text-sm">Нүүр</span>
 
                                 {/* Underline элемент - Энэ нь яг icon + текст доор гарна */}
                                 <span className="absolute -bottom-1 left-0 h-0.5 w-0 bg-amber-400 transition-all duration-300 group-hover:w-full"></span>
@@ -90,23 +90,46 @@ export default function Header() {
                         <div className="relative group z-50">
                             <button className="flex items-center gap-2 px-4 py-2 hover:text-amber-400 transition-colors">
                                 <span className="relative flex items-center gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-4 h-4">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M3 7.5l9-4.5 9 4.5-9 4.5-9-4.5z" />
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l9 4.5 9-4.5" />
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5l9 4.5 9-4.5" />
                                     </svg>
-                                    <span>Үйлчилгээ</span>
+                                    <span className="text-sm">Үйлчилгээ</span>
                                     <span className="absolute -bottom-1 left-0 h-0.5 w-0 bg-amber-400 transition-all duration-300 group-hover:w-full"></span>
                                 </span>
                             </button>
                             <div className="absolute left-0 top-full  bg-white rounded-lg w-48 shadow-xl hidden group-hover:block border border-gray-100 overflow-hidden">
-                                <Link className="block px-4 py-2 text-black hover:bg-gray-50 hover:text-amber-400" href="/service/office">Оффис</Link>
-                                <Link className="block px-4 py-2 text-black hover:bg-gray-50 hover:text-amber-400" href="/service/suh">СӨХ</Link>
-                                <Link className="block px-4 py-2 text-black hover:bg-gray-50 hover:text-amber-400" href="/service/public-space">Олон нийтийн талбай</Link>
+                                <Link className="block px-4 py-2 text-black text-sm hover:bg-gray-50 hover:text-amber-400" href="/service/office">Оффис</Link>
+                                <Link className="block px-4 py-2 text-black text-sm hover:bg-gray-50 hover:text-amber-400" href="/service/suh">СӨХ</Link>
+                                <Link className="block px-4 py-2 text-black text-sm hover:bg-gray-50 hover:text-amber-400" href="/service/public-space">Олон нийтийн талбай</Link>
+                                <Link className="block px-4 py-2 text-black text-sm hover:bg-gray-50 hover:text-amber-400" href="/service/warehouse">Агуулах</Link>
                             </div>
                         </div>
 
                         {/* 3. Захиалга */}
+                        <Link
+                            href="/products"
+                            className="group relative flex items-center gap-2 px-3 py-2 transition-colors duration-0 hover:text-amber-400"
+                        >
+                            <span className="relative flex items-center gap-2">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    strokeWidth="1.5"
+                                    stroke="currentColor"
+                                    className="w-5 h-5"
+                                >
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-5.25v9" />
+                                </svg>
+
+                                <span className="text-sm">Бүтээгдэхүүн</span>
+
+                                {/* Hover хийхэд доогуур нь зурагдах зураас */}
+                                <span className="absolute -bottom-1 left-0 h-0.5 w-0 bg-amber-400 transition-all duration-300 group-hover:w-full"></span>
+                            </span>
+                        </Link>
                         <Link
                             href="/booking"
                             className="group relative flex items-center gap-2 px-3 py-2 transition-colors duration-0 hover:text-amber-400"
@@ -115,7 +138,7 @@ export default function Header() {
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-5 h-5">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 7h18M6 12h12M9 17h6" />
                                 </svg>
-                                <span className="text-[17px]">Захиалга</span>
+                                <span className="text-sm">Захиалга</span>
                                 <span className="absolute -bottom-1 left-0 h-0.5 w-0 bg-amber-400 transition-all duration-300 group-hover:w-full"></span>
                             </span>
                         </Link>
@@ -124,15 +147,15 @@ export default function Header() {
                         <div className="relative group z-50">
                             <button className="flex items-center gap-2 px-4 py-2 hover:text-amber-400 transition-colors">
                                 <span className="relative flex items-center gap-2">
-                                    <MoreHorizontal size={20} />
-                                    <span>Бусад</span>
+                                    <MoreHorizontal size={17} />
+                                    <span className="text-sm">Бусад</span>
                                     <span className="absolute -bottom-1 left-0 h-0.5 w-0 bg-amber-400 transition-all duration-300 group-hover:w-full"></span>
                                 </span>
                             </button>
                             <div className="absolute left-0 top-full bg-white rounded-lg w-52 shadow-xl hidden group-hover:block py-2 border border-gray-100">
-                                <Link href="/about" className="block px-4 py-2 text-black hover:bg-gray-50 hover:text-amber-400">Бидний тухай</Link>
-                                <Link href="/faq" className="block px-4 py-2 text-black hover:bg-gray-50 hover:text-amber-400">Түгээмэл асуултууд</Link>
-                                <Link href="/contact" className="block px-4 py-2 text-black hover:bg-gray-50 hover:text-amber-400">Холбоо барих</Link>
+                                <Link href="/about" className="block text-sm px-4 py-2 text-black hover:bg-gray-50 hover:text-amber-400">Бидний тухай</Link>
+                                <Link href="/faq" className="block text-sm px-4 py-2 text-black hover:bg-gray-50 hover:text-amber-400">Түгээмэл асуултууд</Link>
+                                <Link href="/contact" className="block text-sm px-4 py-2 text-black hover:bg-gray-50 hover:text-amber-400">Холбоо барих</Link>
                             </div>
                         </div>
                     </nav>
@@ -165,7 +188,7 @@ export default function Header() {
                                                 active:scale-95
                                                 flex items-center justify-center"
                             >
-                                <span className="relative">
+                                <span className="relative text-base">
                                     Нэвтрэх
                                     {/* Доорх жижиг зураас hover хийхэд гарч ирнэ */}
                                     <span className="absolute -bottom-1 left-0 w-0 h-[1px] bg-amber-400 transition-all duration-300 group-hover:w-full"></span>
@@ -200,6 +223,7 @@ export default function Header() {
                                 <Link href="/service/office" className="block py-2 px-2 text-sm text-gray-600">Оффис цэвэрлэгээ</Link>
                                 <Link href="/service/suh" className="block py-2 px-2 text-sm text-gray-600">СӨХ цэвэрлэгээ</Link>
                                 <Link href="/service/public-space" className="block py-2 px-2 text-sm text-gray-600">Олон нийтийн талбай цэвэрлэгээ</Link>
+                                <Link href="/service/warehouse" className="block py-2 px-2 text-sm text-gray-600">Агуулах</Link>
                             </div>
                         )}
                     </div>
