@@ -427,6 +427,43 @@ app.put('/api/admin/pricing', isAdminMiddleware, async (req, res) => {
         res.status(500).json({ error: "Үнийн тохиргоо хадгалахад алдаа гарлаа." });
     }
 });
+app.get('/api/products', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM products ORDER BY created_at DESC');
+        res.status(200).json(result.rows);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// --- POST: Шинэ бараа нэмэх ---
+app.post('/api/products', async (req, res) => {
+    const { code, name, image_url, unit, price, type } = req.body;
+    try {
+        const result = await pool.query(
+            'INSERT INTO products (code, name, image_url, unit, price, type) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+            [code, name, image_url, unit, price, type]
+        );
+        res.status(201).json(result.rows[0]);
+    } catch (err) {
+        if (err.code === '23505') { // Unique constraint error (код давхцах)
+            res.status(400).json({ error: 'Барааны код давхцаж байна!' });
+        } else {
+            res.status(500).json({ error: err.message });
+        }
+    }
+});
+
+// --- DELETE: Бараа устгах ---
+app.delete('/api/products/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        await pool.query('DELETE FROM products WHERE id = $1', [id]);
+        res.status(200).json({ message: 'Бараа амжилттай устлаа' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 
 // Энэ бол нээлттэй API. Booking.tsx эндээс үнийг уншина.
 app.get('/api/pricing-settings', async (req, res) => {
