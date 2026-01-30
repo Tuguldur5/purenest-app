@@ -436,21 +436,27 @@ app.get('/api/products', async (req, res) => {
     }
 });
 
-// --- POST: Шинэ бараа нэмэх ---
+
 app.post('/api/products', async (req, res) => {
-    const { code, name, image_url, unit, price, type } = req.body;
+    const { code, name, price, unit, type, image_url } = req.body;
+
     try {
-        const result = await pool.query(
-            'INSERT INTO products (code, name, image_url, unit, price, type) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-            [code, name, image_url, unit, price, type]
-        );
-        res.status(201).json(result.rows[0]);
-    } catch (err) {
-        if (err.code === '23505') { // Unique constraint error (код давхцах)
-            res.status(400).json({ error: 'Барааны код давхцаж байна!' });
-        } else {
-            res.status(500).json({ error: err.message });
+        // 1. Код давхцаж байгааг шалгах
+        const existingProduct = await pool.query('SELECT * FROM products WHERE code = $1', [code]);
+        
+        if (existingProduct.rows.length > 0) {
+            // 409 Conflict алдаа буцаана
+            return res.status(409).json({ error: "Барааны код давхцаж байна! Өөр код ашиглана уу." });
         }
+
+        // 2. Хэрэв давхцаагүй бол хадгална
+        const newProduct = await pool.query(
+            'INSERT INTO products (code, name, price, unit, type, image_url) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+            [code, name, price, unit, type, image_url]
+        );
+        res.status(201).json(newProduct.rows[0]);
+    } catch (err) {
+        res.status(500).json({ error: "Серверийн алдаа" });
     }
 });
 
@@ -462,6 +468,27 @@ app.delete('/api/products/:id', async (req, res) => {
         res.status(200).json({ message: 'Бараа амжилттай устлаа' });
     } catch (err) {
         res.status(500).json({ error: err.message });
+    }
+});
+// Барааны мэдээлэл шинэчлэх (Update)
+app.put('/api/products/:id', async (res, req) => {
+    const { id } = req.params;
+    const { code, name, image_url, unit, price, type } = req.body;
+
+    try {
+        const result = await pool.query(
+            'UPDATE products SET code = $1, name = $2, image_url = $3, unit = $4, price = $5, type = $6 WHERE id = $7 RETURNING *',
+            [code, name, image_url, unit, price, type, id]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: "Бараа олдсонгүй" });
+        }
+
+        res.json({ message: "Амжилттай шинэчлэгдлээ", product: result.rows[0] });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ error: "Серверийн алдаа" });
     }
 });
 
