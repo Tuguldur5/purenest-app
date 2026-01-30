@@ -471,11 +471,12 @@ app.delete('/api/products/:id', async (req, res) => {
     }
 });
 // Барааны мэдээлэл шинэчлэх (Update)
-app.put('/api/products/:id', async (res, req) => {
-    const { id } = req.params;
-    const { code, name, image_url, unit, price, type } = req.body;
-
+app.put('/api/products/:id', async (req, res) => {
     try {
+        const { id } = req.params;
+        const { code, name, image_url, unit, price, type } = req.body;
+
+        // Өгөгдлийн сан руу UPDATE хийх
         const result = await pool.query(
             'UPDATE products SET code = $1, name = $2, image_url = $3, unit = $4, price = $5, type = $6 WHERE id = $7 RETURNING *',
             [code, name, image_url, unit, price, type, id]
@@ -485,10 +486,10 @@ app.put('/api/products/:id', async (res, req) => {
             return res.status(404).json({ error: "Бараа олдсонгүй" });
         }
 
-        res.json({ message: "Амжилттай шинэчлэгдлээ", product: result.rows[0] });
+        res.json(result.rows[0]); // АМЖИЛТТАЙ бол JSON буцаана
     } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ error: "Серверийн алдаа" });
+        console.error("SERVER ERROR:", err); // Энэ лог Render-ийн Dashboard дээр харагдана
+        res.status(500).json({ error: "Сервер дээр алдаа гарлаа: " + err.message });
     }
 });
 
