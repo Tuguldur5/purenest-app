@@ -459,7 +459,23 @@ app.post('/api/products', async (req, res) => {
         res.status(500).json({ error: "Серверийн алдаа" });
     }
 });
-
+// server.js
+app.get('/api/products/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        // Таны датабаазын хүснэгтийн нэр 'products' мөн эсэхийг шалгана уу
+        const result = await pool.query('SELECT * FROM products WHERE id = $1', [id]);
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: "Product not found" });
+        }
+        
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Server Error");
+    }
+});
 // --- DELETE: Бараа устгах ---
 app.delete('/api/products/:id', async (req, res) => {
     const { id } = req.params;
