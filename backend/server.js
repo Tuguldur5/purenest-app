@@ -72,6 +72,9 @@ app.get('/', (req, res) => {
 
 app.use('/auth', require('./route/auth'));
 
+const productOrderRoutes = require('./route/productsOrders');
+app.use('/api/product-orders', productOrderRoutes);
+
 const generateBookingHtml = (data, userDetails) => {
 
     const isSuh = data.service === 'СӨХ цэвэрлэгээ';
@@ -640,9 +643,6 @@ app.post('/api/auth/reset-password', async (req, res) => {
     }
 });
 
-const productOrderRoutes = require('./route/productOrders');
-
-app.use('/api/product-orders', productOrderRoutes);
 
 // Серверийг асаах
 app.listen(4000, async () => {
