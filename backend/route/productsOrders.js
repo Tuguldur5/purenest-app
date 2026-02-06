@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const pool = require('../db');
-const verifyToken = require('../middleware/index.js');
+const pool = require('../db.js');
+const { verifyToken}  = require('../middleware/index.js');
 const { Resend } = require('resend');
 
 const resend = new Resend(process.env.RESEND_API_KEY);
