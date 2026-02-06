@@ -640,7 +640,7 @@ app.post('/api/auth/reset-password', async (req, res) => {
     }
 });
 
-const productOrderRoutes = require('./routes/productOrders');
+const productOrderRoutes = require('./route/productOrders');
 
 app.use('/api/product-orders', productOrderRoutes);
 
