@@ -8,7 +8,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 // --- ЗАХИАЛГА ҮҮСГЭХ + МЭЙЛ ИЛГЭЭХ ---
 router.post('/create', verifyToken, async (req, res) => {
-    const { full_name, phone_number, email, address, items, total_amount } = req.body;
+    const { full_name, phone_number, address, items, total_amount } = req.body;
     const user_id = req.user.id;
 
     try {
@@ -24,17 +24,16 @@ router.post('/create', verifyToken, async (req, res) => {
 
         // 2. Захиалгын бараануудыг бүртгэх
         // Захиалгын бараануудыг бүртгэх хэсэг
+        // Захиалгын бараануудыг бүртгэх хэсэг
         for (let item of items) {
+            // subtotal-ийг Бэкэнд дээр дахин тооцож баталгаажуулах нь аюулгүй байдаг
+            const unitPrice = Number(item.price);
+            const subtotal = item.quantity * unitPrice;
+
             await pool.query(
                 `INSERT INTO product_order_items (order_id, product_id, quantity, unit_price, subtotal) 
-         VALUES ($1, $2, $3, $4, $5)`,
-                [
-                    orderId,
-                    item.id,
-                    item.quantity,
-                    item.unit_price, // Frontend-ээс ирсэн нэрээр
-                    item.subtotal    // Frontend-ээс ирсэн нэрээр
-                ]
+                    VALUES ($1, $2, $3, $4, $5)`,
+                [orderId, item.id, item.quantity, unitPrice, subtotal]
             );
         }
 
@@ -51,7 +50,6 @@ router.post('/create', verifyToken, async (req, res) => {
                 <h1>Шинэ барааны захиалгын мэдээлэл</h1>
                 <p><strong>Захиалагч:</strong> ${full_name}</p>
                 <p><strong>Утас:</strong> ${phone_number}</p>
-                <p><strong>Мэйл:</strong> ${email || 'Байхгүй'}</p>
                 <p><strong>Хаяг:</strong> ${address || 'Хаяг өгөөгүй'}</p>
                 <hr/>
                 <h3>Захиалсан бараанууд:</h3>
@@ -63,6 +61,7 @@ router.post('/create', verifyToken, async (req, res) => {
         res.status(201).json({ message: "Захиалга амжилттай", orderId });
     } catch (err) {
         await pool.query('ROLLBACK');
+        console.error(err);
         res.status(500).json({ error: "Алдаа гарлаа" });
     }
 });
@@ -119,13 +118,13 @@ router.get('/my-orders', verifyToken, async (req, res) => {
 router.get('/admin/all', verifyToken, async (req, res) => {
     try {
         const result = await pool.query(`
-            SELECT po.*, u.email as user_email,
+            SELECT po.*, u.phone as user_phone, -- Энд мэйлийн оронд phone авч байна
             STRING_AGG(p.name || ' (' || poi.quantity || 'ш)', ', ') as items_summary
             FROM product_orders po
             LEFT JOIN users u ON po.user_id = u.id
             LEFT JOIN product_order_items poi ON po.id = poi.order_id
             LEFT JOIN products p ON poi.product_id = p.id
-            GROUP BY po.id, u.email
+            GROUP BY po.id, u.phone -- Group by хэсэгт мөн адил phone-оор солино
             ORDER BY po.created_at DESC
         `);
         res.json(result.rows);
