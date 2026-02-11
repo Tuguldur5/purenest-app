@@ -38,7 +38,7 @@ router.post('/create', verifyToken, async (req, res) => {
         
         await resend.emails.send({
             from: 'PureNest <onboarding@resend.dev>', // Өөрийн домайн байвал солиорой
-            to: 'tuguldur8000@gmail.com', // Танай компанийн мэйл
+            to: COMPANY_MAIL || 'tuguldur8000@gmail.com', // Танай компанийн мэйл
             subject: `Шинэ барааны захиалга ирлээ: #${orderId}`,
             html: `
                 <h1>Шинэ барааны захиалгын мэдээлэл</h1>
