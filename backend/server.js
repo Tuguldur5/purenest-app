@@ -321,7 +321,7 @@ app.post('/api/booking', authMiddleware, async (req, res) => {
 app.delete('/api/booking/:id', authMiddleware, async (req, res) => {
     try {
         const orderId = parseInt(req.params.id); // ID-г тоо болгож хөрвүүлэх
-        const userId = req.user.id; 
+        const userId = req.user.id;
 
         // Query-г туршиж үзэх: Баганын нэрсээ DB-тэйгээ тулгаарай
         const query = 'DELETE FROM orders WHERE id = $1 AND user_id = $2 RETURNING *';
@@ -377,6 +377,8 @@ app.get('/api/admin/pricing', isAdminMiddleware, async (req, res) => {
         res.json({
             office_price_per_sqm: row.office_price_per_sqm,
             public_area_price_per_sqm: row.public_area_price_per_sqm,
+            warehouse_price_per_sqm: row.warehouse_price_per_sqm,
+            duct_price_per_sqm: row.duct_price_per_sqm,
             suh_apartment_base: row.suh_apartment_base,
             suh_floor_price: row.suh_floor_price,
             suh_lift_price: row.suh_lift_price,
@@ -402,16 +404,18 @@ app.put('/api/admin/pricing', isAdminMiddleware, async (req, res) => {
     try {
         await pool.query(
             `UPDATE pricing_settings 
-             SET office_price_per_sqm = $1,
-                 public_area_price_per_sqm = $2,
-                 suh_apartment_base = $3,
-                 suh_floor_price = $4,
-                 suh_lift_price = $5,
-                 suh_room_price = $6,
-                 daily_discount = $7,
-                 weekly_discount = $8,
-                 biweekly_discount = $9
-             WHERE id = 1`,
+     SET office_price_per_sqm = $1,
+         public_area_price_per_sqm = $2,
+         suh_apartment_base = $3,
+         suh_floor_price = $4,
+         suh_lift_price = $5,
+         suh_room_price = $6,
+         daily_discount = $7,
+         weekly_discount = $8,
+         biweekly_discount = $9,
+         duct_price_per_sqm = $10,
+         warehouse_price_per_sqm = $11
+     WHERE id = 1`,
             [
                 pricingData.office_price_per_sqm,
                 pricingData.public_area_price_per_sqm,
@@ -421,7 +425,9 @@ app.put('/api/admin/pricing', isAdminMiddleware, async (req, res) => {
                 pricingData.suh.room,
                 pricingData.frequency.daily,
                 pricingData.frequency.weekly,
-                pricingData.frequency.biweekly
+                pricingData.frequency.biweekly,
+                pricingData.duct_price_per_sqm,      // $10
+                pricingData.warehouse_price_per_sqm   // $11
             ]
         );
         res.json({ message: "Үнийн тохиргоо амжилттай хадгалагдлаа." });
@@ -446,7 +452,7 @@ app.post('/api/products', async (req, res) => {
     try {
         // 1. Код давхцаж байгааг шалгах
         const existingProduct = await pool.query('SELECT * FROM products WHERE code = $1', [code]);
-        
+
         if (existingProduct.rows.length > 0) {
             // 409 Conflict алдаа буцаана
             return res.status(409).json({ error: "Барааны код давхцаж байна! Өөр код ашиглана уу." });
@@ -468,11 +474,11 @@ app.get('/api/products/:id', async (req, res) => {
     try {
         // Таны датабаазын хүснэгтийн нэр 'products' мөн эсэхийг шалгана уу
         const result = await pool.query('SELECT * FROM products WHERE id = $1', [id]);
-        
+
         if (result.rows.length === 0) {
             return res.status(404).json({ message: "Product not found" });
         }
-        
+
         res.json(result.rows[0]);
     } catch (err) {
         console.error(err);

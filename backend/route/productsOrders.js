@@ -16,9 +16,9 @@ router.post('/create', verifyToken, async (req, res) => {
 
         // 1. Захиалга бүртгэх
         const orderRes = await pool.query(
-            `INSERT INTO product_orders (user_id, full_name, phone_number, email, address, total_amount, status) 
-             VALUES ($1, $2, $3, $4, $5, $6, 'Хүлээгдэж байна') RETURNING id`,
-            [user_id, full_name, phone_number, email, address || 'Хаяг өгөөгүй', total_amount]
+            `INSERT INTO product_orders (user_id, full_name, phone_number, address, total_amount, status) 
+             VALUES ($1, $2, $3, $4, $5, 'Хүлээгдэж байна') RETURNING id`,
+            [user_id, full_name, phone_number, address || 'Хаяг өгөөгүй', total_amount]
         );
         const orderId = orderRes.rows[0].id;
 
