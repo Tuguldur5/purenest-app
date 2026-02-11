@@ -38,10 +38,10 @@ router.post('/create', verifyToken, async (req, res) => {
         
         await resend.emails.send({
             from: 'PureNest <onboarding@resend.dev>', // Өөрийн домайн байвал солиорой
-            to: 'company-email@gmail.com', // Танай компанийн мэйл
-            subject: `Шинэ захиалга ирлээ: #${orderId}`,
+            to: 'tuguldur8000@gmail.com', // Танай компанийн мэйл
+            subject: `Шинэ барааны захиалга ирлээ: #${orderId}`,
             html: `
-                <h1>Шинэ захиалгын мэдэгдэл</h1>
+                <h1>Шинэ барааны захиалгын мэдээлэл</h1>
                 <p><strong>Захиалагч:</strong> ${full_name}</p>
                 <p><strong>Утас:</strong> ${phone_number}</p>
                 <p><strong>Мэйл:</strong> ${email || 'Байхгүй'}</p>
@@ -50,7 +50,6 @@ router.post('/create', verifyToken, async (req, res) => {
                 <h3>Захиалсан бараанууд:</h3>
                 <ul>${itemsList}</ul>
                 <p><strong>Нийт дүн:</strong> ${total_amount.toLocaleString()} ₮</p>
-                <p style="color: red;">* Төлбөр хийгдээгүй тул хэрэглэгчтэй утсаар холбогдож баталгаажуулна уу!</p>
             `
         });
 
