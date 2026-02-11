@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../db.js');
-const { verifyToken}  = require('../middleware/index.js');
+const { verifyToken } = require('../middleware/index.js');
 const { Resend } = require('resend');
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -23,11 +23,18 @@ router.post('/create', verifyToken, async (req, res) => {
         const orderId = orderRes.rows[0].id;
 
         // 2. Захиалгын бараануудыг бүртгэх
+        // Захиалгын бараануудыг бүртгэх хэсэг
         for (let item of items) {
             await pool.query(
                 `INSERT INTO product_order_items (order_id, product_id, quantity, unit_price, subtotal) 
-                 VALUES ($1, $2, $3, $4, $5)`,
-                [orderId, item.id, item.quantity, item.price, item.quantity * item.price]
+         VALUES ($1, $2, $3, $4, $5)`,
+                [
+                    orderId,
+                    item.id,
+                    item.quantity,
+                    item.unit_price, // Frontend-ээс ирсэн нэрээр
+                    item.subtotal    // Frontend-ээс ирсэн нэрээр
+                ]
             );
         }
 
@@ -35,7 +42,7 @@ router.post('/create', verifyToken, async (req, res) => {
 
         // 3. Resend-ээр Компани руу мэйл илгээх
         const itemsList = items.map(i => `<li>${i.name} - ${i.quantity}ш (${i.price.toLocaleString()}₮)</li>`).join('');
-        
+
         await resend.emails.send({
             from: 'PureNest <onboarding@resend.dev>', // Өөрийн домайн байвал солиорой
             to: COMPANY_MAIL || 'tuguldur8000@gmail.com', // Танай компанийн мэйл
@@ -82,7 +89,7 @@ router.delete('/cancel/:id', verifyToken, async (req, res) => {
 
         // Захиалгыг устгах (ON DELETE CASCADE байгаа бол items хамт устна)
         await pool.query("DELETE FROM product_orders WHERE id = $1", [order_id]);
-        
+
         res.json({ message: "Захиалга амжилттай цуцлагдлаа" });
     } catch (err) {
         res.status(500).json({ error: "Устгахад алдаа гарлаа" });
