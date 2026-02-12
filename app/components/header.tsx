@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'; // useRouter-ийг импортл�
 import { FaUserCircle } from 'react-icons/fa';
 import { usePathname } from 'next/navigation';
 import { ChevronDown, Home, MoreHorizontal, ShoppingCart, Trash2 } from 'lucide-react';
-import { useCart } from '../context/page'; // Сагсны тоог харуулахын тулд
+import { useCart } from '../context/CartContext'; // Сагсны тоог харуулахын тулд
 export default function Header() {
     // 💡 Header функцийг дотор нь тодорхойлсныг устгаж, шууд Header функцийг ашиглаж байна.
     const [scrolled, setScrolled] = useState(false)

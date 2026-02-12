@@ -5,7 +5,7 @@ import HeaderWrapper from "./components/HeaderWrapper";
 import FooterWrapper from "./components/footerWrapper";
 import AuthProvider from "./components/AuthProvider"; // Доор үүнийг үүсгэнэ
 import { ToastProvider } from "./hooks/useSiteToast";
-import { CartProvider } from '././context/page';
+import { CartProvider } from './context/CartContext';
 //  Замаа зөв заагаарай
 const geistSans = Geist({
   variable: "--font-geist-sans",

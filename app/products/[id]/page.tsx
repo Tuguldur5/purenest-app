@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { useCart } from '../../context/page'
+import { useCart } from '../../context/CartContext'
 import Link from 'next/link'
 import { useSiteToast } from '../../hooks/useSiteToast'
 import { ShoppingCart, ChevronLeft, Info } from 'lucide-react'

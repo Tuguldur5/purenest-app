@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { ShoppingCart, Filter, X, Info } from 'lucide-react' // SortAscIcon-ийг Info-гоор солив
-import { useCart } from '../context/page'
+import { useCart } from '../context/CartContext'
 import { useSiteToast } from '../hooks/useSiteToast' // Toast нэмэв
 import Loading from '../loading' // Loading component байгаа гэж үзэв
 
