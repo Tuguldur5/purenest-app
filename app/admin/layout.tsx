@@ -5,7 +5,8 @@ import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { 
   LayoutDashboard, Users, Settings, LogOut, ChevronRight, Menu, X, 
-  PlusCircle
+  PlusCircle,
+  ListOrderedIcon
 } from 'lucide-react'
 import AddProductForm from './products/page'
 
@@ -20,11 +21,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }, [router])
 
     const menuItems = [
-        { name: 'Хяналтын самбар', href: '/admin/dashboard', icon: LayoutDashboard },
-        { name: 'Хэрэглэгчид', href: '/admin/users', icon: Users },
-        { name: 'Үнэ тохиргоо', href: '/admin/pricing', icon: Settings },
-        { name: 'Бараа нэмэх', href: '/admin/products', icon: PlusCircle },
-        
+    { name: 'Хяналтын самбар', href: '/admin/dashboard', icon: LayoutDashboard },
+    { name: 'Бүтээгдэхүүн захиалга', href: '/admin/product_order', icon: ListOrderedIcon }, 
+    { name: 'Бараа нэмэх / Удирдах', href: '/admin/products', icon: PlusCircle },
+    { name: 'Хэрэглэгчид', href: '/admin/users', icon: Users },
+    { name: 'Үнэ тохиргоо', href: '/admin/pricing', icon: Settings },
+
     ]
 
     return (

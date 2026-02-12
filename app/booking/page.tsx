@@ -2,7 +2,6 @@
 import { useState, useMemo, useEffect } from 'react' // useMemo-г нэмэв
 import { useRouter } from 'next/navigation'; // Чиглүүлэгч нэмэх
 import { useSiteToast } from '../hooks/useSiteToast';
-import { describe } from 'node:test';
 import { DessertIcon } from 'lucide-react';
 
 // Давтамж
@@ -98,7 +97,7 @@ export default function Booking() {
         }
 
         // --- Олон нийтийн талбай ---
-        if (form.service === "Олон нийтийн талбай") {
+        if (form.service === "Олон нийтийн талбай цэвэрлэгээ") {
             base = publicAreaSizeNum * Number(dbPricing.public_area_price_per_sqm);
         }
 
@@ -111,7 +110,13 @@ export default function Booking() {
                 lifts * Number(dbPricing.suh_lift_price) +
                 rooms * Number(dbPricing.suh_room_price);
         }
+        if (form.service === "Агуулах цэвэрлэгээ" ){
+            base = publicAreaSizeNum * Number(dbPricing.warehouse_price_per_sqm);
+        }
 
+        if (form.service === "Агааржуулалт хоолой цэвэрлэгээ") {
+            base = publicAreaSizeNum * Number(dbPricing.duct_price_per_sqm);
+        }
         // --- Давтамжийн хөнгөлөлт ---
         let factor = 1;
         switch (form.frequency) {
@@ -322,12 +327,15 @@ export default function Booking() {
                             >
                                 <option>Оффис цэвэрлэгээ</option>
                                 <option>СӨХ цэвэрлэгээ</option>
-                                <option>Олон нийтийн талбай</option>
+                                <option>Олон нийтийн талбай цэвэрлэгээ</option>
+                                <option>Агуулах цэвэрлэгээ</option>
+                                <option>Агааржуулалт хоолой цэвэрлэгээ</option>
+                                
                             </select>
                         </div>
 
                         {/* Динамик талбарууд - Үйлчилгээ сонгосон үед гарч ирнэ */}
-                        {(form.service === 'Оффис цэвэрлэгээ' || form.service === 'Олон нийтийн талбай') && (
+                        {(form.service === 'Оффис цэвэрлэгээ' ||  form.service === 'Олон нийтийн талбай цэвэрлэгээ' || form.service === 'Агуулах цэвэрлэгээ' || form.service === 'Агааржуулалт хоолой цэвэрлэгээ'  ) && (
                             <div className="p-4 bg-gray-50 rounded-xl space-y-2">
                                 <label className="text-sm font-semibold text-gray-600">Талбайн хэмжээ (м²)</label>
                                 <input

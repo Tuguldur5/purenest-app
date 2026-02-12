@@ -78,14 +78,18 @@ export default function AdminDashboardPage() {
 
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(url, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`
-                },
-                body: JSON.stringify({ status: newStatus })
+            const res = await fetch(`${API_BASE_URL}/orders`, {
+                headers: { Authorization: `Bearer ${token}` }
             });
+
+            if (!res.ok) {
+                // Консол дээр статусыг хэвлэх (401, 403, 404, 500 гэх мэт)
+                console.log("Серверийн хариу статус:", res.status);
+                const errorText = await res.text();
+                console.log("Серверийн алдааны мессеж:", errorText);
+
+                throw new Error(`Алдаа гарлаа: ${res.status}`);
+            }
 
             const data = await res.json();
 
@@ -238,10 +242,10 @@ export default function AdminDashboardPage() {
                                         </td>
                                         <td className="p-4 text-sm text-black truncate max-w-[200px]">{o.district},{o.khoroo},{o.address}</td>
                                         <td className="p-4 text-sm text-black truncate max-w-[200px]">{new Date(o.date).toLocaleString('mn-MN', {
-                                                year: 'numeric',
-                                                month: '2-digit',
-                                                day: '2-digit'
-                                            })} </td>
+                                            year: 'numeric',
+                                            month: '2-digit',
+                                            day: '2-digit'
+                                        })} </td>
                                         <td className="p-4 font-bold text-blue-600">{Number(o.total_price).toLocaleString()} ₮</td>
                                         <td className="p-4">
                                             <select
@@ -287,7 +291,7 @@ export default function AdminDashboardPage() {
                                         tickLine={false}
                                         axisLine={false}
                                         stroke="#94a3b8"
-                                        tickFormatter={(value) => `${(value / 1000000).toLocaleString()} сая`} 
+                                        tickFormatter={(value) => `${(value / 1000000).toLocaleString()} сая`}
                                     />
 
                                     <Tooltip

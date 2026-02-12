@@ -101,13 +101,14 @@ export default function UsersPage() {
                                     <tr>
                                         <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">Хэрэглэгч</th>
                                         <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">И-мэйл</th>
+                                        <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">Утас</th>
                                         <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase text-center">Захиалга</th>
                                         <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">Нийт зарцуулалт</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-100">
-                                    {filteredUsers.map((user, i) => (
-                                        <tr key={user.id || user.user_id || i} className="hover:bg-gray-50 transition-colors">
+                                    {filteredUsers.map((user ,i) => (
+                                        <tr key={user.id || user.user_id ||  i} className="hover:bg-gray-50 transition-colors">
                                             <td className="px-6 py-4 flex items-center space-x-3">
                                                 <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-white text-xs font-bold">
                                                     {user.full_name?.charAt(0)}
@@ -115,13 +116,14 @@ export default function UsersPage() {
                                                 <span className="font-medium text-gray-900">{user.full_name}</span>
                                             </td>
                                             <td className="px-6 py-4 text-gray-600 text-sm">{user.email}</td>
+                                            <td className="px-6 py-4 text-gray-600 text-sm">{user.phone}</td>
                                             <td className="px-6 py-4 text-center">
                                                 <span className="bg-gray-100 px-3 py-1 rounded-full text-xs font-bold text-gray-700">
                                                     {user.orders_count}
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 font-bold text-gray-900 tabular-nums">
-                                                {Number(user.total_spent).toLocaleString()} ₮
+                                                {Number(user.total_price).toLocaleString()} ₮
                                             </td>
                                         </tr>
                                     ))}

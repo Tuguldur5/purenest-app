@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 
-export default function LuxuryBubbleLoader() {
+export default function Loading() {
   const [bubbles, setBubbles] = useState<{ id: number; left: string; size: string; delay: string; duration: string }[]>([]);
 
   useEffect(() => {
