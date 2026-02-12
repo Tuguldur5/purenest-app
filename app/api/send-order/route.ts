@@ -1,7 +1,7 @@
 import { Resend } from 'resend';
 import { NextResponse } from 'next/server';
 
-const resend = new Resend('таны_resend_api_key_энд');
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: Request) {
   try {
@@ -13,7 +13,7 @@ export async function POST(req: Request) {
 
     const { data, error } = await resend.emails.send({
       from: 'Order <onboarding@resend.dev>', // Өөрийн домайн байвал солиорой
-      to: ['таны_компанийн_мэйл@gmail.com'],
+      to: ['tuguldur8000@gmail.com'],
       subject: 'Шинэ захиалга ирлээ!',
       html: `
         <h1>Шинэ захиалгын мэдээлэл</h1>
