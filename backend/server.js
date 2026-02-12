@@ -292,7 +292,7 @@ app.post('/api/booking', authMiddleware, async (req, res) => {
 
             await resend.emails.send({
                 from: 'Booking <onboarding@resend.dev>',
-                to: process.env.COMPANY_MAIL || "sales@purenest.mn",
+                to: process.env.COMPANY_MAIL ||  "tuguldur8000@gmail.com",
                 subject: `🔔 ШИНЭ ЗАХИАЛГА: ${service} - ${userName}`,
                 html: emailHtml,
             });
