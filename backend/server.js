@@ -74,10 +74,10 @@ app.use('/auth', require('./route/auth'));
 
 const productOrderRoutes = require('./route/productsOrders');
 const wishlistRoutes = require('./route/wishlist');
-const reportRoutes = require('./route/reports'); 
+const reportRoutes = require('./route/report'); 
 app.use('/api/product-orders', productOrderRoutes);
 app.use('/api/wishlist', wishlistRoutes);
-app.use('/api/reports', reportRoutes); 
+app.use('/api/report', reportRoutes); 
 
 const generateBookingHtml = (data, userDetails) => {
 
