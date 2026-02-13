@@ -6,9 +6,12 @@ import Link from 'next/link'
 import { 
   LayoutDashboard, Users, Settings, LogOut, ChevronRight, Menu, X, 
   PlusCircle,
-  ListOrderedIcon
+  ListOrderedIcon,
+  Paperclip
 } from 'lucide-react'
 import AddProductForm from './products/page'
+import { ReportChartSize } from 'recharts/types/context/chartLayoutContext'
+import { FaRegHandPointRight } from 'react-icons/fa'
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
     const router = useRouter()
@@ -26,6 +29,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: 'Бараа нэмэх / Удирдах', href: '/admin/products', icon: PlusCircle },
     { name: 'Хэрэглэгчид', href: '/admin/users', icon: Users },
     { name: 'Үнэ тохиргоо', href: '/admin/pricing', icon: Settings },
+    { name: 'Тайлан оруулах', href: '/admin/report', icon: Paperclip },
 
     ]
 

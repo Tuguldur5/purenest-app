@@ -12,7 +12,7 @@ export async function POST(req: Request) {
     ).join('');
 
     const { data, error } = await resend.emails.send({
-      from: 'Order <onboarding@resend.dev>', // Өөрийн домайн байвал солиорой
+      from: 'Order <onboarding@resend.dev>', 
       to: ['tuguldur8000@gmail.com'],
       subject: 'Шинэ захиалга ирлээ!',
       html: `
