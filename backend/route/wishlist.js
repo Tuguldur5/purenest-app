@@ -1,9 +1,9 @@
 // Wishlist-д бараа нэмэх
 const express = require('express'); // 1. Express-ийг дуудах
 const router = express.Router();    // 2. router-ийг зарлах
-const { authenticateToken } = require('../middleware/index.js'); // middleware-ийн замыг шалгаарай
+const { verifyToken } = require('../middleware/index.js'); // middleware-ийн замыг шалгаарай
 
-router.post('/add', authenticateToken, async (req, res) => {
+router.post('/add', verifyToken, async (req, res) => {
     const { product_id } = req.body;
     const user_id = req.user.id;
     try {
@@ -18,7 +18,7 @@ router.post('/add', authenticateToken, async (req, res) => {
 });
 
 // Хадгалсан бараануудыг авах
-router.get('/', authenticateToken, async (req, res) => {
+router.get('/', verifyToken, async (req, res) => {
     try {
         const result = await pool.query(`
             SELECT p.* FROM products p
@@ -31,7 +31,7 @@ router.get('/', authenticateToken, async (req, res) => {
     }
 });
 // Сагсны бүх барааг багцаар нь хадгалах
-router.post('/bulk-add', authenticateToken, async (req, res) => {
+router.post('/bulk-add', verifyToken, async (req, res) => {
     const { product_ids } = req.body; // Жишээ нь: [1, 5, 12]
     const userId = req.user.id;
 
@@ -57,7 +57,7 @@ router.post('/bulk-add', authenticateToken, async (req, res) => {
 });
 w
 // Хадгалсан барааг устгах
-router.delete('/:id', authenticateToken, async (req, res) => {
+router.delete('/:id', verifyToken, async (req, res) => {
     try {
         await pool.query('DELETE FROM wishlist WHERE user_id = $1 AND product_id = $2', [req.user.id, req.params.id]);
         res.json({ message: "Устгагдлаа" });
