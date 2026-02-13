@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../db.js'); // Таны өгөгдлийн сангийн холболт
 
-router.post('/api/reports', async (req, res) => {
+router.post('/', async (req, res) => {
     const { order_id, description, images } = req.body;
 
     // 1. Зургийн тоог шалгах
@@ -31,7 +31,7 @@ router.post('/api/reports', async (req, res) => {
     }
 });
 // 1. Тухайн захиалгын тайланг авах
-router.get('/api/reports/:order_id', async (req, res) => {
+router.get('/:order_id', async (req, res) => {
     try {
         const report = await pool.query("SELECT * FROM order_reports WHERE order_id = $1", [req.params.order_id]);
         if (report.rows.length > 0) {
@@ -45,7 +45,7 @@ router.get('/api/reports/:order_id', async (req, res) => {
 });
 
 // 2. Тайлан шинэчлэх (Update)
-router.put('/api/reports/:order_id', async (req, res) => {
+router.put('/:order_id', async (req, res) => {
     const { description, images } = req.body;
     try {
         const updatedReport = await pool.query(

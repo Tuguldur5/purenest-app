@@ -3,7 +3,7 @@ const express = require('express'); // 1. Express-ийг дуудах
 const router = express.Router();    // 2. router-ийг зарлах
 const { authenticateToken } = require('../middleware/index.js'); // middleware-ийн замыг шалгаарай
 
-router.post('/wishlist/add', authenticateToken, async (req, res) => {
+router.post('/add', authenticateToken, async (req, res) => {
     const { product_id } = req.body;
     const user_id = req.user.id;
     try {
@@ -18,7 +18,7 @@ router.post('/wishlist/add', authenticateToken, async (req, res) => {
 });
 
 // Хадгалсан бараануудыг авах
-router.get('/wishlist', authenticateToken, async (req, res) => {
+router.get('/', authenticateToken, async (req, res) => {
     try {
         const result = await pool.query(`
             SELECT p.* FROM products p
@@ -55,9 +55,9 @@ router.post('/bulk-add', authenticateToken, async (req, res) => {
         res.status(500).json({ error: "Хадгалахад алдаа гарлаа" });
     }
 });
-
+w
 // Хадгалсан барааг устгах
-router.delete('/wishlist/:id', authenticateToken, async (req, res) => {
+router.delete('/:id', authenticateToken, async (req, res) => {
     try {
         await pool.query('DELETE FROM wishlist WHERE user_id = $1 AND product_id = $2', [req.user.id, req.params.id]);
         res.json({ message: "Устгагдлаа" });
@@ -65,3 +65,5 @@ router.delete('/wishlist/:id', authenticateToken, async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
+
+module.exports = router; 
