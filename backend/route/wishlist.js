@@ -1,4 +1,8 @@
 // Wishlist-д бараа нэмэх
+const express = require('express'); // 1. Express-ийг дуудах
+const router = express.Router();    // 2. router-ийг зарлах
+const { authenticateToken } = require('../middleware/index.js'); // middleware-ийн замыг шалгаарай
+
 router.post('/wishlist/add', authenticateToken, async (req, res) => {
     const { product_id } = req.body;
     const user_id = req.user.id;

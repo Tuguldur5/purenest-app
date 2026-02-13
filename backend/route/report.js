@@ -1,7 +1,7 @@
 // routes/reports.js
 const express = require('express');
 const router = express.Router();
-const pool = require('../db'); // Таны өгөгдлийн сангийн холболт
+const pool = require('../db.js'); // Таны өгөгдлийн сангийн холболт
 
 router.post('/api/reports', async (req, res) => {
     const { order_id, description, images } = req.body;
