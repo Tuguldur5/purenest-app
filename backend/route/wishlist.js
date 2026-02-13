@@ -55,7 +55,7 @@ router.post('/bulk-add', verifyToken, async (req, res) => {
         res.status(500).json({ error: "Хадгалахад алдаа гарлаа" });
     }
 });
-w
+
 // Хадгалсан барааг устгах
 router.delete('/:id', verifyToken, async (req, res) => {
     try {
