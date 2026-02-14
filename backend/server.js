@@ -9,7 +9,8 @@ const bcrypt = require('bcrypt');
 const { Resend } = require('resend');
 const resend = new Resend(process.env.RESEND_API_KEY);
 const app = express();
-
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
