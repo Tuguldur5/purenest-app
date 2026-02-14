@@ -74,10 +74,10 @@ app.use('/auth', require('./route/auth'));
 
 const productOrderRoutes = require('./route/productsOrders');
 const wishlistRoutes = require('./route/wishlist');
-const reportRoutes = require('./route/report'); 
+const reportRoutes = require('./route/report');
 app.use('/api/product-orders', productOrderRoutes);
 app.use('/api/wishlist', wishlistRoutes);
-app.use('/api/report', reportRoutes); 
+app.use('/api/report', reportRoutes);
 
 const generateBookingHtml = (data, userDetails) => {
 
@@ -131,7 +131,7 @@ const generateBookingHtml = (data, userDetails) => {
                     <tr><th colspan="2" style="background-color: #ddd;">Бусад Мэдээлэл</th></tr>
                     <tr><th>Талбайн хэмжээ (м²)</th><td>${data.public_area_size || 0} м²</td></tr>
 
-                   <tr class="total">
+                    <tr class="total">
                         <th>НИЙТ ҮНЭ</th>
                         <td>${Number(data.total_price || 0).toLocaleString()} ₮</td> 
                     </tr>
@@ -266,7 +266,7 @@ app.post('/api/booking', authMiddleware, async (req, res) => {
              (user_id, service, date, address, total_price, status, 
               apartments, floors, lifts, rooms, 
               frequency, city, district, khoroo, public_area_size, phone_number)
-             VALUES ($1, $2, $3, $4, $5, 'Хүлээгдэж байна',
+             VALUES ($1, $2, $3, $4, $5, 'Хүлээгдэж байна', 
                      $6, $7, $8, $9, 
                      $10, $11, $12, $13, $14, $15) 
              RETURNING *`,
@@ -296,7 +296,7 @@ app.post('/api/booking', authMiddleware, async (req, res) => {
 
             await resend.emails.send({
                 from: 'Booking <onboarding@resend.dev>',
-                to: process.env.COMPANY_MAIL ||  "tuguldur8000@gmail.com",
+                to: process.env.COMPANY_MAIL || "tuguldur8000@gmail.com",
                 subject: `🔔 ШИНЭ ЗАХИАЛГА: ${service} - ${userName}`,
                 html: emailHtml,
             });
@@ -356,7 +356,6 @@ app.get('/api/orders/history', authMiddleware, async (req, res) => {
     }
 });
 
-// Admin routes
 const adminRoutes = require("./route/admin");
 app.use("/api/admin", adminRoutes);
 

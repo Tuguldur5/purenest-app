@@ -115,20 +115,30 @@ router.get('/my-orders', verifyToken, async (req, res) => {
 });
 
 // --- 3. АДМИН БҮХ ЗАХИАЛГЫГ ХАРАХ (GET) ---
+// --- 3. АДМИН БҮХ ЗАХИАЛГЫГ ХАРАХ (GET) ---
 router.get('/admin/all', verifyToken, async (req, res) => {
     try {
         const result = await pool.query(`
-            SELECT po.*, u.phone as user_phone, -- Энд мэйлийн оронд phone авч байна
-            STRING_AGG(p.name || ' (' || poi.quantity || 'ш)', ', ') as items_summary
+            SELECT 
+                po.*, 
+                u.phone as user_phone,
+                COALESCE(
+                    (SELECT json_agg(item_details) FROM (
+                        SELECT p.name, poi.quantity, poi.unit_price 
+                        FROM product_order_items poi 
+                        JOIN products p ON poi.product_id = p.id 
+                        WHERE poi.order_id = po.id
+                    ) item_details), '[]'
+                ) as items
             FROM product_orders po
             LEFT JOIN users u ON po.user_id = u.id
-            LEFT JOIN product_order_items poi ON po.id = poi.order_id
-            LEFT JOIN products p ON poi.product_id = p.id
-            GROUP BY po.id, u.phone -- Group by хэсэгт мөн адил phone-оор солино
             ORDER BY po.created_at DESC
         `);
-        res.json(result.rows);
+        
+        // Frontend-д "orders" гэдэг түлхүүр дотор өгөгдлөө хийж өгье
+        res.json({ orders: result.rows }); 
     } catch (err) {
+        console.error("SQL Error:", err);
         res.status(500).json({ error: "Серверийн алдаа" });
     }
 });
