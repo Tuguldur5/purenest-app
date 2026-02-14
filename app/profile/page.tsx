@@ -42,12 +42,19 @@ function ProfileContent() {
 
         const fetchUser = async () => {
             try {
-                const res = await fetch('https://purenest-app.onrender.com/api/users/me', {
+                const token = localStorage.getItem('token');
+                // Backend-ийн зам болох /api/users/profile руу хандах ёстой
+                const res = await fetch('https://purenest-app.onrender.com/api/users/profile', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
+
                 if (res.ok) {
                     const data = await res.json();
+                    // Хэрэв Backend 'user' объект дотор өгөгдлөө буцаадаг бол data.user, 
+                    // хэрэв шууд объект бол data-г авна
                     setUserDetails(data.user || data);
+                } else {
+                    console.error("User fetch failed with status:", res.status);
                 }
             } catch (err) {
                 console.error("Fetch error:", err);
@@ -83,8 +90,8 @@ function ProfileContent() {
 
             <div className="container max-w-8xl mx-auto px-4 -mt-20 pb-20 text-black mt-8">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                    <div className="lg:col-span-4">
-                        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-3 pt-4 sticky -mt-10">
+                    <div className="lg:col-span-3">
+                        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-3 pt-4 -mt-15">
                             <MenuButton
                                 id="profile"
                                 active={activeTab === 'profile'}
@@ -111,15 +118,18 @@ function ProfileContent() {
 
                             <button
                                 onClick={handleLogout}
-                                className="w-full flex items-center gap-3 p-4 rounded-2xl text-rose-500 hover:bg-rose-50 transition-all font-bold text-sm"
+                                className="w-full py-3.5 px-6 border border-gray-200 text-white text-sm font-medium rounded-[14px] bg-[#102B5A] hover:bg-white hover:text-red-500 transition-all duration-300 flex items-center justify-center gap-2 group"
                             >
-                                <LogOut size={18} /> Системээс гарах
+                                <span>Системээс гарах</span>
+                                <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 25 25">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                </svg>
                             </button>
                         </div>
                     </div>
 
                     {/* 3. БАРУУН АГУУЛГА: 12-оос 8-ыг нь эзэлнэ (2/3 зай) */}
-                    <div className="lg:col-span-8 bg-white rounded-[2rem] shadow-sm border border-gray-100 p-8 min-h-[600px]">
+                    <div className="lg:col-span-9 bg-white rounded-[2rem] shadow-sm border border-gray-100 p-8 min-h-[600px]">
                         {activeTab === 'profile' && (
                             <UserDetails details={userDetails} onUpdate={handleUserUpdate} />
                         )}
@@ -133,20 +143,20 @@ function ProfileContent() {
                                 <div className="flex gap-2 p-1 bg-gray-50 w-fit rounded-2xl">
                                     <button
                                         onClick={() => setSubTab('service')}
-                                        className={`px-6 py-2.5 rounded-xl text-xs font-black transition-all ${subTab === 'service' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-400'}`}
+                                        className={`px-6 py-2.5 rounded-xl text-md font-bold  transition-all ${subTab === 'service' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-400'}`}
                                     >
-                                        ҮЙЛЧИЛГЭЭ
+                                        Үйчилгээ
                                     </button>
                                     <button
                                         onClick={() => setSubTab('product')}
-                                        className={`px-6 py-2.5 rounded-xl text-xs font-black transition-all ${subTab === 'product' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-400'}`}
+                                        className={`px-6 py-2.5 rounded-xl text-md font-bold transition-all ${subTab === 'product' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-400'}`}
                                     >
-                                        БАРАА БҮТЭЭГДЭХҮҮН
+                                        Бараа бүтээгдэхүүн
                                     </button>
                                 </div>
 
                                 <div className="mt-6">
-                                    {subTab === 'service' ? <OrderHistory orders={[]} /> : <ProductOrders />}
+                                    {subTab === 'service' ? <OrderHistory /> : <ProductOrders />}
                                 </div>
                             </div>
                         )}

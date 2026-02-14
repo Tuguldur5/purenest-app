@@ -35,17 +35,16 @@ export default function OrderReportPage() {
         setFetchLoading(true);
         const token = localStorage.getItem('token');
         try {
-            // Backend-ийн endpoint-оо /admin/orders эсвэл /orders алин болохыг нягтлаарай
             const res = await fetch(`${API_BASE}/admin/orders`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             const data = await res.json();
-            
-            if (Array.isArray(data)) {
-                setOrders(data);
-            } else if (data.orders && Array.isArray(data.orders)) {
-                setOrders(data.orders);
-            }
+
+            let allOrders = Array.isArray(data) ? data : (data.orders || []);
+
+            const filtered = allOrders.filter((o: any) => o.status === 'Баталгаажсан' || o.status === 'Дууссан');
+
+            setOrders(filtered);
         } catch (err) {
             console.error("Orders татахад алдаа гарлаа:", err);
         } finally {
@@ -63,7 +62,7 @@ export default function OrderReportPage() {
             const res = await fetch(`${API_BASE}/reports/${order.id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            
+
             if (res.ok) {
                 const data = await res.json();
                 if (data && data.description) {
@@ -109,47 +108,51 @@ export default function OrderReportPage() {
         setLoading(true);
         const token = localStorage.getItem('token');
         const method = isEditing ? 'PUT' : 'POST';
-        const url = isEditing 
-            ? `${API_BASE}/reports/${selectedOrder.id}` 
+        const url = isEditing
+            ? `${API_BASE}/reports/${selectedOrder.id}`
             : `${API_BASE}/reports`;
 
         try {
             const res = await fetch(url, {
                 method: method,
-                headers: { 
+                headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ 
-                    order_id: selectedOrder.id, 
-                    description, 
-                    images: images // Backend дээр JSON.stringify хийгдэх эсэхийг шалгаарай
+                body: JSON.stringify({
+                    order_id: selectedOrder.id,
+                    description,
+                    // Массив чигээр нь илгээх
+                    images: images
                 })
             });
 
             if (res.ok) {
-                alert(isEditing ? "Тайлан амжилттай шинэчлэгдлээ!" : "Тайлан хадгалагдлаа! Захиалга дууссан төлөвт шилжлээ.");
-                fetchOrders(); // Жагсаалтыг шинэчлэх
+                alert("Амжилттай!");
+                fetchOrders();
+                // Сонгосон захиалгыг reset хийх
+                setSelectedOrder(null);
             } else {
                 const errData = await res.json();
-                alert(errData.message || "Алдаа гарлаа.");
+                alert(errData.error || "Алдаа гарлаа.");
             }
         } catch (error) {
-            alert("Сервертэй холбогдоход алдаа гарлаа.");
+            // Энд payload too large алдаа ирж байгаа эсэхийг консол дээр харна
+            console.error("Submit error:", error);
+            alert("Сервер рүү өгөгдөл илгээхэд алдаа гарлаа. Зургийн хэмжээ хэтэрхий их байж магадгүй.");
         } finally {
             setLoading(false);
         }
     }
-
     return (
-        <div className="max-w-6xl mx-auto p-6 grid grid-cols-1 md:grid-cols-3 gap-6 min-h-screen">
-            
+        <div className="max-w-7xl mx-auto p-4 grid grid-cols-1 md:grid-cols-10 gap-6 min-h-screen">
+
             {/* ЗҮҮН ТАЛ: Захиалгын жагсаалт */}
-            <div className="md:col-span-1 bg-white p-4 rounded-xl border shadow-sm h-[800px] flex flex-col">
+            <div className="md:col-span-3 bg-white p-4 rounded-xl border shadow-sm h-[800px] flex flex-col">
                 <h3 className="font-bold mb-4 text-[#102B5A] flex items-center gap-2 border-b pb-2">
                     <AlertCircle size={20} className="text-blue-600" /> Идэвхтэй захиалгууд
                 </h3>
-                
+
                 {fetchLoading ? (
                     <div className="flex justify-center p-10"><Loader2 className="animate-spin text-blue-600" /></div>
                 ) : (
@@ -159,18 +162,16 @@ export default function OrderReportPage() {
                             <div
                                 key={order.id}
                                 onClick={() => handleOrderSelect(order)}
-                                className={`p-4 rounded-lg cursor-pointer border transition-all duration-200 ${
-                                    selectedOrder?.id === order.id 
-                                    ? 'bg-[#102B5A] text-white border-[#102B5A] shadow-md' 
-                                    : 'bg-gray-50 hover:bg-white hover:border-blue-400 border-transparent'
-                                }`}
+                                className={`p-4 rounded-lg cursor-pointer border transition-all duration-200 ${selectedOrder?.id === order.id
+                                        ? 'bg-[#102B5A] text-white border-[#102B5A] shadow-md'
+                                        : 'bg-gray-50 hover:bg-white hover:border-blue-400 border-transparent'
+                                    }`}
                             >
                                 <div className="text-[10px] uppercase tracking-wider opacity-70">Захиалга #{order.id}</div>
                                 <div className="font-bold text-sm truncate">{order.service}</div>
                                 <div className="text-xs mt-1 opacity-80 truncate">{order.address}</div>
-                                <div className={`text-[10px] mt-2 font-bold px-2 py-0.5 rounded-full w-fit ${
-                                    order.status === 'Дууссан' ? 'bg-green-500/20 text-green-500' : 'bg-orange-500/20 text-orange-500'
-                                }`}>
+                                <div className={`text-[10px] mt-2 font-bold px-2 py-0.5 rounded-full w-fit ${order.status === 'Дууссан' ? 'bg-green-500/20 text-green-500' : 'bg-orange-500/20 text-orange-500'
+                                    }`}>
                                     {order.status}
                                 </div>
                             </div>
@@ -180,15 +181,15 @@ export default function OrderReportPage() {
             </div>
 
             {/* БАРУУН ТАЛ: Тайлан бичих */}
-            <div className="md:col-span-2">
+            <div className="md:col-span-7 ">
                 {selectedOrder ? (
                     <div className="bg-white p-8 rounded-xl shadow-xl border border-gray-100">
                         <div className="mb-6 border-b pb-4 flex justify-between items-start">
                             <div>
-                                <h2 className="text-2xl font-black text-[#102B5A] tracking-tight">
+                                <h2 className="text-2xl font-bold text-black tracking-tight">
                                     {isEditing ? 'Тайлан засах' : 'Тайлан илгээх'}
                                 </h2>
-                                <p className="text-gray-500 text-sm mt-1">
+                                <p className="text-gray-500 text-md mt-1">
                                     Захиалга: <span className="font-semibold text-gray-700">#{selectedOrder.id} - {selectedOrder.service}</span>
                                 </p>
                             </div>
@@ -246,7 +247,7 @@ export default function OrderReportPage() {
                 ) : (
                     <div className="h-full min-h-[500px] flex flex-col items-center justify-center text-gray-400 bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl p-10 text-center">
                         <div className="bg-white p-6 rounded-full shadow-sm mb-4 text-blue-100">
-                             <CheckCircle2 size={64} strokeWidth={1} className="text-gray-200" />
+                            <CheckCircle2 size={64} strokeWidth={1} className="text-gray-200" />
                         </div>
                         <h3 className="text-gray-600 font-bold text-lg">Захиалга сонгоогүй байна</h3>
                         <p className="max-w-xs text-sm mt-2">Зүүн талын жагсаалтаас тайлан бичих захиалгаа сонгож ажлаа баталгаажуулна уу.</p>

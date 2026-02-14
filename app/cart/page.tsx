@@ -224,12 +224,15 @@ export default function CartPage() {
                                         </div>
 
                                         <div className="flex justify-between items-center mt-4">
-                                            <div className="flex items-center bg-gray-50 rounded-xl p-1 border border-gray-100">
+                                            <div className="flex justify-between w-70">
+                                            <p className="text-xl items-center  font-black text-[#102B5A] mt-2 mr-5">{(Number(item.price)).toLocaleString()}₮</p>
+                                            <div className="flex items-center bg-gray-50 rounded-[6px] p-1 border border-gray-100"> 
                                                 <button onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))} className="w-9 h-9 flex items-center justify-center hover:bg-white rounded-lg transition-all text-gray-500"><Minus size={16} /></button>
                                                 <span className="w-10 text-center font-bold text-gray-900">{item.quantity}</span>
                                                 <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="w-9 h-9 flex items-center justify-center hover:bg-white rounded-lg transition-all text-gray-500"><Plus size={16} /></button>
                                             </div>
-                                            <p className="text-xl font-black text-[#102B5A]">{(Number(item.price) * item.quantity).toLocaleString()}₮</p>
+                                            </div>
+                                            <p className="text-xl font-black justify-end text-[#102B5A]">{(Number(item.price) * item.quantity).toLocaleString()}₮</p>
                                         </div>
                                     </div>
                                 </div>
@@ -239,22 +242,22 @@ export default function CartPage() {
                         <div className="lg:col-span-4 xl:col-span-4 lg:sticky lg:top-28 text-black">
                             <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm space-y-8">
                                 <div>
-                                    <h2 className="text-lg font-bold text-gray-900 mb-6">Захиалгын хураангуй</h2>
+                                    <h2 className="text-xl font-bold text-gray-900 mb-6">Захиалгын хураангуй</h2>
                                     <div className="space-y-4">
-                                        <div className="flex justify-between text-sm text-gray-500">
+                                        <div className="flex justify-between text-md text-gray-500">
                                             <span>Барааны дэд дүн</span>
                                             <span className="font-bold text-gray-900">{subtotal.toLocaleString()}₮</span>
                                         </div>
-                                        <div className="flex justify-between text-sm text-gray-500">
+                                        <div className="flex justify-between text-md text-gray-500">
                                             <span className="flex items-center gap-2"><Truck size={16} /> Хүргэлт</span>
-                                            <span className={deliveryFee === 0 ? "text-green-500 font-bold" : "text-gray-900 font-bold"}>
+                                            <span className={deliveryFee === 0 ? "text-emerald-500 font-bold" : "text-gray-900 font-bold"}>
                                                 {deliveryFee === 0 ? "Үнэгүй" : `${deliveryFee.toLocaleString()}₮`}
                                             </span>
                                         </div>
                                         <div className="h-px bg-gray-100 my-2" />
                                         <div className="flex justify-between items-end">
-                                            <span className="text-sm font-bold text-gray-400 uppercase tracking-wider">Нийт төлөх</span>
-                                            <span className="text-2xl font-black text-[#102B5A] tracking-tight">{totalPrice.toLocaleString()}₮</span>
+                                            <span className="text-sm font-bold text-black uppercase tracking-wider">Нийт төлөх</span>
+                                            <span className="text-2xl font-black text-emerald-600 tracking-tight">{totalPrice.toLocaleString()}₮</span>
                                         </div>
                                     </div>
                                 </div>

@@ -38,7 +38,7 @@ export default function Wishlist() {
                 </div>
                 <h3 className="text-lg font-bold text-slate-800">Хадгалсан бараа байхгүй</h3>
                 <p className="text-gray-400 text-sm mb-6">Та өөрт таалагдсан бараагаа хадгалж, дараа нь харах боломжтой.</p>
-                <Link href="/shop" className="flex items-center gap-2 text-indigo-600 font-semibold text-sm hover:underline">
+                <Link href="/products" className="flex items-center gap-2 text-indigo-600 font-semibold text-sm hover:underline">
                     Дэлгүүр хэсэх <ArrowRight size={16} />
                 </Link>
             </div>

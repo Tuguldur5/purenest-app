@@ -39,13 +39,13 @@ export default function ProductDetail() {
     if (!product) return <div className="text-center py-40">Бараа олдсонгүй.</div>
 
     return (
-        <div className="container mx-auto px-4 bg-white min-h-screen py-14">
+        <div className="container max-8xl mx-auto px-4 bg-white min-h-screen py-14">
             <div className="max-w-8xl mx-auto px-4">
 
                 {/* ҮНДСЭН БАРААНЫ МЭДЭЭЛЭЛ */}
                 <div className="flex flex-col md:flex-row gap-12 mb-20">
                     {/* ЗҮҮН ТАЛ: ЗУРАГ */}
-                    <div className="w-[600px] md:w-[1500px] flex-shrink-0">
+                    <div className="w-[600px] md:w-[1000px] flex-shrink-0">
                         <div className="border border-gray-200 rounded-lg p-4 bg-white shadow-sm h-[450px] md:h-full mr-4 flex items-center justify-center overflow-hidden">
                             <img
                                 src={product.image_url || '/placeholder.png'}

@@ -65,9 +65,9 @@ export default function ProductsPage() {
     if (loading) return <Loading />
 
     return (
-        <section className="bg-[#FAFAFA] min-h-screen pb-20 pt-[80px]">
-            <div className="sticky top-[64px] z-40 bg-[#FAFAFA]/80 backdrop-blur-md py-6 mt-20  mb-8">
-            <div className="w-full max-w-8xl text-center mb-12">
+        <section className="bg-[#FAFAFA] min-h-screen pb-20 pt-[64px]">
+            <div className=" top-[64px] z-40 bg-[#FAFAFA]/80  py-6 mt-10  mb-8">
+                <div className="w-full max-w-8xl text-center mb-12">
                     <h1 className="text-4xl font-bold text-gray-800 tracking-tight">
                         Бүтээгдэхүүн
                     </h1>
@@ -83,7 +83,7 @@ export default function ProductsPage() {
                     </button>
 
                     <div className="flex items-center gap-3">
-                        <span className="text-xs font-bold text-gray-400 uppercase hidden sm:inline">Эрэмбэлэх:</span>
+                        <span className="text-xs font-bold text-gray-400 uppercase hidden sm:inline"></span>
                         <select
                             value={sort}
                             onChange={e => setSort(e.target.value)}
@@ -102,9 +102,8 @@ export default function ProductsPage() {
                 {categories.length > 0 ? (
                     categories.map((category) => (
                         <div key={category} id={category} className="scroll-mt-48">
-                            <div className="flex items-center gap-4 mb-8">
-                                <h2 className="text-2xl font-black text-[#102B5A] whitespace-nowrap">{category}</h2>
-                                <div className="h-[1px] flex-grow bg-gray-200" />
+                            <div className="flex items-center gap-4 mb-8 justify-between">
+                                <h2 className="text-2xl font-bold text-black ">{category}</h2>
                                 <span className="bg-white border border-gray-100 px-3 py-1 rounded-lg text-sm font-bold text-gray-400">
                                     {groupedProducts[category].length} бараа
                                 </span>
