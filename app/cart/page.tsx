@@ -151,7 +151,7 @@ export default function CartPage() {
                 <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4 border-b border-gray-100 pb-6">
                     <div>
                         <div className="flex items-center gap-3 mb-1">
-                            <h1 className="text-3xl font-black text-gray-900 tracking-tight">Миний сагс</h1>
+                            <h1 className="text-3xl font-semibold text-black tracking-tight">Миний сагс</h1>
                             <span className="text-[#102B5A] mt-2 text-md font-bold p-1 px-2">{cart.length}  Бараа </span>
                         </div>
                         <Link href="/products" className="text-gray-400 hover:text-[#102B5A] flex items-center gap-2 text-sm font-medium transition-all">

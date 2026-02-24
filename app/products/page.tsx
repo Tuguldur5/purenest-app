@@ -67,8 +67,8 @@ export default function ProductsPage() {
     return (
         <section className="bg-[#FAFAFA] min-h-screen pb-20 pt-[64px]">
             <div className=" top-[64px] z-40 bg-[#FAFAFA]/80  py-6 mt-10  mb-8">
-                <div className="w-full max-w-8xl text-center mb-12">
-                    <h1 className="text-4xl font-bold text-gray-800 tracking-tight">
+                <div className="w-full mt-20 max-w-8xl text-center mb-12">
+                    <h1 className="text-4xl  font-bold text-gray-800 tracking-tight">
                         Бүтээгдэхүүн
                     </h1>
                     <div className="h-1 w-20 bg-amber-400 mx-auto mt-4 rounded-full"></div>
@@ -102,8 +102,8 @@ export default function ProductsPage() {
                 {categories.length > 0 ? (
                     categories.map((category) => (
                         <div key={category} id={category} className="scroll-mt-48">
-                            <div className="flex items-center gap-4 mb-8 justify-between">
-                                <h2 className="text-2xl font-bold text-black ">{category}</h2>
+                            <div className="flex items-center gap-4 mb-8 mt-2 justify-between">
+                                <h2 className="text-2xl font-bold text-black mt-4 ">{category}</h2>
                                 <span className="bg-white border border-gray-100 px-3 py-1 rounded-lg text-sm font-bold text-gray-400">
                                     {groupedProducts[category].length} бараа
                                 </span>
@@ -124,7 +124,7 @@ export default function ProductsPage() {
                     ))
                 ) : (
                     <div className="text-center py-20">
-                        <p className="text-gray-400 font-bold italic">Уучлаарай, энэ ангилалд бараа олдсонгүй.</p>
+                        <p className="text-gray-400 font-bold">Уучлаарай, энэ ангилалд бараа олдсонгүй.</p>
                     </div>
                 )}
             </div>
@@ -170,26 +170,24 @@ function ProductCard({ product, addToCart, setIsCartOpen, showToast }: any) {
     };
 
     return (
-        <div className="group bg-white rounded-[24px] overflow-hidden border border-gray-100 flex flex-col h-full hover:shadow-[0_20px_50px_rgba(0,0,0,0.05)] transition-all duration-500">
+        <div className="group bg-white rounded-[24px] overflow-hidden border border-gray-100 flex flex-col h-full hover:shadow-md  transition-all duration-500">
             {/* IMAGE - Зургийг нэг хэмжээнд барих */}
             <Link
                 href={`/products/${product.id}`}
-                className="relative block w-full overflow-hidden bg-[#F9F9F9]"
-                style={{ aspectRatio: '1 / 1' }} // Яг квадрат байлгахыг баталгаажуулна
+                className="relative block w-full overflow-hidden bg-[#F9F9F9] rounded-t-[14px]"
+                style={{ aspectRatio: '1 / 1' }}
             >
-                <div className="flex h-full w-full items-center justify-center p-4">
-                    <img
-                        src={product.image_url || '/placeholder.png'}
-                        alt={product.name}
-                        className="max-w-full max-h-full object-contain group-hover:scale-110 transition-transform duration-700"
-                    />
-                </div>
+                <img
+                    src={product.image_url || '/placeholder.png'}
+                    alt={product.name}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                />
             </Link>
 
             {/* INFO */}
             <div className="p-5 flex-grow flex flex-col">
                 <div className="mb-3">
-                    <span className="text-[11px] font-black text-amber-400 tracking-widest block mb-1">
+                    <span className="text-[10px] font-black text-amber-400 tracking-widest block mb-1">
                         #{product.code}
                     </span>
                     <Link href={`/products/${product.id}`}>
@@ -201,7 +199,7 @@ function ProductCard({ product, addToCart, setIsCartOpen, showToast }: any) {
 
                 <div className="mt-auto">
                     <div className="flex items-baseline gap-1.5 mb-2">
-                        <span className="text-xl font-black text-[#102B5A]">
+                        <span className="text-lg font-bold font-sans text-[#102B5A]">
                             {Number(product.price).toLocaleString()}₮
                         </span>
                         <span className="text-xs text-gray-400 font-medium lowercase mt-2">/ {product.unit}</span>
@@ -223,7 +221,7 @@ function ProductCard({ product, addToCart, setIsCartOpen, showToast }: any) {
                             type="number"
                             value={quantity}
                             onChange={(e) => handleQuantityChange(e.target.value)}
-                            className="bg-transparent text-center text-sm font-black text-[#102B5A] outline-none"
+                            className="bg-transparent text-center text-sm font-bold font-bold text-[#102B5A] outline-none"
                         />
                         <button
                             onClick={() => setQuantity(prev => prev + 1)}

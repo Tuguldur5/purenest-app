@@ -161,7 +161,7 @@ export default function AdminDashboardPage() {
             {activeTab === 'dashboard' && (
                 <div className="space-y-8">
                     <div className="grid grid-cols-1 md:grid-cols-5 gap-6 text-center">
-                        <StatCard title="Нийт Орлого" value={`${statsData.totalRevenue.toLocaleString()} ₮`} color="text-emerald-600 text-xl" bg="bg-emerald-50" />
+                        <StatCard title="Нийт Орлого" value={`${statsData.totalRevenue.toLocaleString()} ₮`} color="text-black text-xl" bg="bg-white" />
                         <StatCard title="Шинэ Захиалга" value={orders.filter(o => o.status === "Хүлээгдэж байна").length} color="text-amber-600" bg="bg-amber-50" />
                         <StatCard title="Баталгаажсан" value={orders.filter(o => o.status === "Баталгаажсан").length} color="text-blue-600" bg="bg-blue-50" />
                         <StatCard title="Цуцлагдсан" value={orders.filter(o => o.status === "Цуцлагдсан").length} color="text-red-600" bg="bg-red-50" />
@@ -215,7 +215,7 @@ export default function AdminDashboardPage() {
             )}
 
             {activeTab === 'orders' && (
-                <div className="bg-white rounded-3xl shadow-sm border overflow-hidden">
+                <div className="bg-white rounded-2xl shadow-sm border overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="w-full text-left">
                             <thead className="bg-slate-50 border-b">
@@ -234,8 +234,8 @@ export default function AdminDashboardPage() {
                                 {orders.map((o) => (
                                     <tr key={o.id} className="hover:bg-slate-50 transition-colors">
                                         <td className="p-4 text-xs">#{o.id}</td>
-                                        <td className="p-4 text-xm">{o.full_name}</td>
-                                        <td className="p-4 text-xm">{o.phone_number}</td>
+                                        <td className="p-4 text-xs font-semibold">{o.full_name}</td>
+                                        <td className="p-4 text-xs font-bold">{o.phone_number}</td>
                                         <td className="p-4">
                                             <p className="font-bold text-sm">{o.service}</p>
 
@@ -364,7 +364,7 @@ export default function AdminDashboardPage() {
 // Туслах компонент: Карт
 function StatCard({ title, value, color, bg }: { title: string, value: string | number, color: string, bg: string }) {
     return (
-        <div className={`p-6 rounded-3xl border border-white shadow-sm ${bg} transition-transform hover:scale-[1.02]`}>
+        <div className={`p-6 rounded-2xl border border-white shadow-sm ${bg} transition-transform hover:scale-[1.02]`}>
             <p className="text-slate-500 text-xs font-medium mb-1 uppercase tracking-wider">{title}</p>
             <p className={`text-2xl font-black ${color}`}>{value}</p>
         </div>

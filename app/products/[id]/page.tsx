@@ -35,7 +35,7 @@ export default function ProductDetail() {
         if (id) fetchData()
     }, [id])
 
-    if (loading) return <div className="flex justify-center py-40 text-gray-400">Уншиж байна...</div>
+
     if (!product) return <div className="text-center py-40">Бараа олдсонгүй.</div>
 
     return (
@@ -62,15 +62,15 @@ export default function ProductDetail() {
                             <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2 leading-tight">
                                 {product.name}
                             </h1>
-                            <p className="text-sm text-gray-400 font-mono">Барааны код: {product.code}</p>
+                            <p className="text-sm text-gray-400 font-sans">Барааны код: {product.code}</p>
                         </div>
 
                         <div className="mb-8">
                             <div className="flex items-baseline gap-2 mb-1">
-                                <span className="text-3xl font-bold text-[#102B5A]">
+                                <span className="text-3xl font-bold font-sans text-[#102B5A]">
                                     {Number(product.price).toLocaleString()}₮
                                 </span>
-                                <span className="text-gray-500 font-medium">/ {product.unit}</span>
+                                <span className="text-gray-500 mt-2 font-medium">/{product.unit}</span>
                             </div>
                             <p className="text-xs flex items-center gap-1 text-red-500 font-medium">
                                 <Info size={14} /> НӨАТ ороогүй болно
@@ -107,7 +107,7 @@ export default function ProductDetail() {
                 <div className="mt-20">
                     <div className="flex items-center justify-between border-b border-gray-100 pb-4 mb-8">
                         <h2 className="text-xl font-bold text-gray-900">Ижил төрлийн бүтээгдэхүүн</h2>
-                        <span className="text-sm text-gray-400">{product.type}</span>
+                        <span className="text-md font-sans font-bold text-black">{product.type}</span>
                     </div>
 
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5 gap-4">
@@ -123,9 +123,7 @@ export default function ProductDetail() {
                                         alt={p.name}
                                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                     />
-                                    <div className="absolute top-2 left-2 bg-[#102b5a] backdrop-blur-sm text-white font-bold px-2 py-0.5 rounded-md">
-                                        {p.type}
-                                    </div>
+                                
                                 </Link>
 
                                 {/* INFO */}
@@ -135,20 +133,20 @@ export default function ProductDetail() {
                                     </span>
 
                                     <Link href={`/products/${p.id}`}>
-                                        <h3 className="text-xs font-bold text-gray-800 mb-2 line-clamp-2 hover:text-blue-600 h-8">
+                                        <h3 className="text-xm font-sans  font-bold text-gray-800 mb-2 line-clamp-2 hover:text-blue-600 h-8">
                                             {p.name}
                                         </h3>
                                     </Link>
 
                                     <div className="mt-auto">
                                         <div className="flex items-baseline gap-1">
-                                            <span className="text-md font-black text-[#102B5A]">
+                                            <span className="text-md font-sans font-bold text-[#102B5A]">
                                                 {Number(p.price).toLocaleString()}₮
                                             </span>
-                                            <span className="text-[10px] text-gray-500 font-medium">/ {p.unit}</span>
+                                            <span className="text-[10px] mt-1 font-sans text-gray-500 font-medium">/{p.unit}</span>
 
                                         </div>
-                                        <p className="text-[10px] text-red-500 font-bold mt-1 flex items-center gap-1">
+                                        <p className="text-[10px] text-red-500  font-bold mt-1 flex items-center gap-1">
                                             <Info size={12} /> НӨАТ-гүй
                                         </p>
                                     </div>

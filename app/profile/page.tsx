@@ -77,7 +77,7 @@ function ProfileContent() {
     if (loading) return <div className="flex justify-center items-center h-screen">Уншиж байна...</div>;
 
     return (
-        <div className="min-h-screen bg-[#F8FAFC] conatainer mx-auto px-4 max-w-8xl">
+        <div className="min-h-screen bg-[#F8FAFC] conatainer mx-auto  max-w-8xl">
             {/* Header */}
             <div className="bg-[#102B5A] items-center px-4 sm:px-6 lg:px-8 py-12">
                 <div className="max-w-7xl mx-auto w-full ">
@@ -88,10 +88,10 @@ function ProfileContent() {
                 </div>
             </div>
 
-            <div className="container max-w-8xl mx-auto px-4 -mt-20 pb-20 text-black mt-8">
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                    <div className="lg:col-span-3">
-                        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-3 pt-4 -mt-15">
+            <div className="container max-w-8xl mx-auto px-4 mt-10 pb-20 text-black">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <div className="lg:col-span-4">
+                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-3 pt-2 -mt-25">
                             <MenuButton
                                 id="profile"
                                 active={activeTab === 'profile'}
@@ -118,7 +118,7 @@ function ProfileContent() {
 
                             <button
                                 onClick={handleLogout}
-                                className="w-full py-3.5 px-6 border border-gray-200 text-white text-sm font-medium rounded-[14px] bg-[#102B5A] hover:bg-white hover:text-red-500 transition-all duration-300 flex items-center justify-center gap-2 group"
+                                className="w-full py-3.5 px-6 mt-6 border border-gray-200 text-white text-sm font-medium rounded-[14px] bg-[#102B5A] hover:bg-white hover:text-red-500 transition-all duration-300 flex items-center justify-center gap-2 group"
                             >
                                 <span>Системээс гарах</span>
                                 <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 25 25">
@@ -129,7 +129,7 @@ function ProfileContent() {
                     </div>
 
                     {/* 3. БАРУУН АГУУЛГА: 12-оос 8-ыг нь эзэлнэ (2/3 зай) */}
-                    <div className="lg:col-span-9 bg-white rounded-[2rem] shadow-sm border border-gray-100 p-8 min-h-[600px]">
+                    <div className="lg:col-span-8 bg-white rounded-2xl shadow-sm border border-gray-100 p-8 min-h-[600px]">
                         {activeTab === 'profile' && (
                             <UserDetails details={userDetails} onUpdate={handleUserUpdate} />
                         )}
@@ -140,12 +140,12 @@ function ProfileContent() {
 
                         {activeTab === 'orders' && (
                             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                                <div className="flex gap-2 p-1 bg-gray-50 w-fit rounded-2xl">
+                                <div className="flex gap-2 p-1 bg-gray-50 rounded-2xl">
                                     <button
                                         onClick={() => setSubTab('service')}
                                         className={`px-6 py-2.5 rounded-xl text-md font-bold  transition-all ${subTab === 'service' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-400'}`}
                                     >
-                                        Үйчилгээ
+                                        Үйлчилгээ
                                     </button>
                                     <button
                                         onClick={() => setSubTab('product')}

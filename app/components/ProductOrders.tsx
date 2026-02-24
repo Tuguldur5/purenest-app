@@ -100,11 +100,11 @@ export default function ProductOrderHistory() {
                             <div>
                                 <div className="flex items-center gap-2">
                                     <span className="font-bold text-gray-900">Захиалга #{order.id}</span>
-                                    <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full border ${getStatusStyle(order.status)} flex items-center gap-1`}>
+                                    <span className={`text-[11px] font-sans px-2 py-0.5 rounded-full border ${getStatusStyle(order.status)} flex items-center gap-1`}>
                                         {getStatusIcon(order.status)} {order.status}
                                     </span>
                                 </div>
-                                <p className="text-xs text-gray-400 flex items-center gap-1 mt-1 font-medium">
+                                <p className="text-xs text-gray-400 font-sans flex items-center gap-1 mt-1 font-medium">
                                     <Calendar size={12} /> {new Date(order.created_at).toLocaleDateString('mn-MN')}
                                 </p>
                             </div>
@@ -113,7 +113,7 @@ export default function ProductOrderHistory() {
                         <div className="flex items-center justify-between md:justify-end gap-8">
                             <div className="text-right">
                                 <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Нийт дүн</p>
-                                <p className="text-lg font-black text-[#102B5A]">{Number(order.total_amount).toLocaleString()}₮</p>
+                                <p className="text-lg font-sans font-bold text-[#102B5A]">{Number(order.total_amount).toLocaleString()}₮</p>
                             </div>
                             {expandedOrder === order.id ? <ChevronUp className="text-gray-300" /> : <ChevronDown className="text-gray-300" />}
                         </div>
@@ -136,14 +136,14 @@ export default function ProductOrderHistory() {
                                 {/* Барааны жагсаалт */}
                                 <div className="space-y-3">
                                     <h4 className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">Захиалсан бараанууд</h4>
-                                    <div className="bg-white rounded-xl border border-gray-100 divide-y divide-gray-50">
+                                    <div className="bg-white rounded-xl border border-gray-100">
                                         {order.products?.map((prod, idx) => (
                                             <div key={idx} className="p-3 flex justify-between items-center">
                                                 <div>
                                                     <p className="text-sm font-bold text-gray-800">{prod.name}</p>
-                                                    <p className="text-xs text-gray-400">{prod.quantity}ш × {Number(prod.unit_price).toLocaleString()}₮</p>
+                                                    <p className="text-xs font-sans font-medium text-gray-500">{prod.quantity}ш × {Number(prod.unit_price).toLocaleString()}₮</p>
                                                 </div>
-                                                <p className="text-sm font-bold text-[#102B5A]">{(prod.quantity * prod.unit_price).toLocaleString()}₮</p>
+                                                <p className="text-sm font-sans font-bold">{(prod.quantity * prod.unit_price).toLocaleString()}₮</p>
                                             </div>
                                         ))}
                                     </div>

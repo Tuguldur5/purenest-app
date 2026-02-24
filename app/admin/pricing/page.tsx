@@ -79,7 +79,7 @@ export default function PricingAdmin() {
                         officePrice: data.office_price_per_sqm,
                         publicPrice: data.public_area_price_per_sqm,
                         warehousePrice: data.warehouse_price_per_sqm,
-                        ductPrice: data.duct_price_pre_sqm,
+                        ductPrice: data.duct_price_per_sqm,
                         suh: {
                             apartment: data.suh_apartment_base,
                             floor: data.suh_floor_price,

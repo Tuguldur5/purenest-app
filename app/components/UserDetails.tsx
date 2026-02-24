@@ -24,7 +24,7 @@ function EditableField({ label, value, icon, isEditing, onChange, placeholder }:
             <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">
                 {label}
             </label>
-            <div className={`flex items-center gap-3 p-4 rounded-2xl border transition-all duration-200 ${
+            <div className={`flex items-center gap-3 p-4 rounded-2xl border border-black/5 transition-all duration-200 ${
                 isEditing 
                 ? 'bg-white border-indigo-200 ring-4 ring-indigo-50' 
                 : 'bg-slate-50 border-transparent hover:border-slate-200'

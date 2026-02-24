@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -105,7 +106,7 @@ export default function OrderHistory() {
                                 <span className="text-[10px] font-bold text-amber-500 italic uppercase tracking-wider">Захиалга #{selectedOrder.id}</span>
                                 <h3 className="text-xl font-bold text-slate-800 mt-1">{selectedOrder.service}</h3>
                                 <div className="flex items-center gap-4 mt-2">
-                                    <p className="text-xs text-slate-400 flex items-center gap-1.5 font-medium">
+                                    <p className="text-xs text-slate-400 flex font-sans items-center gap-1.5 ">
                                         <Calendar size={14} />
                                         {new Date(selectedOrder.date).toLocaleDateString('mn-MN')}
                                     </p>
@@ -169,7 +170,7 @@ export default function OrderHistory() {
                     {/* Төлбөр */}
                     <div className="p-6 flex justify-between items-center bg-white">
                         <span className="font-bold text-slate-400 text-sm uppercase tracking-wide">Нийт төлбөр</span>
-                        <span className="text-2xl font-black text-slate-900">
+                        <span className="text-2xl font-sans font-bold text-slate-900">
                             {Number(selectedOrder.total_price).toLocaleString()}₮
                         </span>
                     </div>
@@ -197,11 +198,11 @@ export default function OrderHistory() {
                             <span className="text-amber-400">#{order.id}</span>
                         </div>
                     </div>
-                    <div className="text-right flex gap-6 items-center">
-                        <span className={`text-[13px] font-bold px-3 py-1 rounded-lg ${getStatusStyle(order.status)}`}>
+                    <div className="flex gap-6 items-center">
+                        <span className={`text-[12px] font-bold px-3 py-1 rounded-lg ${getStatusStyle(order.status)}`}>
                             {order.status}
                         </span>
-                        <p className="font-extrabold text-lg text-slate-900">
+                        <p className="font-bold font-sans text-lg text-slate-900">
                             {Number(order.total_price).toLocaleString()}₮
                         </p>
                     </div>
