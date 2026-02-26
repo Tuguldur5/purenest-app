@@ -6,6 +6,7 @@ import FooterWrapper from "./components/footerWrapper";
 import AuthProvider from "./components/AuthProvider"; // Доор үүнийг үүсгэнэ
 import { ToastProvider } from "./hooks/useSiteToast";
 import { CartProvider } from './context/CartContext';
+import { WishlistProvider } from "../app/context/wishlistContext";
 //  Замаа зөв заагаарай
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -66,6 +67,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* NextAuth-ийн Provider-оор ороож байна */}
         <AuthProvider>
           <CartProvider>
+             <WishlistProvider>
             <div className="min-h-screen bg-white flex flex-col">
               <HeaderWrapper />
               <ToastProvider>
@@ -75,6 +77,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </ToastProvider>
               <FooterWrapper />
             </div>
+           </WishlistProvider>
           </CartProvider>
         </AuthProvider>
       </body>

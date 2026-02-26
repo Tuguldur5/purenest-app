@@ -10,140 +10,153 @@ interface Order {
     status: string;
 }
 
-interface Report {
-    description: string;
-    images: string[];
-}
-
 export default function OrderReportPage() {
-    const [orders, setOrders] = useState<Order[]>([]);
-    const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-    const [description, setDescription] = useState('');
-    const [images, setImages] = useState<string[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [fetchLoading, setFetchLoading] = useState(true);
-    const [isEditing, setIsEditing] = useState(false);
+    const [orders, setOrders] = useState<Order[]>([])
+    const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
+    const [description, setDescription] = useState('')
+    const [previewImages, setPreviewImages] = useState<string[]>([])
+    const [fileImages, setFileImages] = useState<File[]>([])
+    const [loading, setLoading] = useState(false)
+    const [fetchLoading, setFetchLoading] = useState(true)
+    const [isEditing, setIsEditing] = useState(false)
 
-    const API_BASE = 'https://purenest-app.onrender.com/api';
+    const API_BASE = 'https://purenest-app.onrender.com/api'
+
+    // --- Helper: Client-side resize зураг ---
+    const resizeImage = (file: File, maxWidth = 1024, maxHeight = 1024): Promise<File> => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader()
+            reader.onload = (event) => {
+                const img = new Image()
+                img.onload = () => {
+                    let canvas = document.createElement('canvas')
+                    let ctx = canvas.getContext('2d')!
+                    let ratio = Math.min(maxWidth / img.width, maxHeight / img.height, 1)
+                    canvas.width = img.width * ratio
+                    canvas.height = img.height * ratio
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+                    canvas.toBlob((blob) => {
+                        if (!blob) return reject("Blob error")
+                        resolve(new File([blob], file.name, { type: file.type }))
+                    }, file.type, 0.8)
+                }
+                img.src = event.target?.result as string
+            }
+            reader.onerror = (err) => reject(err)
+            reader.readAsDataURL(file)
+        })
+    }
 
     // 1. Захиалгуудыг татаж ирэх
-    useEffect(() => {
-        fetchOrders();
-    }, []);
+    useEffect(() => { fetchOrders() }, [])
 
     const fetchOrders = async () => {
-        setFetchLoading(true);
-        const token = localStorage.getItem('token');
+        setFetchLoading(true)
+        const token = localStorage.getItem('token')
         try {
             const res = await fetch(`${API_BASE}/admin/orders`, {
                 headers: { Authorization: `Bearer ${token}` }
-            });
-            const data = await res.json();
-
-            let allOrders = Array.isArray(data) ? data : (data.orders || []);
-
-            const filtered = allOrders.filter((o: any) => o.status === 'Баталгаажсан' || o.status === 'Дууссан');
-
-            setOrders(filtered);
+            })
+            const data = await res.json()
+            let allOrders = Array.isArray(data) ? data : (data.orders || [])
+            const filtered = allOrders.filter((o: any) => o.status === 'Дууссан')
+            setOrders(filtered)
         } catch (err) {
-            console.error("Orders татахад алдаа гарлаа:", err);
+            console.error("Orders татахад алдаа гарлаа:", err)
         } finally {
-            setFetchLoading(false);
+            setFetchLoading(false)
         }
-    };
+    }
 
     // 2. Сонгосон захиалга дээр тайлан байгаа эсэхийг шалгах
     const handleOrderSelect = async (order: Order) => {
-        setSelectedOrder(order);
-        setLoading(true);
-        const token = localStorage.getItem('token');
-
+        setSelectedOrder(order)
+        setLoading(true)
+        const token = localStorage.getItem('token')
         try {
             const res = await fetch(`${API_BASE}/reports/${order.id}`, {
                 headers: { Authorization: `Bearer ${token}` }
-            });
-
+            })
             if (res.ok) {
-                const data = await res.json();
+                const data = await res.json()
                 if (data && data.description) {
-                    setDescription(data.description);
-                    // Хэрэв images нь string хэлбэрээр ирвэл JSON.parse хийнэ
-                    setImages(typeof data.images === 'string' ? JSON.parse(data.images) : data.images);
-                    setIsEditing(true);
+                    setDescription(data.description)
+                    const imgs = typeof data.images === 'string' ? JSON.parse(data.images) : data.images
+                    setPreviewImages(imgs)
+                    setIsEditing(true)
                 }
             } else {
-                // Тайлан олдохгүй бол шинээр үүсгэх горим
-                setDescription('');
-                setImages([]);
-                setIsEditing(false);
+                setDescription('')
+                setPreviewImages([])
+                setFileImages([])
+                setIsEditing(false)
             }
         } catch (error) {
-            console.error("Report check error:", error);
-            setDescription('');
-            setImages([]);
-            setIsEditing(false);
+            console.error("Report check error:", error)
+            setDescription('')
+            setPreviewImages([])
+            setFileImages([])
+            setIsEditing(false)
         } finally {
-            setLoading(false);
+            setLoading(false)
         }
-    };
-
-    // 3. Зургийг Base64 формат руу хөрвүүлж хадгалах
-    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const files = Array.from(e.target.files || []);
-        files.forEach(file => {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setImages(prev => [...prev, reader.result as string]);
-            };
-            reader.readAsDataURL(file);
-        });
     }
 
-    // 4. Тайлан илгээх (POST эсвэл PUT)
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!selectedOrder) return;
-        if (images.length < 3) return alert("Заавал 3 болон түүнээс дээш зураг оруулна уу!");
+    // 3. Зураг сонгох + resize
+    const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = Array.from(e.target.files || [])
+        try {
+            const resizedFiles: File[] = await Promise.all(files.map(f => resizeImage(f)))
+            setFileImages(prev => [...prev, ...resizedFiles])
+            const urls = resizedFiles.map(f => URL.createObjectURL(f))
+            setPreviewImages(prev => [...prev, ...urls])
+        } catch (err) {
+            console.error("Resize error:", err)
+            alert("Зураг resize хийхэд алдаа гарлаа.")
+        }
+    }
 
-        setLoading(true);
-        const token = localStorage.getItem('token');
-        const method = isEditing ? 'PUT' : 'POST';
-        const url = isEditing
-            ? `${API_BASE}/reports/${selectedOrder.id}`
-            : `${API_BASE}/reports`;
+    // 4. Тайлан илгээх
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        if (!selectedOrder) return
+        if (fileImages.length < 3) return alert("Заавал 3 болон түүнээс дээш зураг оруулна уу!")
+
+        setLoading(true)
+        const token = localStorage.getItem("token")
+        const method = isEditing ? 'PUT' : 'POST'
+        const url = isEditing ? `${API_BASE}/reports/${selectedOrder.id}` : `${API_BASE}/reports`
 
         try {
+            const formData = new FormData()
+            formData.append("order_id", String(selectedOrder.id))
+            formData.append("description", description)
+            fileImages.forEach(file => formData.append("images", file))
+
             const res = await fetch(url, {
-                method: method,
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    order_id: selectedOrder.id,
-                    description,
-                    // Массив чигээр нь илгээх
-                    images: images
-                })
-            });
+                method,
+                headers: { Authorization: `Bearer ${token}` },
+                body: formData
+            })
 
             if (res.ok) {
-                alert("Амжилттай!");
-                fetchOrders();
-                // Сонгосон захиалгыг reset хийх
-                setSelectedOrder(null);
+                alert("Амжилттай илгээлээ!")
+                fetchOrders()
+                setSelectedOrder(null)
+                setDescription('')
+                setFileImages([])
+                setPreviewImages([])
+                setIsEditing(false)
             } else {
-                const errData = await res.json();
-                alert(errData.error || "Алдаа гарлаа.");
+                const errData = await res.json()
+                alert(errData.error || "Алдаа гарлаа.")
             }
         } catch (error) {
-            // Энд payload too large алдаа ирж байгаа эсэхийг консол дээр харна
-            console.error("Submit error:", error);
-            alert("Сервер рүү өгөгдөл илгээхэд алдаа гарлаа. Зургийн хэмжээ хэтэрхий их байж магадгүй.");
-        } finally {
-            setLoading(false);
-        }
+            console.error("Submit error:", error)
+            alert("Сервер рүү өгөгдөл илгээхэд алдаа гарлаа. Зургийн хэмжээ хэтэрхий их байж магадгүй.")
+        } finally { setLoading(false) }
     }
+
     return (
         <div className="max-w-7xl mx-auto p-4 grid grid-cols-1 md:grid-cols-10 gap-6 min-h-screen">
 
@@ -171,9 +184,7 @@ export default function OrderReportPage() {
                                 <div className="font-bold text-sm truncate">{order.service}</div>
                                 <div className="text-xs mt-1 opacity-80 truncate">{order.address}</div>
                                 <div className={`text-[10px] mt-2 font-bold px-2 py-0.5 rounded-full w-fit ${order.status === 'Дууссан' ? 'bg-green-500/20 text-green-500' : 'bg-orange-500/20 text-orange-500'
-                                    }`}>
-                                    {order.status}
-                                </div>
+                                    }`}>{order.status}</div>
                             </div>
                         ))}
                     </div>
@@ -212,15 +223,18 @@ export default function OrderReportPage() {
 
                             <div>
                                 <label className="block text-sm font-semibold text-gray-700 mb-2 uppercase tracking-wide">
-                                    Зургийн баримтууд <span className="text-red-500 font-normal ml-2">(Багадаа 3 зураг: {images.length}/3)</span>
+                                    Зургийн баримтууд <span className="text-red-500 font-normal ml-2">(Багадаа 3 зураг: {fileImages.length}/3)</span>
                                 </label>
                                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                                    {images.map((img, index) => (
+                                    {previewImages.map((img, index) => (
                                         <div key={index} className="relative group aspect-square">
                                             <img src={img} className="w-full h-full object-cover rounded-xl border" alt="preview" />
                                             <button
                                                 type="button"
-                                                onClick={() => setImages(images.filter((_, i) => i !== index))}
+                                                onClick={() => {
+                                                    setPreviewImages(prev => prev.filter((_, i) => i !== index))
+                                                    setFileImages(prev => prev.filter((_, i) => i !== index))
+                                                }}
                                                 className="absolute -top-2 -right-2 bg-red-500 text-white p-1.5 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
                                             >
                                                 <Trash2 size={14} />
@@ -237,7 +251,7 @@ export default function OrderReportPage() {
 
                             <button
                                 type="submit"
-                                disabled={loading || images.length < 3}
+                                disabled={loading || fileImages.length < 3}
                                 className="w-full bg-[#102B5A] text-white py-4 rounded-xl font-bold text-lg shadow-lg hover:bg-blue-900 transition-all disabled:bg-gray-300 disabled:shadow-none flex justify-center items-center gap-2"
                             >
                                 {loading ? "Боловсруулж байна..." : isEditing ? "Өөрчлөлтийг хадгалах" : "Тайлан илгээж, захиалга дуусгах"}

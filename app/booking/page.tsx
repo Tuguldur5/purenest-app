@@ -532,23 +532,23 @@ export default function Booking() {
                         </svg>
                     </div>
 
-                    <h2 className="text-2xl font-black text-gray-800 mb-2">
+                    <h2 className="text-2xl font-bold font-sans text-gray-800 mb-2">
                         Захиалга амжилттай!
                     </h2>
-                    <p className="text-gray-500 mb-8 leading-relaxed">
+                    <p className="text-gray-500 mb-8 font-sans font-medium leading-relaxed">
                         Баярлалаа. Таны захиалгыг бид хүлээн авлаа. Манай ажилтан удахгүй холбогдож баталгаажуулах болно.
                     </p>
 
                     <div className="w-full space-y-3">
                         <button
                             onClick={() => window.location.href = '/profile'} // Эсвэл router.push('/profile')
-                            className="w-full bg-[#102B5A] text-white py-4 rounded-2xl font-bold hover:bg-[#1a3f7a] transition-all shadow-lg"
+                            className="w-full bg-[#102B5A] text-white py-4 rounded-2xl font-bold font-sans hover:bg-[#1a3f7a] transition-all shadow-lg"
                         >
                             Миний захиалгууд харах
                         </button>
                         <button
                             onClick={() => setShowSuccessModal(false)}
-                            className="w-full bg-gray-100 text-gray-600 py-4 rounded-2xl font-bold hover:bg-gray-200 transition-all"
+                            className="w-full bg-gray-100 text-gray-600 py-4 rounded-2xl font-bold font-sans hover:bg-gray-200 transition-all"
                         >
                             Хаах
                         </button>

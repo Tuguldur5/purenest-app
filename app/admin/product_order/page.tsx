@@ -127,14 +127,14 @@ export default function ProductOrdersPage() {
                                             {Number(order.total_amount).toLocaleString()}₮
                                         </td>
                                         <td className="p-4">
-                                            <StatusSelect 
-                                                status={order.status} 
-                                                onChange={(val) => updateStatus(order.id, val)} 
+                                            <StatusSelect
+                                                status={order.status}
+                                                onChange={(val) => updateStatus(order.id, val)}
                                                 styles={getStatusStyles(order.status)}
                                             />
                                         </td>
                                         <td className="p-4">
-                                            <button 
+                                            <button
                                                 onClick={() => setSelectedOrder(order)}
                                                 className="p-2 hover:bg-blue-50 text-blue-600 rounded-lg transition-colors flex items-center gap-1 text-xs font-medium"
                                             >
@@ -179,9 +179,9 @@ export default function ProductOrdersPage() {
                                 <div className="space-y-3">
                                     <h3 className="text-xs font-bold uppercase text-gray-400 tracking-widest">Захиалгын төлөв</h3>
                                     <div className="pt-1">
-                                        <StatusSelect 
-                                            status={selectedOrder.status} 
-                                            onChange={(val) => updateStatus(selectedOrder.id, val)} 
+                                        <StatusSelect
+                                            status={selectedOrder.status}
+                                            onChange={(val) => updateStatus(selectedOrder.id, val)}
                                             styles={`${getStatusStyles(selectedOrder.status)} w-full py-3 text-sm`}
                                         />
                                         <p className="text-[11px] text-gray-400 mt-2 text-center italic">Статус өөрчлөхөд системд шууд хадгалагдана</p>
@@ -194,24 +194,28 @@ export default function ProductOrdersPage() {
                                 <h3 className="text-xs font-bold uppercase text-black tracking-widest flex items-center gap-2">
                                     <ShoppingCart size={14} /> Захиалсан бараанууд ({selectedOrder.items?.length})
                                 </h3>
-                                <div className="border border-black/5 rounded-xl overflow-hidden">
-                                    {selectedOrder.items?.map((item: any, i: number) => (
-                                        <div key={i} className="p-4 flex justify-between items-center hover:bg-gray-50 transition-colors">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 font-bold text-xs">
-                                                    {i + 1}
+
+                                {/* Жагсаалтын хүрээ болон өндрийг энд хязгаарлав */}
+                                <div className="border border-black/5 rounded-xl overflow-hidden bg-white">
+                                    <div className="max-h-[380px] overflow-y-auto divide-y divide-gray-50 custom-scrollbar">
+                                        {selectedOrder.items?.map((item: any, i: number) => (
+                                            <div key={i} className="p-4 flex justify-between items-center hover:bg-gray-50/50 transition-colors">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-10 h-10 bg-blue-50 rounded-xl flex-shrink-0 flex items-center justify-center text-blue-600 font-bold text-xs">
+                                                        {i + 1}
+                                                    </div>
+                                                    <div className="min-w-0">
+                                                        <p className="font-semibold text-gray-800 truncate max-w-[200px]">{item.name}</p>
+                                                        <p className="text-xs text-gray-500">Нэгж: {Number(item.unit_price).toLocaleString()}₮</p>
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <p className="font-semibold text-gray-800">{item.name}</p>
-                                                    <p className="text-xs text-gray-500">Нэгж үнэ: {Number(item.unit_price).toLocaleString()}₮</p>
+                                                <div className="text-right flex-shrink-0">
+                                                    <p className="font-bold text-blue-600 text-sm">x{item.quantity}</p>
+                                                    <p className="text-sm font-bold text-gray-900">{(item.unit_price * item.quantity).toLocaleString()}₮</p>
                                                 </div>
                                             </div>
-                                            <div className="text-right">
-                                                <p className="font-bold text-blue-600">x{item.quantity}</p>
-                                                <p className="text-sm font-bold text-gray-800">{(item.unit_price * item.quantity).toLocaleString()}₮</p>
-                                            </div>
-                                        </div>
-                                    ))}
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
                         </div>
