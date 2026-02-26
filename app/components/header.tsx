@@ -26,7 +26,23 @@ export default function Header() {
     }, [pathname])
     const isHome = pathname === '/' || pathname === '/home';
     const isProducts = pathname === '/products';
-
+    const handleCartClick = () => {
+    if (!isLoggedIn) {
+        router.push("/login")
+    } else {
+        router.push("/cart")
+    }
+}
+    const linkStyle = (path: string) =>
+        `block py-2.5 px-3 rounded-lg transition-all duration-200 ${pathname === path
+            ? "bg-amber-50 text-amber-500 font-semibold"
+            : "text-gray-700 hover:bg-gray-50 hover:text-amber-500"
+        }`
+    // ✅ Route солигдох үед автоматаар menu хаагдана
+    useEffect(() => {
+        setOpen(false)
+        setIsServiceOpen(false)
+    }, [pathname])
     // Header-ийн классыг тодорхойлох logic
     let headerClasses = '';
 
@@ -279,7 +295,6 @@ export default function Header() {
                                                 border border-white/20
                                                 rounded-[14px]
                                                 shadow-[0_4px_10px_rgba(0,0,0,0.3)]
-                                               
                                                 transition-all duration-300 ease-out
                                                 hover:scale-105 
                                                 hover:bg-[#102B5A] 
@@ -300,43 +315,104 @@ export default function Header() {
                 </nav>
 
                 {/* Mobile Menu Toggle */}
-                <div className="md:hidden">
-                    <button onClick={() => setOpen(!open)} aria-label="menu">☰</button>
+                <div className="md:hidden flex items-center gap-3">
+
+                    {/* Cart */}
+                    <div className="p-2 cursor-pointer"
+                        onClick={handleCartClick}>
+                        <ShoppingCart
+                            size={24}
+                            className={`transition-all duration-300 ${isHome && !scrolled ? 'text-white' : 'text-black'}`}
+                        />
+                        {cart.length > 0 && (
+                            <span className="absolute right-15 top-5 bg-red-500 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold">
+                                {cart.length}
+                            </span>
+                        )}
+                    </div>
+
+                    {/* Hamburger */}
+                    <button
+                        onClick={() => setOpen(prev => !prev)}
+                        className="p-2 rounded-lg hover:bg-gray-100 transition"
+                    >
+                        ☰
+                    </button>
+
                 </div>
             </div>
 
             {/* Mobile Menu Links */}
-            {open && (
-                <div className="md:hidden bg-white border-t border-gray-50 px-4 pt-2 pb-6 space-y-1">
-                    <Link href="/home" className="block py-2 text-black hover:text-amber-400">Нүүр</Link>
+            <div
+                className={`md:hidden overflow-hidden transition-all duration-300 ${open ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"
+                    }`}
+            >
+                <div className="bg-white/95 backdrop-blur-md border-t shadow-lg px-4 pt-4 pb-6 space-y-1 rounded-b-2xl">
 
-                    {/* Mobile Dropdown */}
+                    <Link href="/home" className={linkStyle("/home")}>
+                        Нүүр
+                    </Link>
+
+                    {/* Dropdown */}
                     <div>
                         <button
-                            onClick={() => setIsServiceOpen(!isServiceOpen)}
-                            className="flex items-center justify-between w-full py-2 text-black hover:text-amber-400"
+                            onClick={() => setIsServiceOpen(prev => !prev)}
+                            className="flex items-center justify-between w-full py-2.5 px-3 rounded-lg text-gray-700 hover:bg-gray-50 hover:text-amber-500 transition"
                         >
-                            Үйлчилгээ <ChevronDown className={`w-4 h-4 transform ${isServiceOpen ? 'rotate-180' : ''}`} />
+                            Үйлчилгээ
+                            <ChevronDown
+                                className={`w-4 h-4 transition-transform duration-300 ${isServiceOpen ? "rotate-180" : ""
+                                    }`}
+                            />
                         </button>
 
-                        {isServiceOpen && (
-                            <div className="pl-4 bg-gray-50 rounded-lg mt-1 border-l-2 border-amber-400">
-                                <Link href="/service/office" className="block py-2 px-2 text-sm text-gray-600">Оффис цэвэрлэгээ</Link>
-                                <Link href="/service/suh" className="block py-2 px-2 text-sm text-gray-600">СӨХ цэвэрлэгээ</Link>
-                                <Link href="/service/public-space" className="block py-2 px-2 text-sm text-gray-600">Олон нийтийн талбай цэвэрлэгээ</Link>
-                                <Link href="/service/warehouse" className="block py-2 px-2 text-sm text-gray-600">Агуулах</Link>
-                                <Link href="/service/duct" className="block py-2 px-2 text-sm text-gray-600">Агааржуулалт</Link>
+                        <div
+                            className={`overflow-hidden transition-all duration-300 ${isServiceOpen ? "max-h-96 mt-1" : "max-h-0"
+                                }`}
+                        >
+                            <div className="pl-3 border-l-2 border-amber-400 space-y-1">
+                                <Link href="/service/office" className={linkStyle("/service/office")}>
+                                    Оффис цэвэрлэгээ
+                                </Link>
+                                <Link href="/service/suh" className={linkStyle("/service/suh")}>
+                                    СӨХ цэвэрлэгээ
+                                </Link>
+                                <Link href="/service/public-space" className={linkStyle("/service/public-space")}>
+                                    Олон нийтийн талбай
+                                </Link>
+                                <Link href="/service/warehouse" className={linkStyle("/service/warehouse")}>
+                                    Агуулах
+                                </Link>
+                                <Link href="/service/duct" className={linkStyle("/service/duct")}>
+                                    Агааржуулалт
+                                </Link>
                             </div>
-                        )}
+                        </div>
                     </div>
 
-                    <Link href="/booking" className="block py-2 text-black hover:text-amber-400">Захиалга</Link>
-                    <Link href="/about" className="block py-2 text-black hover:text-amber-400">Бидний тухай</Link>
-                    <Link className="text-black hover:text-amber-400" href={isLoggedIn ? "/profile" : "/login"}>
-                        {isLoggedIn ? "Профайл" : "Нэвтрэх"}
+                    <Link href="/products" className={linkStyle("/products")}>
+                        Бүтээгдэхүүн
                     </Link>
+
+                    <Link href="/booking" className={linkStyle("/booking")}>
+                        Захиалга
+                    </Link>
+
+                    <Link href="/about" className={linkStyle("/about")}>
+                        Бидний тухай
+                    </Link>
+
+                    <div className="pt-3 border-t mt-3">
+                        <Link
+                            href={isLoggedIn ? "/profile" : "/login"}
+                            className="block text-center bg-amber-400 text-white py-2.5 rounded-lg font-semibold hover:bg-amber-600 transition"
+                        >
+                            {isLoggedIn ? "Профайл" : "Нэвтрэх"}
+                        </Link>
+                    </div>
+
                 </div>
-            )}
+            </div>
         </header>
     )
 }
