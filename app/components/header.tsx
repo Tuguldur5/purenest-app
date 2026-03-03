@@ -27,12 +27,12 @@ export default function Header() {
     const isHome = pathname === '/' || pathname === '/home';
     const isProducts = pathname === '/products';
     const handleCartClick = () => {
-    if (!isLoggedIn) {
-        router.push("/login")
-    } else {
-        router.push("/cart")
+        if (!isLoggedIn) {
+            router.push("/login")
+        } else {
+            router.push("/cart")
+        }
     }
-}
     const linkStyle = (path: string) =>
         `block py-2.5 px-3 rounded-lg transition-all duration-200 ${pathname === path
             ? "bg-amber-50 text-amber-500 font-semibold"
@@ -318,16 +318,82 @@ export default function Header() {
                 <div className="md:hidden flex items-center gap-3">
 
                     {/* Cart */}
-                    <div className="p-2 cursor-pointer"
-                        onClick={handleCartClick}>
-                        <ShoppingCart
-                            size={24}
-                            className={`transition-all duration-300 ${isHome && !scrolled ? 'text-white' : 'text-black'}`}
-                        />
+                    <div className={`relative ${cart.length > 0 ? 'group' : ''}`}>
+
+                        {/* Сагсны Icon болон Badge */}
+                        <div className="p-2 cursor-pointer">
+                            <ShoppingCart
+                                size={24}
+                                className={`transition-all duration-300 ${isHome && !scrolled ? 'text-white' : 'text-black'}`}
+                            />
+                            {cart.length > 0 && (
+                                <span className="absolute top-0 right-0 bg-red-500 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold">
+                                    {cart.length}
+                                </span>
+                            )}
+                        </div>
+
+                        {/* 2. Dropdown Цэс - Сагс хоосон биш үед л render хийнэ */}
                         {cart.length > 0 && (
-                            <span className="absolute right-15 top-5 bg-red-500 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold">
-                                {cart.length}
-                            </span>
+                            <div className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-[100] transform origin-top-right group-hover:scale-100 scale-95">
+
+                                {/* Толгой хэсэг: Гарчиг болон Хоослох товч */}
+                                <div className="p-4 border-b flex justify-between items-center">
+                                    <h3 className="font-bold text-gray-800">Миний сагс</h3>
+                                    <button
+                                        onClick={() => {
+                                            if (window.confirm("Та сагсаа бүрэн хоослохдоо итгэлтэй байна уу?")) {
+                                                clearCart();
+                                            }
+                                        }}
+                                        className="text-[11px] text-red-500 hover:text-red-700 font-medium underline"
+                                    >
+                                        Хоослох
+                                    </button>
+                                </div>
+
+                                {/* Барааны жагсаалт: Max-height тохируулсан хэсэг */}
+                                <div className="max-h-[400px] overflow-y-auto p-2 space-y-1 custom-scrollbar">
+                                    {cart.map((item: any) => (
+                                        <div key={item.id} className="flex gap-3 p-2 hover:bg-gray-50 rounded-xl transition-colors items-center group/item">
+                                            <div className="w-12 h-12 bg-white border border-gray-100 rounded-lg flex-shrink-0 p-1">
+                                                <img src={item.image_url} alt={item.name} className="w-full h-full object-contain" />
+                                            </div>
+
+                                            <div className="flex-grow min-w-0">
+                                                <h4 className="text-[11px] font-bold text-gray-800 truncate leading-tight">{item.name}</h4>
+                                                <p className="text-[10px] text-gray-500 mt-0.5">{item.quantity}ш × <span className="text-[#102B5A] font-medium">{Number(item.price).toLocaleString()}₮</span></p>
+                                            </div>
+
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    removeFromCart(item.id);
+                                                }}
+                                                className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-md transition-all opacity-0 group-hover/item:opacity-100"
+                                            >
+                                                <Trash2 size={14} />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* Доод хэсэг: Нийт дүн болон Захиалах */}
+                                <div className="p-4 border-t bg-gray-50 rounded-b-2xl">
+                                    <div className="flex justify-between items-center mb-3">
+                                        <span className="text-sm text-gray-600">Нийт:</span>
+                                        <span className="text-sm font-bold text-[#102B5A]">
+                                            {cart.reduce((total: number, item: any) => total + (item.price * item.quantity), 0).toLocaleString()}₮
+                                        </span>
+                                    </div>
+                                    <button
+                                        onClick={() => window.location.href = '/cart'}
+                                        className="w-full py-2.5 bg-[#102B5A] text-white rounded-xl text-sm font-bold hover:bg-blue-900 transition-colors shadow-lg shadow-blue-900/20"
+                                    >
+                                        Захиалах
+                                    </button>
+                                </div>
+                            </div>
                         )}
                     </div>
 

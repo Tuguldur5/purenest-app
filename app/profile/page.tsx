@@ -74,7 +74,7 @@ function ProfileContent() {
         router.push('/');
     };
 
-    if (loading) return <div className="flex justify-center items-center h-screen">Уншиж байна...</div>;
+    if (loading) return <div className="flex justify-center text-black items-center h-screen">Уншиж байна...</div>;
 
     return (
         <div className="min-h-screen bg-[#F8FAFC] conatainer mx-auto  max-w-8xl">

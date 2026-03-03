@@ -1,44 +1,43 @@
 "use client"
 import { useWishlist } from "../context/wishlistContext"
-import { ShoppingCart, Trash2 } from "lucide-react"
-import { useCart } from "../context/CartContext"
-import { useSiteToast } from "../hooks/useSiteToast"
+import { Heart } from "lucide-react"
+import Link from "next/link"
+import ProductCard from "../components/ProductCard" // Таны ProductCard-ын зам
 
 export default function WishlistPage() {
-  const { wishlist, toggleWishlist } = useWishlist()
-  const { addToCart, setIsCartOpen } = useCart()
-  const { showToast } = useSiteToast()
+  const { wishlist } = useWishlist()
 
   if (wishlist.length === 0)
-    return <div className="text-center py-20">Хадгалсан бараа байхгүй байна.</div>
+    return (
+      <div className="flex flex-col items-center justify-center py-40">
+        <Heart size={64} className="text-gray-200 mb-4" />
+        <p className="text-gray-500 font-medium">Хадгалсан бараа байхгүй байна.</p>
+        <Link href="/products" className="mt-4 text-[#102B5A] font-bold border-b border-[#102B5A]">
+          Дэлгүүр хэсэх
+        </Link>
+      </div>
+    )
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-      {wishlist.map(p => (
-        <div key={p.id} className="border border-black/5  rounded-lg  p-4 relative">
-          <img src={p.image_url} className="w-full h-40 rounded-lg object-cover" />
-          
-          <button
-            onClick={() => toggleWishlist(p)}
-            className="absolute top-2 right-2 p-2 bg-white rounded-full hover:bg-red-100"
-          >
-            <Trash2 size={16} />
-          </button>
-
-          <h3 className="mt-2 font-bold">{p.name}</h3>
-          <p className="text-[#102B5A] font-bold">{Number(p.price).toLocaleString()}₮</p>
-          <button
-            onClick={() => {
-              addToCart(p)
-              setIsCartOpen(true)
-              showToast({ title: "Сагсанд нэмэгдлээ", description: p.name })
-            }}
-            className="mt-2 w-full py-2 bg-[#102B5A] text-white rounded flex items-center justify-center gap-2"
-          >
-            <ShoppingCart size={16} /> Сагсанд хийх
-          </button>
-        </div>
-      ))}
+    <div className="container mx-auto px-4 py-10">
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-2xl font-bold text-gray-900 font-sans">Миний хүсэлт ({wishlist.length})</h1>
+        <Link href="/products" className="text-sm text-blue-600 font-medium hover:underline">
+          + Бараа нэмэх
+        </Link>
+      </div>
+      
+      {/* grid-cols-6 хүртэл ихэсгэж, gap-г багасгаж барааг жижиг харагдуулна */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
+        {wishlist.map(p => (
+          <div key={p.id} className="relative group">
+            {/* ProductCard-ийг жижиг хэлбэрээр дуудах */}
+            <ProductCard product={p} isSmall={true} />
+            
+            {/* Устгах товчийг картын гадна эсвэл дээр нь overlay байдлаар тавьж болно */}
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
