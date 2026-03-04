@@ -35,29 +35,43 @@ export const metadata: Metadata = {
   },
 
   title: {
-    default: "Purenest | Мэргэжлийн цэвэрлэгээний үйлчилгээ",
+    default: "Purenest | Мэргэжлийн цэвэрлэгээний үйлчилгээ (Cleaning Service)",
     template: "%s | Purenest"
   },
-  description: "Оффис, СӨХ, айл гэр болон олон нийтийн талбайн мэргэжлийн цэвэрлэгээ. Purenest - Таны тав тухтай орчин.",
+  description: "Purenest: Мэргэжлийн цэвэрлэгээний нэгдсэн үйлчилгээ. Оффис, СӨХ, айл гэр, засварын дараах цэвэрлэгээг чанартай гүйцэтгэнэ. Professional cleaning services in Ulaanbaatar.",
+
   keywords: [
-    "цэвэрлэгээ", "цэвэрлэгээний үйлчилгээ", "айлын цэвэрлэгээ",
-    "оффис цэвэрлэгээ", "сөх цэвэрлэгээ", "purenest", "cleaning service mongolia"
+    "цэвэрлэгээ", "tseverlegee", "tsewerlegee", "цэвэрлэгээний үйлчилгээ", "tseverlegeenii uilchilgee", "оффис цэвэрлэгээ", "office cleaning mongolia",
+    "СӨХ цэвэрлэгээ", "SOH tseverlegee", "агуулах цэвэрлэгээ", "agualah tseverlegee", "агааржуулалтын хоолой цэвэрлэгээ", "agaarjuulaltiin hooloi tseverlegee",
+    "duct cleaning mongolia", "purenest cleaning mongolia", "duct tseverlegee", "purenest tseverlegee", "purenest cleaning service", "warehouse cleaning mongolia", "агуулахын цэвэрлэгээ", "agualahiin tseverlegee",
+    "purenest", "пюренест", "pure nest", "cleaning service ulaanbaatar"
   ],
+
   openGraph: {
-    title: "Purenest - Цэвэрлэгээний үйлчилгээ",
-    description: "Мэргэжлийн цэвэрлэгээний нэгдсэн үйлчилгээ. Найдвартай хамт олон.",
+    title: "Purenest - Мэргэжлийн цэвэрлэгээний үйлчилгээ",
+    description: "Таны тав тухтай орчныг бид бүтээнэ. Найдвартай, түргэн шуурхай цэвэрлэгээ.",
     url: 'https://purenest.mn',
-    siteName: 'Purenest',
-    // 2. СОШИАЛД ЗУРАГ ХАРАГДАХ ХЭСЭГ:
+    siteName: 'Purenest Cleaning',
     images: [
       {
-        url: '/nest.jpg', // Энэ зургийн замыг public/ дотор байгаа зөв зургаар солиорой
+        url: '/og-image.jpg', // 1200x630 хэмжээтэй зураг байвал хамгийн сайн
         width: 1200,
         height: 630,
+        alt: 'Purenest Cleaning Service Mongolia',
       }
     ],
     locale: 'mn_MN',
     type: 'website',
+  },
+
+  // Роботуудад сайтыг индексжүүлэхийг зөвшөөрөх
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+    },
   },
 };
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -67,17 +81,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* NextAuth-ийн Provider-оор ороож байна */}
         <AuthProvider>
           <CartProvider>
-             <WishlistProvider>
-            <div className="min-h-screen bg-white flex flex-col">
-              <HeaderWrapper />
-              <ToastProvider>
-                <main className="min-h-screen">
-                  {children}
-                </main>
-              </ToastProvider>
-              <FooterWrapper />
-            </div>
-           </WishlistProvider>
+            <WishlistProvider>
+              <div className="min-h-screen bg-white flex flex-col">
+                <HeaderWrapper />
+                <ToastProvider>
+                  <main className="min-h-screen">
+                    {children}
+                  </main>
+                </ToastProvider>
+                <FooterWrapper />
+              </div>
+            </WishlistProvider>
           </CartProvider>
         </AuthProvider>
       </body>

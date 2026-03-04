@@ -8,7 +8,7 @@ import { useSiteToast } from '../hooks/useSiteToast'
 import { useWishlist } from '../context/wishlistContext'
 
 export type Product = {
-    id: string
+    id: string | number
     name: string
     price: number
     type?: string

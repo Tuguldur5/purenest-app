@@ -1,14 +1,21 @@
 'use client'
 import { useCart } from '../context/CartContext'
-import { useWishlist } from '../context/wishlistContext' // Нэмсэн
-import { Trash2, Plus, Minus, ArrowLeft, CheckCircle, ArrowRight, ShoppingBag, Truck, Heart, Trash } from 'lucide-react'
+import { useWishlist } from '../context/wishlistContext'
+import { Trash2, Plus, Minus, ArrowLeft, CheckCircle, ArrowRight, ShoppingBag, Truck, Heart } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useSiteToast } from "@/app/hooks/useSiteToast";
+import { Product } from '../components/ProductCard'
+
+// 1. Сагсанд зориулсан шинэ төрөл тодорхойлох (Product + quantity)
+type CartItem = Product & {
+    quantity: number;
+};
 
 export default function CartPage() {
+    // useCart-аас ирж буй cart-ыг CartItem[] гэж үзнэ
     const { cart, removeFromCart, updateQuantity, clearCart } = useCart()
-    const { toggleWishlist, isWishlisted } = useWishlist() // Wishlist контекстээс авлаа
+    const { toggleWishlist, isWishlisted } = useWishlist()
     const { showToast } = useSiteToast()
     const [loading, setLoading] = useState(false)
     const [sent, setSent] = useState(false)
@@ -31,41 +38,37 @@ export default function CartPage() {
         }
     }, []);
 
-    const subtotal = cart.reduce((sum: number, item: any) => sum + (Number(item.price) * (item.quantity || 1)), 0)
+    // subtotal тооцоолохдоо CartItem ашиглана
+    const subtotal = cart.reduce((sum: number, item: CartItem) => 
+        sum + (Number(item.price) * (item.quantity || 1)), 0
+    )
     const deliveryFee = subtotal > 500000 ? 0 : 5000
     const totalPrice = subtotal + deliveryFee
 
-    // Сагсанд байгаа бүх барааг хадгалах функц
-    const saveAllToWishlist = async () => {
+    const handleBulkWishlist = async () => {
         const token = localStorage.getItem('token');
-        if (!token) {
-            showToast({ title: "Нэвтрэнэ үү", description: "Хадгалахын тулд нэвтрэх хэрэгтэй." });
-            return;
-        }
+        const productIds = cart.map((item: CartItem) => item.id);
 
-        const productIds = cart.map((item: any) => item.id);
-
-        try {
-            setLoading(true);
-            const res = await fetch('https://purenest-app.onrender.com/api/wishlist/bulk-add', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ product_ids: productIds })
-            });
-
-            if (res.ok) {
-                showToast({
-                    title: "Амжилттай",
-                    description: "Сагсанд байсан бүх барааг хадгаллаа."
+        if (token) {
+            try {
+                const response = await fetch(`https://purenest-app.onrender.com/api/wishlist/bulk-add`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ product_ids: productIds })
                 });
+                
+                if (response.ok) {
+                    showToast({ title: "Амжилттай", description: "Бүх барааг хадгаллаа." });
+                    window.location.reload();
+                }
+            } catch (error) {
+                showToast({ title: "Алдаа", description: "Хадгалахад алдаа гарлаа." });
             }
-        } catch (err) {
-            showToast({ title: "Алдаа", description: "Хадгалж чадсангүй." });
-        } finally {
-            setLoading(false);
+        } else {
+            showToast({ title: "Анхааруулга", description: "Та нэвтэрсэн байх шаардлагатай." });
         }
     };
 
@@ -92,9 +95,9 @@ export default function CartPage() {
                     address: userInfo.address,
                     email: user.email || '',
                     total_amount: totalPrice,
-                    items: cart.map((item: any) => ({
+                    items: cart.map((item: CartItem) => ({
                         id: item.id,
-                        quantity: item.quantity,
+                        quantity: Number(item.quantity),
                         price: Number(item.price),
                         name: item.name
                     }))
@@ -134,8 +137,7 @@ export default function CartPage() {
     return (
         <div className="bg-[#F8F9FB] min-h-screen pb-20 px-4">
             <div className="container max-w-6xl mx-auto mt-10">
-                
-                {/* Header */}
+
                 <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4 border-b pb-6">
                     <div>
                         <div className="flex items-center gap-3 mb-1">
@@ -153,7 +155,7 @@ export default function CartPage() {
                         {cart.length > 0 && (
                             <>
                                 <button
-                                    onClick={saveAllToWishlist}
+                                    onClick={handleBulkWishlist}
                                     className="flex items-center gap-2 text-[#102B5A] hover:bg-blue-50 px-4 py-2 rounded-xl transition-all text-sm font-bold border border-blue-100"
                                 >
                                     <Heart size={16} /> Бүгдийг хадгалах
@@ -177,9 +179,8 @@ export default function CartPage() {
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-                        {/* LEFT: PRODUCTS LIST */}
                         <div className="lg:col-span-8 space-y-4">
-                            {cart.map((item: any) => (
+                            {cart.map((item: CartItem) => (
                                 <div key={item.id} className="bg-white p-5 rounded-3xl flex flex-col sm:flex-row items-center gap-6 shadow-sm border border-gray-50">
                                     <div className="w-28 h-28 bg-[#F9FAFB] rounded-2xl overflow-hidden flex-shrink-0 p-2">
                                         <img src={item.image_url} className="w-full h-full object-contain" alt={item.name} />
@@ -190,10 +191,10 @@ export default function CartPage() {
                                             <div>
                                                 <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest">#{item.code}</p>
                                                 <h3 className="font-bold text-[#102B5A] text-lg leading-tight mb-1">{item.name}</h3>
-                                                <p className="text-xs text-gray-400">{item.type}</p>
+                                                <p className="text-xs text-gray-400">{(item as any).type}</p>
                                             </div>
                                             <div className="flex gap-1">
-                                                <button 
+                                                <button
                                                     onClick={() => toggleWishlist(item)}
                                                     className={`p-2 rounded-xl transition-all ${isWishlisted(item.id) ? 'text-red-500 bg-red-50' : 'text-gray-300 hover:bg-gray-50 hover:text-red-400'}`}
                                                 >
@@ -212,7 +213,6 @@ export default function CartPage() {
                                                 <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm text-gray-500"><Plus size={14} /></button>
                                             </div>
                                             <div className="text-right">
-                                                
                                                 <p className="text-lg font-bold text-[#102B5A]">{(Number(item.price) * item.quantity).toLocaleString()}₮</p>
                                             </div>
                                         </div>
@@ -221,7 +221,6 @@ export default function CartPage() {
                             ))}
                         </div>
 
-                        {/* RIGHT: SUMMARY */}
                         <div className="lg:col-span-4">
                             <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm sticky top-28">
                                 <h2 className="text-xl font-bold text-gray-900 mb-6">Захиалгын мэдээлэл</h2>

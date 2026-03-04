@@ -1,11 +1,13 @@
 "use client"
 import { useWishlist } from "../context/wishlistContext"
-import { Heart } from "lucide-react"
+import { Heart, Trash2 } from "lucide-react"
 import Link from "next/link"
-import ProductCard from "../components/ProductCard" // Таны ProductCard-ын зам
+import ProductCard from "../components/ProductCard"
 
 export default function WishlistPage() {
-  const { wishlist } = useWishlist()
+  const { wishlist, toggleWishlist, isLoading } = useWishlist()
+
+  if (isLoading) return <div className="py-40 text-center">Уншиж байна...</div>
 
   if (wishlist.length === 0)
     return (
@@ -20,21 +22,19 @@ export default function WishlistPage() {
 
   return (
     <div className="container mx-auto px-4 py-10">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-bold text-gray-900 font-sans">Миний хүсэлт ({wishlist.length})</h1>
-        <Link href="/products" className="text-sm text-blue-600 font-medium hover:underline">
-          + Бараа нэмэх
-        </Link>
-      </div>
+      <h1 className="text-2xl font-bold mb-8">Миний хүсэлт ({wishlist.length})</h1>
       
-      {/* grid-cols-6 хүртэл ихэсгэж, gap-г багасгаж барааг жижиг харагдуулна */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
         {wishlist.map(p => (
           <div key={p.id} className="relative group">
-            {/* ProductCard-ийг жижиг хэлбэрээр дуудах */}
             <ProductCard product={p} isSmall={true} />
-            
-            {/* Устгах товчийг картын гадна эсвэл дээр нь overlay байдлаар тавьж болно */}
+            {/* Устгах товч */}
+            <button 
+              onClick={() => toggleWishlist(p)}
+              className="absolute top-2 right-2 p-1.5 bg-white/80 rounded-full text-red-500 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+            >
+              <Trash2 size={16} />
+            </button>
           </div>
         ))}
       </div>

@@ -8,6 +8,28 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     const [cart, setCart] = useState<any[]>([])
     const [isCartOpen, setIsCartOpen] = useState(false)
 
+
+    // CartContext.tsx дотор нэмэх
+    useEffect(() => {
+        const fetchCartFromDB = async () => {
+            const token = localStorage.getItem('token');
+            if (token) {
+                try {
+                    const response = await fetch('https://purenest-app.onrender.com/api/cart', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (response.ok) {
+                        const dbCart = await response.json();
+                        if (dbCart.length > 0) setCart(dbCart);
+                    }
+                } catch (err) {
+                    console.error("DB-ээс сагс татахад алдаа гарлаа");
+                }
+            }
+        };
+        fetchCartFromDB();
+    }, []);
+    
     useEffect(() => {
         const handleStorageChange = () => {
             const token = localStorage.getItem('token');
@@ -31,13 +53,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         const user = JSON.parse(localStorage.getItem('user') || '{}');
         const storageKey = user.id ? `cart_${user.id}` : 'guest_cart';
-        
+
         // Хадгалах
         if (cart.length > 0) {
             localStorage.setItem(storageKey, JSON.stringify(cart));
         }
     }, [cart]);
-    
+
     // 1. Хуудас ачаалагдах үед localStorage-оос сагсыг унших
     useEffect(() => {
         const savedCart = localStorage.getItem('purenest_cart')
@@ -56,25 +78,25 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }, [cart])
 
     const addToCart = (product: any) => {
-    setCart((prev) => {
-        const existing = prev.find((item) => item.id === product.id)
-        
-        // Хэрэв бараа сагсанд нэмэгдэхдээ өөрийн гэсэн quantity-тай ирвэл түүнийг авна, 
-        // байхгүй бол 1-ийг авна.
-        const amountToAdd = product.quantity ? Number(product.quantity) : 1;
+        setCart((prev) => {
+            const existing = prev.find((item) => item.id === product.id)
 
-        if (existing) {
-            return prev.map((item) =>
-                item.id === product.id 
-                    ? { ...item, quantity: (item.quantity || 0) + amountToAdd } 
-                    : item
-            )
-        }
-        
-        // Шинээр нэмэхдээ мөн сонгосон тоог нь оноож өгнө
-        return [...prev, { ...product, quantity: amountToAdd }]
-    })
-}
+            // Хэрэв бараа сагсанд нэмэгдэхдээ өөрийн гэсэн quantity-тай ирвэл түүнийг авна, 
+            // байхгүй бол 1-ийг авна.
+            const amountToAdd = product.quantity ? Number(product.quantity) : 1;
+
+            if (existing) {
+                return prev.map((item) =>
+                    item.id === product.id
+                        ? { ...item, quantity: (item.quantity || 0) + amountToAdd }
+                        : item
+                )
+            }
+
+            // Шинээр нэмэхдээ мөн сонгосон тоог нь оноож өгнө
+            return [...prev, { ...product, quantity: amountToAdd }]
+        })
+    }
 
     const removeFromCart = (id: string | number) => {
         setCart((prev) => prev.filter((item) => item.id !== id))
@@ -93,15 +115,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
 
     return (
-        <CartContext.Provider 
-            value={{ 
-                cart, 
-                isCartOpen, 
-                setIsCartOpen, 
-                addToCart, 
-                removeFromCart, 
-                updateQuantity, 
-                clearCart 
+        <CartContext.Provider
+            value={{
+                cart,
+                isCartOpen,
+                setIsCartOpen,
+                addToCart,
+                removeFromCart,
+                updateQuantity,
+                clearCart
             }}
         >
             {children}
