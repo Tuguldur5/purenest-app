@@ -76,6 +76,8 @@ app.use('/auth', require('./route/auth'));
 const productOrderRoutes = require('./route/productsOrders');
 const wishlistRoutes = require('./route/wishlist');
 const reportRoutes = require('./route/report');
+const cartRoutes = require('./route/cart');
+app.use('/api/cart', cartRoutes);
 app.use('/api/product-orders', productOrderRoutes);
 app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/report', reportRoutes);
