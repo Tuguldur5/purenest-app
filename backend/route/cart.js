@@ -7,7 +7,7 @@ const { verifyToken } = require('../middleware/index.js');
 router.get('/', verifyToken, async (req, res) => {
     try {
         const userId = req.user.id;
-        
+
         const result = await pool.query(`
             SELECT p.*, ci.quantity 
             FROM cart_items ci
@@ -22,7 +22,48 @@ router.get('/', verifyToken, async (req, res) => {
         res.status(500).json({ error: "Сагсны мэдээлэл татахад алдаа гарлаа" });
     }
 });
+router.post('/add', verifyToken, async (req, res) => {
+    const { product_id, quantity } = req.body;
+    const userId = req.user.id;
 
+    try {
+        // 1. Сагс байгаа эсэхийг шалгах/үүсгэх
+        const cartResult = await pool.query(
+            'INSERT INTO carts (user_id) VALUES ($1) ON CONFLICT (user_id) DO UPDATE SET updated_at = NOW() RETURNING id',
+            [userId]
+        );
+        const cartId = cartResult.rows[0].id;
+
+        // 2. Барааг нэмэх эсвэл байгаа бол тоог нь нэмэх
+        await pool.query(`
+            INSERT INTO cart_items (cart_id, product_id, quantity)
+            VALUES ($1, $2, $3)
+            ON CONFLICT (cart_id, product_id)
+            DO UPDATE SET quantity = cart_items.quantity + $3
+        `, [cartId, product_id, quantity]);
+
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Барааг бүрмөсөн устгах
+router.delete('/remove/:productId', verifyToken, async (req, res) => {
+    const userId = req.user.id;
+    const productId = req.params.productId;
+
+    try {
+        await pool.query(`
+            DELETE FROM cart_items 
+            WHERE cart_id = (SELECT id FROM carts WHERE user_id = $1)
+            AND product_id = $2
+        `, [userId, productId]);
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 // 2. Сагсыг өгөгдлийн сантай синхрончлох (Хадгалах)
 router.post('/sync', verifyToken, async (req, res) => {
     const { items } = req.body; // [{id: 1, quantity: 2}, ...]
@@ -36,7 +77,7 @@ router.post('/sync', verifyToken, async (req, res) => {
         if (cart.rows.length === 0) {
             // Сагс байхгүй бол шинээр үүсгэх
             const newCart = await pool.query(
-                'INSERT INTO carts (user_id) VALUES ($1) RETURNING id', 
+                'INSERT INTO carts (user_id) VALUES ($1) RETURNING id',
                 [userId]
             );
             cartId = newCart.rows[0].id;
