@@ -1,72 +1,43 @@
-// routes/reports.js
 const express = require('express');
 const router = express.Router();
 const pool = require('../db.js');
 const { verifyToken } = require('../middleware/index.js');
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
 
-// Multer тохиргоо
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        const dir = 'uploads/reports';
-        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-        cb(null, dir);
-    },
-    filename: function (req, file, cb) {
-        const ext = path.extname(file.originalname);
-        const name = `${Date.now()}-${Math.round(Math.random() * 1E9)}${ext}`;
-        cb(null, name);
+/**
+ * 1. ТАЙЛАН НЭМЭХ (POST)
+ * Frontend-ээс { order_id, description, images: ["url1", "url2", "url3"] } ирнэ.
+ */
+router.post('/', verifyToken, async (req, res) => {
+    const { order_id, description, images } = req.body;
+
+    // Шалгалт: Зургийн URL-ууд массив байх ёстой бөгөөд багадаа 3 ширхэг
+    if (!Array.isArray(images) || images.length < 3) {
+        return res.status(400).json({ message: "Багадаа 3 зургийн URL оруулах шаардлагатай." });
     }
-});
-
-const upload = multer({
-    storage,
-    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB хүртэл зураг
-    fileFilter: (req, file, cb) => {
-        const allowed = ['.png', '.jpg', '.jpeg', '.webp'];
-        if (!allowed.includes(path.extname(file.originalname).toLowerCase())) {
-            return cb(new Error('Зөвхөн зураг upload хийж болно'));
-        }
-        cb(null, true);
-    }
-});
-
-// Тайлан нэмэх
-router.post('/', verifyToken, upload.array('images', 10), async (req, res) => {
-    const { order_id, description } = req.body;
-    if (!req.files || req.files.length < 3) {
-        return res.status(400).json({ message: "Багадаа 3 зураг оруулах шаардлагатай." });
-    }
-
-    const images = req.files.map(f => f.filename); // файлын нэрсийг хадгална
 
     try {
         const newReport = await pool.query(
             "INSERT INTO order_reports (order_id, description, images) VALUES ($1, $2, $3) RETURNING *",
-            [order_id, description, JSON.stringify(images)]
+            [order_id, description, images] // Postgres TEXT[] руу шууд массив орно
         );
 
+        // Захиалгын төлөвийг шинэчлэх
         await pool.query("UPDATE orders SET status = 'Дууссан' WHERE id = $1", [order_id]);
 
         res.status(201).json(newReport.rows[0]);
     } catch (err) {
         console.error(err);
-        res.status(500).send("Серверийн алдаа");
+        res.status(500).json({ error: "Тайлан хадгалахад серверийн алдаа гарлаа." });
     }
 });
 
-// Тайлан update
-router.put('/:order_id', verifyToken, upload.array('images', 10), async (req, res) => {
+/**
+ * 2. ТАЙЛАН БҮХЭЛД НЬ ШИНЭЧЛЭХ (PUT)
+ * Зураг устгах, нэмэх үйлдлийг Frontend дээр массиваа бэлдээд энд явуулна.
+ */
+router.put('/:order_id', verifyToken, async (req, res) => {
     const { order_id } = req.params;
-    const { description } = req.body;
-
-    let images;
-    if (req.files && req.files.length > 0) {
-        images = req.files.map(f => f.filename);
-        if (images.length < 3) return res.status(400).json({ message: "Багадаа 3 зураг оруулах шаардлагатай." });
-    }
+    const { description, images } = req.body;
 
     try {
         const updatedReport = await pool.query(
@@ -76,7 +47,7 @@ router.put('/:order_id', verifyToken, upload.array('images', 10), async (req, re
                  updated_at = NOW()
              WHERE order_id = $3 
              RETURNING *`,
-            [description, images ? JSON.stringify(images) : undefined, order_id]
+            [description, images, order_id]
         );
 
         if (updatedReport.rows.length === 0) {
@@ -89,36 +60,78 @@ router.put('/:order_id', verifyToken, upload.array('images', 10), async (req, re
         });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: "Тайланг шинэчлэхэд алдаа гарлаа." });
+        res.status(500).json({ error: "Шинэчлэхэд алдаа гарлаа." });
     }
 });
 
-// Тайлан авах
+/**
+ * 3. НЭГ ШИРХЭГ ЗУРГИЙГ СОЛИХ (PATCH)
+ * Тодорхой индекс дээрх зургийн URL-ыг солих.
+ */
+router.patch('/:order_id/update-image', verifyToken, async (req, res) => {
+    const { order_id } = req.params;
+    const { index, new_url } = req.body; 
+
+    if (index === undefined || !new_url) {
+        return res.status(400).json({ message: "Индекс болон шинэ URL дутуу байна." });
+    }
+
+    try {
+        // Postgres массив 1-ээс эхэлдэг тул индекс дээр 1-ийг нэмнэ
+        const dbIndex = parseInt(index) + 1;
+        
+        const result = await pool.query(
+            `UPDATE order_reports SET images[${dbIndex}] = $1 WHERE order_id = $2 RETURNING *`,
+            [new_url, order_id]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: "Тайлан олдсонгүй." });
+        }
+
+        res.json({ message: "Зураг амжилттай солигдлоо.", report: result.rows[0] });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Зураг солиход алдаа гарлаа." });
+    }
+});
+
+/**
+ * 4. ТАЙЛАН АВАХ (GET)
+ */
 router.get('/:order_id', verifyToken, async (req, res) => {
     try {
         const report = await pool.query("SELECT * FROM order_reports WHERE order_id = $1", [req.params.order_id]);
         if (report.rows.length > 0) {
-            // images-г JSON.parse хийнэ
-            const data = report.rows[0];
-            data.images = JSON.parse(data.images);
-            res.json(data);
+            res.json(report.rows[0]); // images нь хэдийн массив ирнэ
         } else {
             res.status(404).json({ message: "Тайлан олдсонгүй" });
         }
     } catch (err) {
+        console.error(err);
         res.status(500).send("Серверийн алдаа");
     }
 });
 
-// Тайлан устгах
+/**
+ * 5. ТАЙЛАН УСТГАХ (DELETE)
+ */
 router.delete('/:order_id', verifyToken, async (req, res) => {
     const { order_id } = req.params;
     try {
-        await pool.query("DELETE FROM order_reports WHERE order_id = $1", [order_id]);
+        const result = await pool.query("DELETE FROM order_reports WHERE order_id = $1", [order_id]);
+        
+        if (result.rowCount === 0) {
+            return res.status(404).json({ message: "Устгах тайлан олдсонгүй." });
+        }
+
+        // Захиалгын төлөвийг буцааж "Хүлээгдэж байна" болгох
         await pool.query("UPDATE orders SET status = 'Хүлээгдэж байна' WHERE id = $1", [order_id]);
+        
         res.json({ message: "Тайлан амжилттай устлаа" });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error(err);
+        res.status(500).json({ error: "Устгахад алдаа гарлаа." });
     }
 });
 
