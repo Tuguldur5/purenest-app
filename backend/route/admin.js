@@ -53,15 +53,23 @@ router.get('/orders', async (req, res) => {
             SELECT 
                 o.*, 
                 u.full_name, 
-                u.email 
+                u.email,
+                -- Тайлан байгаа эсэхийг шалгах логик:
+                CASE 
+                    WHEN r.order_id IS NOT NULL THEN TRUE 
+                    ELSE FALSE 
+                END as "hasReport"
             FROM orders o
             JOIN users u ON o.user_id = u.id
+            -- Тайлангийн хүснэгттэй холбох (LEFT JOIN ашиглана)
+            LEFT JOIN order_reports r ON o.id = r.order_id
             ORDER BY o.created_at DESC
         `;
+        
         const { rows } = await pool.query(query);
         res.json({ orders: rows });
     } catch (err) {
-        console.error(err);
+        console.error("Orders татахад алдаа гарлаа:", err);
         res.status(500).json({ error: "Server error" });
     }
 });
