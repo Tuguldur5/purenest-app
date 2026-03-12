@@ -39,7 +39,7 @@ export default function CartPage() {
     }, []);
 
     // subtotal тооцоолохдоо CartItem ашиглана
-    const subtotal = cart.reduce((sum: number, item: CartItem) => 
+    const subtotal = cart.reduce((sum: number, item: CartItem) =>
         sum + (Number(item.price) * (item.quantity || 1)), 0
     )
     const deliveryFee = subtotal > 500000 ? 0 : 5000
@@ -59,7 +59,7 @@ export default function CartPage() {
                     },
                     body: JSON.stringify({ product_ids: productIds })
                 });
-                
+
                 if (response.ok) {
                     showToast({ title: "Амжилттай", description: "Бүх барааг хадгаллаа." });
                     window.location.reload();
@@ -182,15 +182,18 @@ export default function CartPage() {
                         <div className="lg:col-span-8 space-y-4">
                             {cart.map((item: CartItem) => (
                                 <div key={item.id} className="bg-white p-5 rounded-3xl flex flex-col sm:flex-row items-center gap-6 shadow-sm border border-gray-50">
-                                    <div className="w-28 h-28 bg-[#F9FAFB] rounded-2xl overflow-hidden flex-shrink-0 p-2">
+                                    <Link href={`/products/${item.id}`} className="w-28 h-28 bg-[#F9FAFB] rounded-2xl overflow-hidden flex-shrink-0 p-2 hover:opacity-80 transition-opacity">
                                         <img src={item.image_url} className="w-full h-full object-contain" alt={item.name} />
-                                    </div>
-
+                                    </Link>
                                     <div className="flex-grow w-full">
                                         <div className="flex justify-between items-start">
                                             <div>
                                                 <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest">#{item.code}</p>
-                                                <h3 className="font-bold text-[#102B5A] text-lg leading-tight mb-1">{item.name}</h3>
+
+                                                {/* НЭР ДЭЭР ДАРАХАД ҮСРЭХ */}
+                                                <Link href={`/products/${item.id}`} className="hover:text-blue-600 transition-colors">
+                                                    <h3 className="font-bold text-[#102B5A] text-lg leading-tight mb-1">{item.name}</h3>
+                                                </Link>
                                                 <p className="text-xs text-gray-400">{(item as any).type}</p>
                                             </div>
                                             <div className="flex gap-1">

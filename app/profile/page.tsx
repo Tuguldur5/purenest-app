@@ -90,7 +90,7 @@ function ProfileContent() {
 
             <div className="container max-w-8xl mx-auto px-4 mt-10 pb-20 text-black">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                    <div className="lg:col-span-4">
+                    <div className="lg:col-span-3">
                         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-3 pt-2 -mt-25">
                             <MenuButton
                                 id="profile"
@@ -129,7 +129,7 @@ function ProfileContent() {
                     </div>
 
                     {/* 3. БАРУУН АГУУЛГА: 12-оос 8-ыг нь эзэлнэ (2/3 зай) */}
-                    <div className="lg:col-span-8 bg-white rounded-2xl shadow-sm border border-gray-100 p-8 min-h-[600px]">
+                    <div className="lg:col-span-9 bg-white rounded-2xl shadow-sm border border-gray-100 p-8 min-h-[600px]">
                         {activeTab === 'profile' && (
                             <UserDetails details={userDetails} onUpdate={handleUserUpdate} />
                         )}

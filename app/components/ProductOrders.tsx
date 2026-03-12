@@ -1,13 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
     Package, Calendar, MapPin, Phone, 
     ChevronRight, Clock, CheckCircle2, 
-    XCircle, ShoppingBag, Loader2, X, ShoppingCart 
+    XCircle, ShoppingBag, Loader2, X, ShoppingCart, Search, Filter 
 } from 'lucide-react';
 
-// Төрлүүдийг тодорхойлох
 interface OrderedProduct {
     name: string;
     quantity: number;
@@ -29,6 +28,10 @@ export default function ProductOrderHistory() {
     const [orders, setOrders] = useState<ProductOrder[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedOrder, setSelectedOrder] = useState<ProductOrder | null>(null);
+    
+    // Хайлт болон Шүүлтүүрийн state-үүд
+    const [searchTerm, setSearchTerm] = useState('');
+    const [statusFilter, setStatusFilter] = useState('all');
 
     useEffect(() => {
         fetchMyOrders();
@@ -51,144 +54,174 @@ export default function ProductOrderHistory() {
         }
     };
 
-    // Төлөвөөс хамаарч икон болон өнгө буцаах функцууд
-    const getStatusIcon = (status: string) => {
-        switch (status) {
-            case 'Хүлээгдэж байна': return <Clock size={16} className="text-orange-500" />;
-            case 'Хүргэгдсэн': return <CheckCircle2 size={16} className="text-green-500" />;
-            case 'Цуцлагдсан': return <XCircle size={16} className="text-red-500" />;
-            default: return <Package size={16} className="text-blue-500" />;
-        }
-    };
+    // --- Хайлт болон Шүүлтүүрийн Логик ---
+    const filteredOrders = useMemo(() => {
+        return orders.filter(order => {
+            const matchesSearch = order.id.toString().includes(searchTerm);
+            const matchesStatus = statusFilter === 'all' || 
+                order.status.toLowerCase().includes(statusFilter.toLowerCase());
+            
+            return matchesSearch && matchesStatus;
+        });
+    }, [orders, searchTerm, statusFilter]);
 
     const getStatusStyle = (status: string) => {
-        if (status === 'Хүлээгдэж байна') return 'bg-orange-50 text-orange-600 border-orange-100';
-        if (status === 'Хүргэгдсэн') return 'bg-green-50 text-green-600 border-green-100';
-        if (status === 'Цуцлагдсан') return 'bg-red-50 text-red-600 border-red-100';
-        return 'bg-blue-50 text-blue-600 border-blue-100';
+        const s = status.toLowerCase();
+        if (s.includes('хүргэгдсэн') || s.includes('success')) return 'bg-green-100 text-green-700 border-green-200';
+        if (s.includes('хүлээгдэж') || s.includes('pending')) return 'bg-orange-100 text-orange-700 border-orange-200';
+        if (s.includes('цуцлагдсан') || s.includes('cancel')) return 'bg-red-100 text-red-700 border-red-200';
+        return 'bg-blue-100 text-blue-700 border-blue-200';
     };
 
     if (loading) return (
-        <div className="flex flex-col items-center justify-center p-20 text-slate-400">
+        <div className="flex flex-col items-center justify-center p-20 text-slate-400 font-medium">
             <Loader2 className="animate-spin mb-2" />
-            <p className="text-sm font-medium">Захиалгын түүх уншиж байна...</p>
-        </div>
-    );
-
-    if (orders.length === 0) return (
-        <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-200">
-            <ShoppingBag size={48} className="mx-auto text-gray-200 mb-4" />
-            <h3 className="text-lg font-bold text-gray-900">Захиалга олдсонгүй</h3>
-            <p className="text-gray-400 text-sm mt-1">Та одоогоор ямар нэгэн бараа захиалаагүй байна.</p>
+            <p className="text-sm">Захиалгын түүх уншиж байна...</p>
         </div>
     );
 
     return (
-        <div className="space-y-4">
-            <h2 className="text-xl font-bold text-[#102B5A] mb-6 flex items-center gap-2">
-                <Package size={24} /> Бараа захиалгын түүх
+        <div className="max-w-5xl mx-auto px-4 py-4 sm:py-6 font-sans">
+            <h2 className="text-xl sm:text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+                <Package size={24} className="text-indigo-600" /> Бараа захиалгын түүх
             </h2>
 
+            {/* --- Хайлт болон Шүүлтүүр хэсэг --- */}
+            <div className="flex flex-col sm:flex-row gap-3 mb-6">
+                <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                    <input 
+                        type="text"
+                        placeholder="Захиалгын ID-аар хайх..."
+                        className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all font-medium"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </div>
+                <div className="relative">
+                    <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                    <select 
+                        className="pl-9 pr-8 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none appearance-none font-bold text-slate-700 w-full sm:w-auto cursor-pointer"
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                    >
+                        <option value="all">Бүгд</option>
+                        <option value="хүлээгдэж">Хүлээгдэж буй</option>
+                        <option value="хүргэгдсэн">Хүргэгдсэн</option>
+                        <option value="цуцлагдсан">Цуцлагдсан</option>
+                    </select>
+                </div>
+            </div>
+
             {/* Захиалгуудын жагсаалт */}
-            <div className="grid gap-3">
-                {orders.map((order) => (
+            <div className="grid gap-3 sm:gap-4">
+                {filteredOrders.length > 0 ? filteredOrders.map((order) => (
                     <div 
                         key={order.id} 
                         onClick={() => setSelectedOrder(order)}
-                        className="bg-white border border-gray-100 rounded-2xl p-5 flex items-center justify-between cursor-pointer hover:border-blue-200 hover:shadow-lg transition-all group active:scale-[0.98]"
+                        className="bg-white border border-slate-100 rounded-2xl p-4 sm:p-5 flex items-center justify-between cursor-pointer hover:border-indigo-100 hover:shadow-md transition-all group"
                     >
-                        <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center text-[#102B5A] group-hover:bg-blue-50 transition-colors">
+                        <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400 group-hover:bg-indigo-600 group-hover:text-white transition-colors flex-shrink-0">
                                 <ShoppingBag size={20} />
                             </div>
-                            <div>
-                                <h4 className="font-bold text-gray-900">Захиалга #{order.id}</h4>
-                                <p className="text-xs text-gray-400 flex items-center gap-1 mt-1">
+                            <div className="min-w-0">
+                                <h4 className="font-bold text-slate-800 text-sm sm:text-base truncate">Захиалга #{order.id}</h4>
+                                <p className="text-[11px] sm:text-xs text-slate-400 flex items-center gap-1 mt-1 font-bold uppercase tracking-wide">
                                     <Calendar size={12} /> {new Date(order.created_at).toLocaleDateString('mn-MN')}
                                 </p>
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-6">
-                            <div className="text-right hidden sm:block">
-                                <div className={`text-[11px] font-bold px-3 py-1 rounded-full border ${getStatusStyle(order.status)} flex items-center gap-1.5 mb-1`}>
-                                    {getStatusIcon(order.status)} {order.status}
+                        <div className="flex items-center gap-2 sm:gap-6">
+                            <div className="flex flex-col sm:flex-row items-end sm:items-center gap-1.5 sm:gap-6">
+                                <div className={`px-2.5 py-1 rounded-lg text-[10px] sm:text-xs font-bold border uppercase tracking-wide ${getStatusStyle(order.status)}`}>
+                                    {order.status}
                                 </div>
-                                <p className="text-lg font-bold text-[#102B5A]">
+                                <p className="text-base sm:text-lg font-bold text-slate-900">
                                     {Number(order.total_amount).toLocaleString()}₮
                                 </p>
                             </div>
-                            <ChevronRight size={20} className="text-gray-300 group-hover:text-blue-500 transition-colors" />
+                            <ChevronRight size={18} className="text-slate-300 hidden sm:block" />
                         </div>
                     </div>
-                ))}
+                )) : (
+                    <div className="text-center py-20 bg-slate-50/50 rounded-3xl border border-dashed border-slate-200">
+                         <ShoppingBag size={40} className="mx-auto text-slate-200 mb-3" />
+                         <p className="text-slate-400 text-sm font-medium">Захиалга олдсонгүй</p>
+                    </div>
+                )}
             </div>
 
-            {/* --- ДЭЛГЭРЭНГҮЙ POP-UP (MODAL) --- */}
+            {/* --- ДЭЛГЭРЭНГҮЙ MODAL --- */}
             {selectedOrder && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-                    <div className="bg-white rounded-[14px] shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col animate-in fade-in zoom-in duration-200">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4 bg-slate-900/60 backdrop-blur-sm">
+                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[95vh] overflow-hidden flex flex-col animate-in fade-in zoom-in duration-200 font-sans">
                         
                         {/* Modal Header */}
-                        <div className="p-8 border-b flex justify-between items-center bg-gray-50/50">
-                            <div>
-                                <h2 className="text-2xl font-bold text-gray-800">Захиалгын дэлгэрэнгүй</h2>
-                                <p className="text-sm text-gray-500 mt-1">ID: #{selectedOrder.id} | {new Date(selectedOrder.created_at).toLocaleString('mn-MN')}</p>
+                        <div className="p-5 sm:p-7 border-b flex justify-between items-start bg-slate-50/50">
+                            <div className="min-w-0">
+                                <h2 className="text-lg sm:text-xl font-bold text-slate-800 truncate">Захиалгын дэлгэрэнгүй</h2>
+                                <p className="text-[11px] sm:text-xs text-slate-500 mt-1 font-bold">
+                                    ID: #{selectedOrder.id} • {new Date(selectedOrder.created_at).toLocaleString('mn-MN')}
+                                </p>
                             </div>
                             <button 
                                 onClick={() => setSelectedOrder(null)} 
-                                className="p-3 hover:bg-gray-200 rounded-full transition-colors bg-white shadow-sm"
+                                className="p-2 hover:bg-slate-200 rounded-full transition-colors bg-white shadow-sm flex-shrink-0"
                             >
-                                <X size={20} className="text-gray-500" />
+                                <X size={20} className="text-slate-500" />
                             </button>
                         </div>
 
                         {/* Modal Content */}
-                        <div className="p-8 overflow-y-auto flex-1 space-y-8">
-                            {/* Хүргэлтийн хаяг болон Төлөв */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="p-5 sm:p-7 overflow-y-auto flex-1 space-y-6 sm:space-y-8">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                                 <div className="space-y-3">
-                                    <h3 className="text-xs font-bold uppercase text-gray-400 tracking-[0.2em]">Хүргэлтийн мэдээлэл</h3>
-                                    <div className="bg-gray-50 p-5 rounded-3xl border border-gray-100">
-                                        <p className="font-bold text-gray-800 text-lg">{selectedOrder.full_name}</p>
-                                        <p className="text-sm text-gray-600 flex items-center gap-2 mt-2"><Phone size={14}/> {selectedOrder.phone_number}</p>
-                                        <p className="text-sm text-gray-500 mt-3 leading-relaxed flex items-start gap-2">
-                                            <MapPin size={16} className="mt-1 flex-shrink-0 text-gray-400" /> {selectedOrder.address}
+                                    <h3 className="text-[10px] font-bold uppercase text-slate-400 tracking-widest px-1">Хүргэлтийн мэдээлэл</h3>
+                                    <div className="bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-100">
+                                        <p className="font-bold text-slate-800 text-base">{selectedOrder.full_name}</p>
+                                        <p className="text-sm text-slate-600 flex items-center gap-2 mt-2 font-bold"><Phone size={14} className="text-slate-400"/> {selectedOrder.phone_number}</p>
+                                        <p className="text-sm text-slate-500 mt-3 leading-relaxed flex items-start gap-2 font-bold">
+                                            <MapPin size={16} className="mt-0.5 flex-shrink-0 text-slate-400" /> {selectedOrder.address}
                                         </p>
                                     </div>
                                 </div>
                                 <div className="space-y-3">
-                                    <h3 className="text-xs font-bold uppercase text-gray-400 tracking-[0.2em]">Одоогийн төлөв</h3>
-                                    <div className={`p-6 rounded-3xl border flex flex-col items-center justify-center h-full min-h-[120px] ${getStatusStyle(selectedOrder.status)}`}>
-                                        <div className="scale-150 mb-3">{getStatusIcon(selectedOrder.status)}</div>
-                                        <span className="font-bold text-lg">{selectedOrder.status}</span>
+                                    <h3 className="text-[10px] font-bold uppercase text-slate-400 tracking-widest px-1">Одоогийн төлөв</h3>
+                                    <div className={`p-4 sm:p-6 rounded-2xl border flex flex-col items-center justify-center min-h-[100px] h-full ${getStatusStyle(selectedOrder.status)}`}>
+                                        <div className="mb-2">
+                                            {selectedOrder.status.includes('Хүлээгдэж') && <Clock size={24} />}
+                                            {selectedOrder.status.includes('Хүргэгдсэн') && <CheckCircle2 size={24} />}
+                                            {selectedOrder.status.includes('Цуцлагдсан') && <XCircle size={24} />}
+                                        </div>
+                                        <span className="font-bold text-base uppercase tracking-wide">{selectedOrder.status}</span>
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Барааны жагсаалт */}
                             <div className="space-y-4">
-                                <h3 className="text-xs font-bold uppercase text-black tracking-[0.2em] flex items-center gap-2">
-                                    <ShoppingCart size={14} /> Захиалсан бараанууд ({selectedOrder.products?.length})
+                                <h3 className="text-[10px] font-bold uppercase text-slate-800 tracking-widest flex items-center gap-2 px-1">
+                                    <ShoppingCart size={14} /> Захиалсан бараа ({selectedOrder.products?.length})
                                 </h3>
 
-                                <div className="border border-gray-100 rounded-[2rem] overflow-hidden bg-white shadow-sm">
-                                    <div className="max-h-[300px] overflow-y-auto divide-y divide-gray-50">
+                                <div className="border border-slate-100 rounded-2xl overflow-hidden bg-white shadow-sm">
+                                    <div className="max-h-[250px] overflow-y-auto divide-y divide-slate-50">
                                         {selectedOrder.products?.map((item, i) => (
-                                            <div key={i} className="p-5 flex justify-between items-center hover:bg-gray-50/50 transition-colors">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="w-10 h-10 bg-blue-50 rounded-xl flex-shrink-0 flex items-center justify-center text-[#102B5A] font-bold text-xs border border-blue-100">
+                                            <div key={i} className="p-4 flex justify-between items-center hover:bg-slate-50/50 transition-colors">
+                                                <div className="flex items-center gap-3 min-w-0">
+                                                    <div className="w-8 h-8 bg-slate-50 rounded-lg flex-shrink-0 flex items-center justify-center text-slate-400 font-bold text-[10px] border border-slate-100">
                                                         {i + 1}
                                                     </div>
                                                     <div className="min-w-0">
-                                                        <p className="font-bold text-gray-800 text-sm truncate max-w-[250px]">{item.name}</p>
-                                                        <p className="text-xs text-gray-400 mt-1">
+                                                        <p className="font-bold text-slate-800 text-sm truncate pr-2">{item.name}</p>
+                                                        <p className="text-[11px] text-slate-400 mt-0.5 font-bold italic">
                                                             {Number(item.unit_price).toLocaleString()}₮ × {item.quantity}
                                                         </p>
                                                     </div>
                                                 </div>
-                                                <div className="text-right">
-                                                    <p className="font-bold text-[#102B5A] text-md">
+                                                <div className="text-right flex-shrink-0">
+                                                    <p className="font-bold text-slate-900 text-sm">
                                                         {(item.unit_price * item.quantity).toLocaleString()}₮
                                                     </p>
                                                 </div>
@@ -200,9 +233,9 @@ export default function ProductOrderHistory() {
                         </div>
 
                         {/* Modal Footer */}
-                        <div className="p-8 border-t bg-gray-50/50 flex justify-between items-center">
-                            <div className="text-gray-500 font-medium">Нийт төлөх дүн:</div>
-                            <div className="text-3xl font-black text-[#102B5A] tracking-tight">{Number(selectedOrder.total_amount).toLocaleString()}₮</div>
+                        <div className="p-6 sm:p-8 border-t bg-slate-50/50 flex justify-between items-center">
+                            <div className="text-slate-500 font-bold uppercase text-xs tracking-wider">Нийт дүн</div>
+                            <div className="text-2xl sm:text-3xl font-bold text-slate-900">{Number(selectedOrder.total_amount).toLocaleString()}₮</div>
                         </div>
                     </div>
                 </div>

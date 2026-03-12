@@ -1,10 +1,9 @@
-
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { 
-    ClipboardList, Calendar, ArrowLeft, MapPin, 
-    CreditCard, Layout, Image as ImageIcon, MessageSquare 
+import React, { useState, useEffect, useMemo } from 'react';
+import {
+    ClipboardList, Calendar, ArrowLeft, MapPin,
+    Layout, Image as ImageIcon, MessageSquare, Download, X, ChevronRight, Clock, Filter, Search
 } from 'lucide-react';
 
 interface Order {
@@ -16,7 +15,6 @@ interface Order {
     address?: string;
 }
 
-// Тайлангийн төрөл
 interface Report {
     description: string;
     images: string[];
@@ -25,9 +23,12 @@ interface Report {
 export default function OrderHistory() {
     const [orders, setOrders] = useState<Order[]>([]);
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-    const [report, setReport] = useState<Report | null>(null); // Тайлан хадгалах
+    const [report, setReport] = useState<Report | null>(null);
     const [loading, setLoading] = useState(true);
     const [reportLoading, setReportLoading] = useState(false);
+    const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [statusFilter, setStatusFilter] = useState('all');
 
     useEffect(() => {
         fetchOrders();
@@ -50,7 +51,6 @@ export default function OrderHistory() {
         }
     };
 
-    // Захиалга сонгоход тайланг давхар татах
     const handleSelectOrder = async (order: Order) => {
         setSelectedOrder(order);
         setReport(null);
@@ -58,12 +58,11 @@ export default function OrderHistory() {
 
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`https://purenest-app.onrender.com/api/reports/${order.id}`, {
+            const res = await fetch(`https://purenest-app.onrender.com/api/report/${order.id}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
                 const data = await res.json();
-                // Images-ийг JSON parse хийх шаардлагатай эсэхийг шалгана
                 const reportData = {
                     description: data.description,
                     images: typeof data.images === 'string' ? JSON.parse(data.images) : data.images
@@ -77,137 +76,185 @@ export default function OrderHistory() {
         }
     };
 
+    // Хайлт болон Шүүлтүүрийн логик
+    const filteredOrders = useMemo(() => {
+        return orders.filter(order => {
+            const matchesSearch = order.id.toString().includes(searchTerm.toLowerCase());
+            const matchesStatus = statusFilter === 'all' || order.status.toLowerCase().includes(statusFilter.toLowerCase());
+            return matchesSearch && matchesStatus;
+        });
+    }, [orders, searchTerm, statusFilter]);
+
     const getStatusStyle = (status: string) => {
         const s = status.toLowerCase();
-        if (s.includes('дууссан') || s.includes('success')) return 'bg-green-50 text-green-600';
-        if (s.includes('хүлээгдэж') || s.includes('pending')) return 'bg-orange-50 text-orange-600';
-        return 'bg-blue-50 text-blue-600';
+        if (s.includes('дууссан') || s.includes('success')) return 'bg-green-100 text-green-700 border-green-200';
+        if (s.includes('хүлээгдэж') || s.includes('pending')) return 'bg-orange-100 text-orange-700 border-orange-200';
+        return 'bg-blue-100 text-blue-700 border-blue-200';
     };
 
-    if (loading) return <div className="p-10 text-center text-slate-400">Ачаалж байна...</div>;
+    if (loading) return <div className="p-10 text-center text-slate-500 font-medium">Ачаалж байна...</div>;
 
-    // --- 1. ДЭЛГЭРЭНГҮЙ ХАРАГДАЦ (View State) ---
-    if (selectedOrder) {
-        return (
-            <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-                <button 
-                    onClick={() => setSelectedOrder(null)}
-                    className="flex items-center gap-2 text-slate-500 hover:text-indigo-600 transition-colors mb-6 group font-semibold"
-                >
-                    <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
-                    Буцах
-                </button>
+    return (
+        <div className="max-w-5xl mx-auto px-4 py-4 sm:py-6">
 
-                <div className="bg-white border border-gray-100 rounded-3xl overflow-hidden shadow-sm space-y-px">
-                    {/* Үндсэн мэдээлэл */}
-                    <div className="p-6 bg-slate-50/30 border-b border-gray-50">
-                        <div className="flex justify-between items-start">
-                            <div>
-                                <span className="text-[10px] font-bold text-amber-500 italic uppercase tracking-wider">Захиалга #{selectedOrder.id}</span>
-                                <h3 className="text-xl font-bold text-slate-800 mt-1">{selectedOrder.service}</h3>
-                                <div className="flex items-center gap-4 mt-2">
-                                    <p className="text-xs text-slate-400 flex font-sans items-center gap-1.5 ">
-                                        <Calendar size={14} />
-                                        {new Date(selectedOrder.date).toLocaleDateString('mn-MN')}
-                                    </p>
-                                    <p className="text-xs text-slate-400 flex items-center gap-1.5 font-medium">
-                                        <MapPin size={14} />
-                                        {selectedOrder.address || "Хаяг тодорхойгүй"}
-                                    </p>
-                                </div>
-                            </div>
-                            <span className={`px-4 py-1.5 rounded-xl text-sm font-bold ${getStatusStyle(selectedOrder.status)}`}>
-                                {selectedOrder.status}
-                            </span>
-                        </div>
-                    </div>
+            {/* Image Modal */}
+            {selectedImage && (
+                <div className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4">
+                    <button onClick={() => setSelectedImage(null)} className="absolute top-4 right-4 text-white p-2 hover:bg-white/10 rounded-full">
+                        <X size={24} />
+                    </button>
+                    <img src={selectedImage} className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl" alt="Full view" />
+                </div>
+            )}
 
-                    {/* ГҮЙЦЭТГЭЛИЙН ТАЙЛАН ХЭСЭГ (Админаас оруулсан бол харагдана) */}
-                    {reportLoading ? (
-                        <div className="p-8 text-center"><span className="animate-pulse text-slate-400 text-sm">Тайлан уншиж байна...</span></div>
-                    ) : report ? (
-                        <div className="p-6 space-y-6 bg-white">
-                            <div className="flex items-center gap-2 border-l-4 border-indigo-500 pl-4 py-1">
-                                <Layout size={18} className="text-indigo-500" />
-                                <h4 className="font-bold text-slate-800">Гүйцэтгэлийн тайлан</h4>
-                            </div>
+            {selectedOrder ? (
+                <div className="animate-in fade-in duration-300">
+                    <button
+                        onClick={() => setSelectedOrder(null)}
+                        className="flex items-center gap-2 text-slate-500 hover:text-indigo-600 transition-colors mb-6 font-bold text-sm sm:text-base"
+                    >
+                        <ArrowLeft size={18} /> Буцах
+                    </button>
 
-                            <div className="space-y-4">
-                                {/* Тайлбар */}
-                                <div className="bg-slate-50 p-4 rounded-2xl flex gap-3">
-                                    <MessageSquare size={18} className="text-slate-400 flex-shrink-0 mt-1" />
-                                    <p className="text-slate-600 text-[14px] leading-relaxed italic">
-                                        "{report.description}"
-                                    </p>
-                                </div>
-
-                                {/* Зургууд */}
-                                <div className="space-y-3">
-                                    <div className="flex items-center gap-2 text-slate-400 text-[11px] font-bold uppercase tracking-widest px-1">
-                                        <ImageIcon size={14} /> Баримт зургууд
+                    <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+                        <div className="p-5 sm:p-8 bg-slate-50/50 border-b border-slate-100">
+                            <div className="flex flex-col sm:flex-row justify-between sm:items-start gap-4">
+                                <div className="space-y-1">
+                                    <div className="text-[10px] font-bold text-indigo-500 uppercase tracking-widest">Захиалга #{selectedOrder.id}</div>
+                                    <h2 className="text-xl sm:text-2xl font-bold text-slate-800">{selectedOrder.service}</h2>
+                                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 mt-3 text-sm text-slate-500">
+                                        <span className="flex items-center gap-1.5 font-medium"><Calendar size={16} /> {new Date(selectedOrder.date).toLocaleDateString('mn-MN')}</span>
+                                        <span className="flex items-center gap-1.5 font-medium"><MapPin size={16} /> {selectedOrder.address || "Хаяг байхгүй"}</span>
                                     </div>
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                </div>
+                                <div className={`px-4 py-1.5 rounded-xl text-xs sm:text-sm font-bold border self-start ${getStatusStyle(selectedOrder.status)}`}>
+                                    {selectedOrder.status}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="p-5 sm:p-8">
+                            <h4 className="flex items-center gap-2 font-bold text-slate-800 mb-5 uppercase text-[11px] tracking-wider">
+                                <Layout size={16} className="text-indigo-500" /> Ажлын гүйцэтгэл
+                            </h4>
+
+                            {reportLoading ? (
+                                <div className="py-10 text-center text-slate-400 font-medium">Уншиж байна...</div>
+                            ) : report ? (
+                                <div className="space-y-6">
+                                    <div className="p-4 sm:p-5 bg-slate-50 rounded-xl border border-slate-100 text-slate-600 leading-relaxed text-sm sm:text-base font-medium italic">
+                                        "{report.description}"
+                                    </div>
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
                                         {report.images.map((img, idx) => (
-                                            <div key={idx} className="aspect-square rounded-2xl overflow-hidden border border-slate-100 shadow-sm">
-                                                <img 
-                                                    src={img} 
-                                                    alt={`баримт-${idx}`} 
-                                                    className="w-full h-full object-cover hover:scale-110 transition-transform duration-500 cursor-zoom-in"
-                                                    onClick={() => window.open(img, '_blank')}
-                                                />
+                                            <div
+                                                key={idx}
+                                                onClick={() => setSelectedImage(img)}
+                                                className="aspect-square rounded-xl overflow-hidden border border-slate-200 cursor-pointer hover:opacity-90 transition-opacity"
+                                            >
+                                                <img src={img} className="w-full h-full object-cover" alt="Баримт" />
+                                                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                                                    <a
+                                                        href={img}
+                                                        download={`report-image-${idx}.jpg`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        onClick={(e) => e.stopPropagation()} // Томруулах event-ийг дарахаас сэргийлнэ
+                                                        className="pointer-events-auto p-2 bg-white/90 hover:bg-white rounded-full shadow-lg transform translate-y-2 group-hover:translate-y-0 transition-all duration-300 flex items-center justify-center text-slate-700"
+                                                        title="Татах"
+                                                    >
+                                                        <Download size={18} />
+                                                    </a>
+                                                </div>
                                             </div>
                                         ))}
                                     </div>
                                 </div>
+                            ) : (
+                                <div className="p-10 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200 text-slate-400 text-sm font-medium">
+                                    Тайлан ороогүй байна.
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="p-5 sm:p-8 bg-slate-50/30 border-t border-slate-100 flex justify-between items-center">
+                            <span className="text-slate-500 font-bold uppercase text-xs tracking-wider">Нийт төлбөр</span>
+                            <span className="text-xl sm:text-2xl font-bold text-slate-900">{Number(selectedOrder.total_price).toLocaleString()}₮</span>
+                        </div>
+                    </div>
+                </div>
+            ) : (
+                <div className="space-y-6">
+                    <div>
+                        <h1 className="text-2xl font-bold text-slate-800">Миний захиалгууд</h1>
+                        <p className="text-slate-500 text-sm font-medium">Нийт үйлчилгээний түүх</p>
+                    </div>
+
+                    {/* Search & Filter Controls */}
+                    <div className="flex flex-col sm:flex-row gap-3">
+                        <div className="relative flex-1">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                            <input
+                                type="text"
+                                placeholder="Захиалгын ID-аар хайх..."
+                                className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all font-medium"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                        </div>
+                        <div className="relative">
+                            <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                            <select
+                                className="pl-9 pr-8 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none appearance-none font-bold text-slate-700 w-full sm:w-auto cursor-pointer"
+                                value={statusFilter}
+                                onChange={(e) => setStatusFilter(e.target.value)}
+                            >
+                                <option value="all">Бүгд</option>
+                                <option value="хүлээгдэж">Хүлээгдэж буй</option>
+                                <option value="баталгаажсан">Баталгаажсан</option>
+                                <option value="дууссан">Дууссан</option>
+                                <option value="цуцлагдсан">Цуцлагдсан</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-3 sm:gap-4 font-sans">
+                        {filteredOrders.length > 0 ? filteredOrders.map((order) => (
+                            <div
+                                key={order.id}
+                                onClick={() => handleSelectOrder(order)}
+                                className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-100 hover:border-indigo-100 hover:shadow-md transition-all flex items-center gap-3 sm:gap-6 cursor-pointer group"
+                            >
+                                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400 group-hover:bg-indigo-600 group-hover:text-white transition-colors flex-shrink-0">
+                                    <ClipboardList size={20} />
+                                </div>
+
+                                <div className="flex-1 min-w-0">
+                                    <h4 className="text-base sm:text-lg font-bold text-slate-800 truncate">{order.service}</h4>
+                                    <div className="flex items-center gap-3 mt-1 text-[11px] sm:text-xs text-slate-400 font-bold uppercase tracking-wide">
+                                        <span className="flex items-center gap-1 font-bold"><Calendar size={12} /> {new Date(order.date).toLocaleDateString('mn-MN')}</span>
+                                        <span className="text-indigo-500 font-bold">#{order.id}</span>
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 sm:gap-6">
+                                    <div className={`px-2.5 py-1 rounded-lg text-[10px] sm:text-xs font-bold border tracking-wide uppercase ${getStatusStyle(order.status)}`}>
+                                        {order.status}
+                                    </div>
+                                    <div className="text-right sm:min-w-[100px]">
+                                        <p className="font-bold text-base sm:text-lg text-slate-900">{Number(order.total_price).toLocaleString()}₮</p>
+                                    </div>
+                                    <ChevronRight size={18} className="text-slate-300 hidden sm:block" />
+                                </div>
                             </div>
-                        </div>
-                    ) : (
-                        <div className="p-8 text-center text-slate-400 border-b border-gray-50">
-                            <p className="text-xs font-medium">Гүйцэтгэлийн тайлан хараахан ороогүй байна.</p>
-                        </div>
-                    )}
-
-                    {/* Төлбөр */}
-                    <div className="p-6 flex justify-between items-center bg-white">
-                        <span className="font-bold text-slate-400 text-sm uppercase tracking-wide">Нийт төлбөр</span>
-                        <span className="text-2xl font-sans font-bold text-slate-900">
-                            {Number(selectedOrder.total_price).toLocaleString()}₮
-                        </span>
+                        )) : (
+                            <div className="py-20 text-center bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
+                                <p className="text-slate-400 text-sm font-medium">Захиалга олдсонгүй</p>
+                            </div>
+                        )}
                     </div>
                 </div>
-            </div>
-        );
-    }
-
-    // --- 2. ҮНДСЭН ЖАГСААЛТ ---
-    return (
-        <div className="grid grid-cols-1 gap-4 animate-in fade-in duration-500">
-            {orders.map((order) => (
-                <div
-                    key={order.id}
-                    onClick={() => handleSelectOrder(order)}
-                    className="bg-white p-5 rounded-2xl border border-gray-100 hover:shadow-md transition-all flex items-center gap-6 group cursor-pointer"
-                >
-                    <div className="w-16 h-16 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
-                        <ClipboardList size={24} />
-                    </div>
-                    <div className="flex-1">
-                        <h4 className="text-lg font-bold text-slate-800">{order.service}</h4>
-                        <div className="flex gap-4 mt-1 text-xs text-slate-400 font-medium">
-                            <span className="flex items-center text-[14px] gap-1"><Calendar size={12} /> {new Date(order.date).toLocaleDateString('mn-MN')}</span>
-                            <span className="text-amber-400">#{order.id}</span>
-                        </div>
-                    </div>
-                    <div className="flex gap-6 items-center">
-                        <span className={`text-[12px] font-bold px-3 py-1 rounded-lg ${getStatusStyle(order.status)}`}>
-                            {order.status}
-                        </span>
-                        <p className="font-bold font-sans text-lg text-slate-900">
-                            {Number(order.total_price).toLocaleString()}₮
-                        </p>
-                    </div>
-                </div>
-            ))}
+            )}
         </div>
     );
 }

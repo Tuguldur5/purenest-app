@@ -68,39 +68,43 @@ export default function AdminDashboardPage() {
     useEffect(() => { fetchAdminData(); }, []);
 
     // Статус шинэчлэх функц
+    // handleStatusUpdate функцийг дараах байдлаар шинэчлээрэй
+
     const handleStatusUpdate = async (id: number, newStatus: string) => {
-        // ХУУЧИН: const url = `https://purenest-app.onrender.com/api/admin/orders/:id/status`;
-
-        // ШИНЭ: Жинхэнэ id-г нь url дотор нь ингэж хийнэ
-        const url = `https://purenest-app.onrender.com/api/admin/orders/${id}/status`;
-
-        console.log("Хүсэлт илгээж буй URL:", url); // Шалгах зорилгоор
+        // API_BASE_URL-ийн төгсгөлд '/' байгаа эсэхийг анхаар. 
+        // Хэрэв https://.../api/admin бол доорх зам зөв:
+        const url = `${API_BASE_URL}/orders/${id}/status`;
 
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`${API_BASE_URL}/orders`, {
-                headers: { Authorization: `Bearer ${token}` }
+
+            const res = await fetch(url, {
+                method: 'PUT', // Бэкенд PUT ашиглаж байгаа тул заавал PUT байна
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ status: newStatus })
             });
 
             if (!res.ok) {
-                // Консол дээр статусыг хэвлэх (401, 403, 404, 500 гэх мэт)
-                console.log("Серверийн хариу статус:", res.status);
-                const errorText = await res.text();
-                console.log("Серверийн алдааны мессеж:", errorText);
-
-                throw new Error(`Алдаа гарлаа: ${res.status}`);
+                const errorData = await res.json();
+                throw new Error(errorData.error || "Алдаа гарлаа");
             }
 
-            const data = await res.json();
+            // 1. Датаг шууд шинэчлэх (Тайлангийн тоо шууд өөрчлөгдөнө)
+            setOrders(prev => prev.map(o => o.id === id ? { ...o, status: newStatus } : o));
 
-            if (res.ok) {
-                setOrders(prev => prev.map(o => o.id === id ? { ...o, status: newStatus } : o));
-            } else {
-                showToast({ title: "Алдаа", description: "Шинэчилж чадсангүй." })
-            }
-        } catch (error) {
-            console.error("Хүсэлт илгээхэд алдаа гарлаа:", error);
-            showToast({ title: "Алдаа", description: "Сервертэй холбогдож чадсангүй." })
+            showToast({ title: "Амжилттай", description: "Захиалгын төлөв өөрчлөгдлөө." });
+
+        } catch (error: any) {
+            console.error("Fetch Error:", error.message);
+            showToast({
+                title: "Алдаа",
+                description: error.message === "Failed to fetch"
+                    ? "Сервертэй холбогдож чадсангүй (CORS эсвэл Сүлжээ)"
+                    : error.message
+            });
         }
     };
     const statsData = useMemo(() => {
@@ -110,7 +114,7 @@ export default function AdminDashboardPage() {
         );
 
         // 2. Үйлчилгээний төрлөөр тоолох (PieChart-д зориулсан)
-        const SERVICE_TYPES = ["Оффис цэвэрлэгээ", "СӨХ цэвэрлэгээ", "Олон нийтийн талбай"];
+        const SERVICE_TYPES = ["Оффис цэвэрлэгээ", "СӨХ цэвэрлэгээ", "Олон нийтийн талбай, Агааржуулалтын хоолой цэвэрлэгээ, Агуулах цэвэрлэгээ"];
 
         const serviceCounts = SERVICE_TYPES.map(serviceName => ({
             name: serviceName.replace(" цэвэрлэгээ", ""), // График дээр богино харагдуулахын тулд

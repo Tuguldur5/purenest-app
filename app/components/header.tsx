@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation'; // useRouter-ийг импортлох
 import { FaUserCircle } from 'react-icons/fa';
 import { usePathname } from 'next/navigation';
-import { ChevronDown, Home, MoreHorizontal, ShoppingCart, Trash2 } from 'lucide-react';
+import { ChevronDown, Home, MoreHorizontal, ShoppingCart, Trash2, Info, Mail, HelpCircle, Menu } from 'lucide-react';
 import { useCart } from '../context/CartContext'; // Сагсны тоог харуулахын тулд
 export default function Header() {
     // 💡 Header функцийг дотор нь тодорхойлсныг устгаж, шууд Header функцийг ашиглаж байна.
@@ -397,13 +397,17 @@ export default function Header() {
                         )}
                     </div>
 
-                    {/* Hamburger */}
-                    <button
+                    <div
+                        className="relative p-2 cursor-pointer"
                         onClick={() => setOpen(prev => !prev)}
-                        className="p-2 rounded-lg hover:bg-gray-100 transition"
                     >
-                        ☰
-                    </button>
+                        {/* Цэсний Icon (☰) */}
+                        <Menu
+                            size={26}
+                            className={`transition-all duration-300 ${isHome && !scrolled ? 'text-white' : 'text-black'
+                                }`}
+                        />
+                    </div>
 
                 </div>
             </div>
@@ -415,11 +419,6 @@ export default function Header() {
             >
                 <div className="bg-white/95 backdrop-blur-md border-t shadow-lg px-4 pt-4 pb-6 space-y-1 rounded-b-2xl">
 
-                    <Link href="/home" className={linkStyle("/home")}>
-                        Нүүр
-                    </Link>
-
-                    {/* Dropdown */}
                     <div>
                         <button
                             onClick={() => setIsServiceOpen(prev => !prev)}
@@ -464,14 +463,41 @@ export default function Header() {
                         Захиалга
                     </Link>
 
-                    <Link href="/about" className={linkStyle("/about")}>
-                        Бидний тухай
-                    </Link>
+                    <div className="grid grid-cols-3 gap-2 w-full sm:flex sm:flex-col sm:gap-0">
+
+                        <Link
+                            href="/about"
+                            className={`${linkStyle("/about")} flex items-center justify-center p-3 rounded-xl border border-slate-100 sm:border-0 sm:justify-start`}
+                            title="Бидний тухай"
+                        >
+                            <Info size={22} />
+                            <span className="hidden sm:inline ml-3">Бидний тухай</span>
+                        </Link>
+
+                        <Link
+                            href="/contact"
+                            className={`${linkStyle("/contact")} flex items-center justify-center p-3 rounded-xl border border-slate-100 sm:border-0 sm:justify-start`}
+                            title="Холбоо барих"
+                        >
+                            <Mail size={22} />
+                            <span className="hidden sm:inline ml-3">Холбоо барих</span>
+                        </Link>
+
+                        <Link
+                            href="/faq"
+                            className={`${linkStyle("/faq")} flex items-center justify-center p-3 rounded-xl border border-slate-100 sm:border-0 sm:justify-start`}
+                            title="Түгээмэл асуултууд"
+                        >
+                            <HelpCircle size={22} />
+                            <span className="hidden sm:inline ml-3">Түгээмэл асуултууд</span>
+                        </Link>
+
+                    </div>
 
                     <div className="pt-3 border-t mt-3">
                         <Link
                             href={isLoggedIn ? "/profile" : "/login"}
-                            className="block text-center bg-amber-400 text-white py-2.5 rounded-lg font-semibold hover:bg-amber-600 transition"
+                            className="block text-center bg-blue-400 text-white py-2.5 rounded-lg font-semibold hover:bg-blue-600 transition"
                         >
                             {isLoggedIn ? "Профайл" : "Нэвтрэх"}
                         </Link>

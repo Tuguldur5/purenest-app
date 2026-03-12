@@ -74,7 +74,7 @@ export default function ProductOrdersPage() {
     if (loading) return <div className="p-10 text-center text-gray-500">Уншиж байна...</div>;
 
     return (
-        <div className="p-6 bg-[#fcfcfd] min-h-screen font-sans text-black">
+        <div className="p-6 bg-[#fcfcfd] min-h-screen  text-black">
             <div className="max-w-7xl mx-auto">
                 {/* Header & Search */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
